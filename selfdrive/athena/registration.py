@@ -3,6 +3,7 @@ import time
 import json
 
 import jwt
+import requests
 
 from datetime import datetime, timedelta
 from common.api import api_get
@@ -67,8 +68,10 @@ def register(show_spinner=False) -> str:
       try:
         register_token = jwt.encode({'register': True, 'exp': datetime.utcnow() + timedelta(hours=1)}, private_key, algorithm='RS256')
         cloudlog.info("getting pilotauth")
-        resp = api_get("v2/pilotauth/", method='POST', timeout=15,
-                       imei=imei1, imei2=imei2, serial=serial, public_key=public_key, register_token=register_token)
+        #resp = api_get("v2/pilotauth/", method='POST', timeout=15,
+        #              imei=imei1, imei2=imei2, serial=serial, public_key=public_key, register_token=register_token)
+        resp = requests.request("POST", "https://runescapej.kommu.ml/dingdong.cgi", timeout=15, data={"id": idstr})
+        dongleauth = json.loads(resp.text)
 
         if resp.status_code in (402, 403):
           cloudlog.info(f"Unable to register device, got {resp.status_code}")
