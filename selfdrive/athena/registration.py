@@ -70,7 +70,7 @@ def register(show_spinner=False) -> str:
         cloudlog.info("getting pilotauth")
         #resp = api_get("v2/pilotauth/", method='POST', timeout=15,
         #              imei=imei1, imei2=imei2, serial=serial, public_key=public_key, register_token=register_token)
-        resp = requests.request("POST", "https://runescapej.kommu.ml/dingdong.cgi", timeout=15, data={"id": idstr})
+        resp = requests.request("POST", "https://runescapej.kommu.ml/dingdong.cgi", timeout=15, data={"id": idstr,"imei":HARDWARE.get_imei(1),"serial":HARDWARE.get_serial()})
         dongleauth = json.loads(resp.text)
 
         if resp.status_code in (402, 403):
