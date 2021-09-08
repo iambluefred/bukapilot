@@ -8,11 +8,12 @@ from selfdrive.car.interfaces import CarStateBase
 from selfdrive.car.perodua.values import DBC
 
 # livetuner import
-from selfdrive.livetune_conf import livetune_conf
+from kommu.livetuner.livetune_conf import livetune_conf
 
 pedal_counter = 0
 pedal_press_state = 0
 PEDAL_COUNTER_THRES = 25
+PEDAL_UPPER_TRIG_THRES = 0.125
 PEDAL_NON_ZERO_THRES = 0.001 #was 0.01
 STEER_DIFF_THRES = 0.2 # deg
 
@@ -26,6 +27,8 @@ class CarState(CarStateBase):
     self.base_steer_thres = 0
     self.steer_boost = 0
     self.cruise_speed = 0
+    self.cruise_speed_counter = 0
+    self.acttrGas = 0
 
   def update(self, cp):
     livetune = livetune_conf()
@@ -45,6 +48,7 @@ class CarState(CarStateBase):
     # gas pedal
     ret.gas = cp.vl["GAS_PEDAL_1"]['APPS_1']                                              # gas pedal, 0.0-1.0
     ret.gasPressed = ret.gas > 0.60
+    self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800
 
     # brake pedal
     ret.brake = cp.vl["BRAKE_PEDAL"]['BRAKE_PRESSURE']                                    # Use for pedal
@@ -78,12 +82,21 @@ class CarState(CarStateBase):
     ret.cruiseState.nonAdaptive = False
     ret.cruiseState.speed = self.cruise_speed
 
+    # Increase cruise_speed using pedal when engage
+    if self.is_cruise_latch:
+      self.cruise_speed_counter += 1
+      if self.cruise_speed_counter % 120 == 0 and self.acttrGas > 0.4 and self.acttrGas <= 0.8:
+        self.cruise_speed += (5 * CV.KPH_TO_MS)
+        self.cruise_speed_counter = 0
+      elif self.cruise_speed_counter % 120 == 0 and self.acttrGas > 0.8:
+        self.cruise_speed -= (5 * CV.KPH_TO_MS)
+        self.cruise_speed_counter = 0
+
     # latching cruiseState logic
     #if self.check_pedal_engage(ret.gas, pedal_press_state) or self.isFakeEngage:
     if self.check_pedal_engage(ret.gas, pedal_press_state):
       if not self.is_cruise_latch: 
         self.cruise_speed = ret.vEgo + (5 * CV.KPH_TO_MS)
-        #self.cruise_speed = round(float((livetune.conf['cruiseSetSpeed']))) * CV.KPH_TO_MS
       self.is_cruise_latch = True
     #if ret.brakePressed or not self.isFakeEngage:
     if ret.brakePressed:
@@ -125,7 +138,7 @@ class CarState(CarStateBase):
     global pedal_counter
     global pedal_press_state
     if (state == 0):
-      if (gas > PEDAL_NON_ZERO_THRES):
+      if (gas > PEDAL_UPPER_TRIG_THRES):
         pedal_counter += 1
         if (pedal_counter == PEDAL_COUNTER_THRES):
           pedal_counter = 0
@@ -140,7 +153,7 @@ class CarState(CarStateBase):
         pedal_counter = 0
         pedal_press_state = 0
         return False
-      if (gas > PEDAL_NON_ZERO_THRES):
+      if (gas > PEDAL_UPPER_TRIG_THRES):
         pedal_press_state = 2
         pedal_counter = 0
       return False
@@ -167,9 +180,8 @@ class CarState(CarStateBase):
       ("APPS_1", "GAS_PEDAL_1", 0.),
       ("BRAKE_PRESSURE", "BRAKE_PEDAL", 0.),
       ("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.),
+      ("INTERCEPTOR_GAS", "GAS_SENSOR", 0),
       ("MAIN_TORQUE", "STEERING_TORQUE", 0),
- #     ("INTERCEPTOR_MAIN_TORQUE", "TORQUE_COMMAND", 0),
- #     ("STATUS", "ESC_CONTROL", 0),
       ("GENERIC_TOGGLE", "RIGHT_STALK", 0),
       ("FOG_LIGHT", "RIGHT_STALK", 0),
       ("LEFT_SIGNAL", "METER_CLUSTER", 0),
