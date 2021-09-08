@@ -2,7 +2,7 @@ What is bukapilot?
 ------
 ***Todo: Add some images
 
-[bukapilot](http://github.com/kommuai/bukapilot) is an open source software for advanced driver's assistant system (ADAS). It a fork of an open source driver assistance system from [openpilot](http://github.com/commaai/openpilot). Currently, bukapilot aims to support all Malaysian vehicles especially for Perodua and Proton while adding complete right hand drive support on top of the existing capability from openpilot.
+[bukapilot](http://github.com/kommuai/bukapilot) is an open source software for advanced driver's assistant system (ADAS). It is a maintained patchset based on [openpilot](http://github.com/commaai/openpilot) which aims to support all Malaysian vehicles especially for Perodua and Proton by using hardwares specially designed for them, while adding complete right hand drive support on top of the existing capability from openpilot.
 
 bukapilot performs the functions of Adaptive Cruise Control (ACC), Lane Keep Assist (LKA), Forward Collision Warning (FCW) and Lane Departure Warning (LDW) for a growing variety of supported [car makes, models and model years](#supported-cars). In addition, while bukapilot is engaged, a camera based Driver Monitoring (DM) feature alerts distracted and asleep drivers.
 
@@ -19,6 +19,8 @@ Additionally, on specific supported cars (see ACC column in [supported cars](#su
 bukapilot should preserve all other vehicle's stock features, including, but are not limited to: FCW, Automatic Emergency Braking (AEB), auto high-beam, blind spot warning, and side collision warning.
 
 We have detailed instructions for [how to install the device in a car](https://comma.ai/setup).
+
+Bukapilot patchset modifies the code heavily to integrate with our hardware and backend services, thus we can't make any statement for openpilot supported cars.  Instead, we plan to offer commerical support for the following:
 
 | Make      | Model                         | ADAS     | LKAS                      | Gas                        | Brake         |
 | ----------| ------------------------------| ---------| --------------------------| ---------------------------| --------------|
@@ -106,8 +108,7 @@ Safety and Testing
 ----
 DISCLAIMER: bukapilot is still under development by a limited number of members. Duty of care will be taken to ensure the safety of both the hardware and the software. 
 
-bukapilot currently follows the safety model from openpilot, see [SAFETY.md](SAFETY.md) for more detail. bukapilot code development is isolated from release version of openpilot whereby isolation unit test is performed based on the induction that openpilot release version has been safety tested.
-
+As a patchset of openpilot, bukapilot benefits from the software safety model of openpilot.  Incremental tests are being implemented to ensure the correctness of the patchset on top of the openpilot release.
 
 Community and Contributing
 ------
