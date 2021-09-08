@@ -147,15 +147,13 @@ class Uploader():
 
   def do_upload(self, key, fn):
     try:
-      url_resp = self.api.get("v1.3/"+self.dongle_id+"/upload_url/", timeout=10, path=key, access_token=self.api.get_token())
-      if url_resp.status_code == 412:
-        self.last_resp = url_resp
-        return
+      lfn = os.path.basename(fn)
+      key = key.replace("/","---")
+      ext = "qcam" if lfn == "qcamera.ts" else "rlog"
 
-      url_resp_json = json.loads(url_resp.text)
-      url = url_resp_json['url']
-      headers = url_resp_json['headers']
-      cloudlog.debug("upload_url v1.3 %s %s", url, str(headers))
+      url = "https://s4.kommu.ml/upload.cgi"
+      headers = {"X-Filename": self.dongle_id + "---" + key, "X-Filetype": ext}
+      cloudlog.info("upload_kommu s4-v0 %s %s", url, str(headers))
 
       if fake_upload:
         cloudlog.debug("*** WARNING, THIS IS A FAKE UPLOAD TO %s ***" % url)
@@ -167,7 +165,7 @@ class Uploader():
         self.last_resp = FakeResponse()
       else:
         with open(fn, "rb") as f:
-          self.last_resp = requests.put(url, data=f, headers=headers, timeout=10)
+          self.last_resp = requests.post(url, data=f, headers=headers, timeout=10)
     except Exception as e:
       self.last_exc = (e, traceback.format_exc())
       raise
