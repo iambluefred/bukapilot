@@ -44,12 +44,12 @@ class CarController():
     else:
       apply_steer = 0
     # limit steering based on angle
-    if (abs(CS.out.steeringAngle) > 220):
+    if (abs(CS.out.steeringAngleDeg) > 220):
       apply_steer = 0
 
     # lower the fighting torque during manual steer
     if (CS.out.steeringPressed):
-      apply_steer = apply_steer / 100
+      apply_steer = apply_steer / 1000
 
     self.last_steer = apply_steer
     if apply_steer >= 0:
