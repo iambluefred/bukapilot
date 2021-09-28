@@ -13,7 +13,7 @@ TRAJECTORY_SIZE = 33
 # however the average measured path difference is 0.04 m
 if EON:
   CAMERA_OFFSET = -0.06
-  PATH_OFFSET = 0.0
+  PATH_OFFSET = -0.12
 elif TICI:
   CAMERA_OFFSET = 0.04
   PATH_OFFSET = 0.04
