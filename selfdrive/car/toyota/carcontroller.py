@@ -3,9 +3,11 @@ from common.numpy_fast import clip
 from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, make_can_msg
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
-                                           create_fcw_command, create_lta_steer_command
+                                           create_fcw_command, create_lta_steer_command, \
+                                           create_acttr_steer_command
 from selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
-                                        MIN_ACC_SPEED, PEDAL_HYST_GAP, CarControllerParams
+                                        MIN_ACC_SPEED, PEDAL_HYST_GAP, CarControllerParams, \
+                                        NON_CAN_CONTROLLED
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
@@ -54,7 +56,7 @@ class CarController():
       elif CS.out.vEgo > MIN_ACC_SPEED + PEDAL_HYST_GAP:
         self.use_interceptor = False
 
-      if self.use_interceptor and enabled:
+      if self.use_interceptor and enabled or CS.CP.carFingerprint in NON_CAN_CONTROLLED:
         # only send negative accel when using interceptor. gas handles acceleration
         # +0.06 offset to reduce ABS pump usage when OP is engaged
         interceptor_gas_cmd = clip(actuators.gas, 0., 1.)
@@ -63,8 +65,11 @@ class CarController():
     pcm_accel_cmd, self.accel_steady = accel_hysteresis(pcm_accel_cmd, self.accel_steady, enabled)
     pcm_accel_cmd = clip(pcm_accel_cmd * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
-    # steer torque
-    new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
+    # steer torquei
+    if CS.CP.carFingerprint in NON_CAN_CONTROLLED:
+      new_steer = int(round(actuators.steer * CarControllerParams.ACTTR_STEER_MAX))
+    else:
+      new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
     self.steer_rate_limited = new_steer != apply_steer
 
@@ -98,7 +103,11 @@ class CarController():
     # toyota can trace shows this message at 42Hz, with counter adding alternatively 1 and 2;
     # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
     # on consecutive messages
-    can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req, frame))
+    if CS.CP.carFingerprint in NON_CAN_CONTROLLED:
+      steer_direction = True if (apply_steer >= 0) else False
+      can_sends.append(create_acttr_steer_command(self.packer, apply_steer, steer_direction, enabled, frame))
+    else:
+      can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req, frame))
     if frame % 2 == 0 and CS.CP.carFingerprint in TSS2_CAR:
       can_sends.append(create_lta_steer_command(self.packer, 0, 0, frame // 2))
 

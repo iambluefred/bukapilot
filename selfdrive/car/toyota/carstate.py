@@ -4,8 +4,13 @@ from opendbc.can.can_define import CANDefine
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
-from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, TSS2_CAR
+from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, TSS2_CAR, NON_CAN_CONTROLLED
 
+pedal_counter = 0
+pedal_press_state = 0
+PEDAL_COUNTER_THRES = 25
+PEDAL_UPPER_TRIG_THRES = 0.125
+PEDAL_NON_ZERO_THRES = 0.001
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -23,6 +28,12 @@ class CarState(CarStateBase):
     self.low_speed_lockout = False
     self.acc_type = 1
 
+    # for vehicles with no cruise enable button
+    self.is_cruise_latch = False
+    self.cruise_speed = 0
+    self.cruise_speed_counter = 0
+    self.acttrGas = 0
+
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
@@ -37,6 +48,8 @@ class CarState(CarStateBase):
     else:
       ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+
+    self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800
 
     ret.wheelSpeeds.fl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"] * CV.KPH_TO_MS
     ret.wheelSpeeds.fr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"] * CV.KPH_TO_MS
@@ -77,6 +90,10 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.LEXUS_IS:
       ret.cruiseState.available = cp.vl["DSU_CRUISE"]["MAIN_ON"] != 0
       ret.cruiseState.speed = cp.vl["DSU_CRUISE"]["SET_SPEED"] * CV.KPH_TO_MS
+    elif self.CP.carFingerprint in NON_CAN_CONTROLLED:
+      ret.cruiseState.available = True
+      ret.cruiseState.nonAdaptive = False
+      ret.cruiseState.speed = self.cruise_speed
     else:
       ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
       ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
@@ -99,7 +116,26 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = False
     else:
       ret.cruiseState.standstill = self.pcm_acc_status == 7
-    ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
+
+    if self.CP.carFingerprint in NON_CAN_CONTROLLED:
+      if self.is_cruise_latch:
+        self.cruise_speed_counter += 1
+        if self.cruise_speed_counter % 120 == 0 and self.acttrGas > 0.3:
+          self.cruise_speed += (5 * CV.KPH_TO_MS)
+          self.cruise_speed_counter = 0
+
+      if self.check_pedal_engage(ret.gas, pedal_press_state):
+        if not self.is_cruise_latch:
+          self.cruise_speed = ret.vEgo + (5 * CV.KPH_TO_MS)
+          self.is_cruise_latch = True
+        if ret.brakePressed:
+          self.is_cruise_latch = False
+
+      ret.cruiseState.enabled = self.is_cruise_latch
+    else:
+      ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
+
+
     ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in [1, 2, 3, 4, 5, 6]
 
     ret.genericToggle = bool(cp.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
@@ -114,6 +150,43 @@ class CarState(CarStateBase):
       ret.rightBlindspot = (cp.vl["BSM"]["R_ADJACENT"] == 1) or (cp.vl["BSM"]["R_APPROACHING"] == 1)
 
     return ret
+
+  @staticmethod
+  def check_pedal_engage(gas,state):
+    ''' Pedal engage logic '''
+    global pedal_counter
+    global pedal_press_state
+    if (state == 0):
+      if (gas > PEDAL_UPPER_TRIG_THRES):
+        pedal_counter += 1
+        if (pedal_counter == PEDAL_COUNTER_THRES):
+          pedal_counter = 0
+          return False
+        if (pedal_counter > 2 and gas <= PEDAL_NON_ZERO_THRES):
+          pedal_press_state = 1
+          pedal_counter = 0
+        return False
+      if (state == 1):
+        pedal_counter += 1
+        if (pedal_counter == PEDAL_COUNTER_THRES):
+          pedal_counter = 0
+          pedal_press_state = 0
+          return False
+        if (gas > PEDAL_UPPER_TRIG_THRES):
+          pedal_press_state = 2
+          pedal_counter = 0
+        return False
+      if (state == 2):
+        pedal_counter += 1
+        if (pedal_counter == PEDAL_COUNTER_THRES):
+          pedal_counter = 0
+          pedal_press_state = 0
+          return False
+        if (gas <= PEDAL_NON_ZERO_THRES):
+          pedal_counter = 0
+          pedal_press_state = 0
+          return True
+      return False
 
   @staticmethod
   def get_can_parser(CP):
