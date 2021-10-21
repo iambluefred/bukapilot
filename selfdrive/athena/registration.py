@@ -26,7 +26,7 @@ def register(show_spinner=False) -> str:
   IMEI = params.get("IMEI", encoding='utf8')
   HardwareSerial = params.get("HardwareSerial", encoding='utf8')
   dongle_id = params.get("DongleId", encoding='utf8')
-  needs_registration = None in (IMEI, HardwareSerial, dongle_id)
+  needs_registration = None in (IMEI, HardwareSerial, dongle_id) or (dongle_id == UNREGISTERED_DONGLE_ID)
 
   # create a key for auth
   # your private key is kept on your device persist partition and never sent to our servers
@@ -68,9 +68,7 @@ def register(show_spinner=False) -> str:
       try:
         register_token = jwt.encode({'register': True, 'exp': datetime.utcnow() + timedelta(hours=1)}, private_key, algorithm='RS256')
         cloudlog.info("getting pilotauth")
-        #resp = api_get("v2/pilotauth/", method='POST', timeout=15,
-        #              imei=imei1, imei2=imei2, serial=serial, public_key=public_key, register_token=register_token)
-        resp = requests.request("POST", "https://runescapej.kommu.ml/dingdong.cgi", timeout=15, data={"id": idstr,"imei":HARDWARE.get_imei(1),"serial":HARDWARE.get_serial()})
+        resp = requests.request("POST", "https://runescapej.kommu.ml/dingdong.cgi", timeout=15, data={"id": dongle_id,"imei": HARDWARE.get_imei(1),"serial": HARDWARE.get_serial()})
         dongleauth = json.loads(resp.text)
 
         if resp.status_code in (402, 403):
