@@ -294,6 +294,17 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.9
       tire_stiffness_factor = 0.6471
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.19], [0.02]]
+      ret.mass = 1090. + STD_CARGO_KG
+      ret.lateralTuning.pid.kf = 0.00007818594
+    
+    elif candidate == CAR.VIOS:
+      stop_and_go = True
+      ret.radarOffCan = True
+      ret.safetyParam = 1 # kommu actuator safetyparams
+      ret.wheelbase = 2.55
+      ret.steerRatio = 13.9
+      tire_stiffness_factor = 0.6471
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.19], [0.02]]
       ret.mass = 1110. + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00007818594
 
