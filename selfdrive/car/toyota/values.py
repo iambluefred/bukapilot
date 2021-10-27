@@ -63,6 +63,7 @@ class CAR:
   MIRAI = "TOYOTA MIRAI 2021" # TSS 2.5
   ALPHARD_TSS2 = "TOYOTA ALPHARD 2020"
   YARIS = "TOYOTA YARIS 2020"
+  VIOS = "TOYOTA VIOS 2020"
 
 # (addr, cars, bus, 1/freq*100, vl)
 STATIC_DSU_MSGS = [
@@ -200,6 +201,12 @@ FINGERPRINTS = {
   # 2020 Malaysia Yaris
   {
     32: 4, 36: 8, 37: 8, 170: 8, 180: 8, 186: 4, 426: 6, 452: 8, 464: 8, 466: 7, 513:6, 544: 4, 545: 5, 550: 8, 608: 8, 679: 8, 680: 8, 681: 7, 705: 8, 800: 8, 849: 4, 852: 1, 865: 8, 866: 1, 896: 8, 899: 8, 906: 5, 916: 3, 921: 7, 928: 8, 944: 8, 945: 8, 951: 8, 955: 8, 956: 8, 976: 1, 979: 2, 1017: 8, 1024: 8, 1056: 8, 1059: 1, 1090: 8, 1101: 8, 1196: 8, 1212: 8, 1217: 8, 1219: 8, 1222: 8, 1224: 8, 1244: 8, 1245: 8, 1267: 8, 1552: 8, 1553: 8, 1557: 8, 1559: 8, 1568: 8, 1570: 8, 1587: 8, 1600: 8, 1728: 8, 1984: 8, 1992: 8, 2015: 8, 2024: 8
+  }
+  ],
+  CAR.VIOS: [
+  # 2020 Malaysia Vios
+  {
+    32: 4, 36: 8, 37: 6, 170: 2, 180: 8, 186: 4, 426: 6, 452: 8, 464: 8, 466: 7, 513:6, 544: 4, 545: 5, 550: 8, 608: 8, 679: 8, 680: 8, 681: 7, 705: 8, 800: 8, 849: 4, 852: 1, 865: 8, 866: 1, 896: 8, 899: 8, 906: 5, 916: 3, 921: 7, 928: 8, 944: 8, 945: 8, 951: 8, 955: 8, 956: 8, 976: 1, 979: 2, 1017: 8, 1024: 8, 1056: 8, 1059: 1, 1090: 8, 1101: 8, 1196: 8, 1212: 8, 1217: 8, 1219: 8, 1222: 8, 1224: 8, 1244: 8, 1245: 8, 1267: 8, 1552: 8, 1553: 8, 1557: 8, 1559: 8, 1568: 8, 1570: 8, 1587: 8, 1600: 8, 1728: 8, 1984: 8, 1992: 8, 2015: 8, 2024: 8
   }
   ],
 }
@@ -1645,6 +1652,7 @@ DBC = {
   CAR.MIRAI: dbc_dict('toyota_nodsu_hybrid_pt_generated', 'toyota_tss2_adas'),
   CAR.ALPHARD_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.YARIS: dbc_dict('toyota_nodsu_pt_generated', None),
+  CAR.VIOS: dbc_dict('toyota_nodsu_pt_generated', None),
 }
 
 
@@ -1659,4 +1667,4 @@ NO_DSU_CAR = TSS2_CAR | set([CAR.CHR, CAR.CHRH, CAR.CAMRY, CAR.CAMRYH])
 NO_STOP_TIMER_CAR = TSS2_CAR | set([CAR.RAV4H, CAR.HIGHLANDERH, CAR.HIGHLANDER, CAR.SIENNA, CAR.LEXUS_ESH])
 
 # cars that has no can controlled functionalities
-NON_CAN_CONTROLLED = set([CAR.YARIS])
+NON_CAN_CONTROLLED = set([CAR.YARIS, CAR.VIOS])
