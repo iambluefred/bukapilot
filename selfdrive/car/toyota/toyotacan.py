@@ -38,9 +38,9 @@ def create_acttr_steer_command(packer, command, direction, enable, idx):
     "COUNTER_STEERING": idx & 0xF,
   }
 
-  dat = packer.make_can_msg("TORQUE_COMMAND", 0, values)[2]
-  crc = crc8_interceptor(dat[:-1])
-  values["CHECKSUM_STEERING"] = crc
+  #dat = packer.make_can_msg("TORQUE_COMMAND", 0, values)[2]
+  #crc = crc8_interceptor(dat[:-1])
+  #values["CHECKSUM_STEERING"] = crc
 
   return packer.make_can_msg("TORQUE_COMMAND", 0, values)
 

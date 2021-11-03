@@ -108,7 +108,7 @@ def crc8_interceptor(data):
         crc = ((crc << 1) ^ poly) & 0xFF
       else:
         crc <<= 1
-  return return crc
+  return crc
 
 def create_gas_command(packer, gas_amount, idx):
   # Common gas pedal msg generator

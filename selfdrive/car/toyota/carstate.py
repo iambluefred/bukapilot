@@ -10,7 +10,7 @@ pedal_counter = 0
 pedal_press_state = 0
 PEDAL_COUNTER_THRES = 25
 PEDAL_UPPER_TRIG_THRES = 0.125
-PEDAL_NON_ZERO_THRES = 0.001
+PEDAL_NON_ZERO_THRES = 0.1
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -43,17 +43,19 @@ class CarState(CarStateBase):
 
     ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     if self.CP.enableGasInterceptor:
-      ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) / 2.
-      ret.gasPressed = ret.gas > 15
-    else:
-      ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
-      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+      #ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) / 2.
+      #ret.gasPressed = ret.gas > 15
+      self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800
 
-    self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800
+    ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
+    if self.CP.carFingerprint not in NON_CAN_CONTROLLED:
+      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+    else:
+      ret.gasPressed = ret.gas > 0.6
 
     ret.wheelSpeeds.fl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"] * CV.KPH_TO_MS
     ret.wheelSpeeds.fr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"] * CV.KPH_TO_MS
-    ret.wheelSpeeds.rl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"] * CV.KPH_TO_MS
+
     ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"] * CV.KPH_TO_MS
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
@@ -105,16 +107,18 @@ class CarState(CarStateBase):
     # these cars are identified by an ACC_TYPE value of 2.
     # TODO: it may be possible to avoid the lockout and gain stop and go if you
     # send your own ACC_CONTROL msg on startup with ACC_TYPE set to 1
-    if (self.CP.carFingerprint not in TSS2_CAR and self.CP.carFingerprint != CAR.LEXUS_IS) or \
+    if (self.CP.carFingerprint not in TSS2_CAR and self.CP.carFingerprint != CAR.LEXUS_IS and \
+        self.CP.carFingerprint not in NON_CAN_CONTROLLED) or \
        (self.CP.carFingerprint in TSS2_CAR and self.acc_type == 1):
       self.low_speed_lockout = cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
 
-    self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
-    if self.CP.carFingerprint in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor:
+    if self.CP.carFingerprint in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor or \
+        self.CP.carFingerprint in NON_CAN_CONTROLLED:
       # ignore standstill in hybrid vehicles, since pcm allows to restart without
       # receiving any special command. Also if interceptor is detected
       ret.cruiseState.standstill = False
     else:
+      self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
       ret.cruiseState.standstill = self.pcm_acc_status == 7
 
     if self.CP.carFingerprint in NON_CAN_CONTROLLED:
@@ -134,9 +138,7 @@ class CarState(CarStateBase):
       ret.cruiseState.enabled = self.is_cruise_latch
     else:
       ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
-
-
-    ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in [1, 2, 3, 4, 5, 6]
+      ret.cruiseState.nonAdaptive = cp.vl["PCM_CRUISE"]["CRUISE_STATE"] in [1, 2, 3, 4, 5, 6]
 
     ret.genericToggle = bool(cp.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
     ret.stockAeb = bool(cp_cam.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_cam.vl["PRE_COLLISION"]["FORCE"] < -1e-5)
@@ -156,6 +158,7 @@ class CarState(CarStateBase):
     ''' Pedal engage logic '''
     global pedal_counter
     global pedal_press_state
+    print(pedal_counter, pedal_press_state, gas)
     if (state == 0):
       if (gas > PEDAL_UPPER_TRIG_THRES):
         pedal_counter += 1
@@ -209,9 +212,6 @@ class CarState(CarStateBase):
       ("TC_DISABLED", "ESP_CONTROL", 1),
       ("STEER_FRACTION", "STEER_ANGLE_SENSOR", 0),
       ("STEER_RATE", "STEER_ANGLE_SENSOR", 0),
-      ("CRUISE_ACTIVE", "PCM_CRUISE", 0),
-      ("CRUISE_STATE", "PCM_CRUISE", 0),
-      ("GAS_RELEASED", "PCM_CRUISE", 1),
       ("STEER_TORQUE_DRIVER", "STEER_TORQUE_SENSOR", 0),
       ("STEER_TORQUE_EPS", "STEER_TORQUE_SENSOR", 0),
       ("STEER_ANGLE", "STEER_TORQUE_SENSOR", 0),
@@ -231,18 +231,21 @@ class CarState(CarStateBase):
       ("GAS_PEDAL", 33),
       ("WHEEL_SPEEDS", 80),
       ("STEER_ANGLE_SENSOR", 80),
-      ("PCM_CRUISE", 33),
       ("STEER_TORQUE_SENSOR", 50),
     ]
 
-    if CP.carFingerprint == CAR.LEXUS_IS:
+    if CP.carFingerprint == CAR.LEXUS_IS or CP.carFingerprint in NON_CAN_CONTROLLED:
       signals.append(("MAIN_ON", "DSU_CRUISE", 0))
       signals.append(("SET_SPEED", "DSU_CRUISE", 0))
       checks.append(("DSU_CRUISE", 5))
     else:
+      signals.append(("CRUISE_ACTIVE", "PCM_CRUISE", 0))
+      signals.append(("CRUISE_STATE", "PCM_CRUISE", 0))
+      signals.append(("GAS_RELEASED", "PCM_CRUISE", 1))
       signals.append(("MAIN_ON", "PCM_CRUISE_2", 0))
       signals.append(("SET_SPEED", "PCM_CRUISE_2", 0))
       signals.append(("LOW_SPEED_LOCKOUT", "PCM_CRUISE_2", 0))
+      checks.append(("PCM_CRUISE", 33))
       checks.append(("PCM_CRUISE_2", 33))
 
     # add gas interceptor reading if we are using it
