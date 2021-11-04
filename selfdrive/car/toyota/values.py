@@ -19,9 +19,18 @@ class CarControllerParams:
   STEER_DELTA_DOWN = 25     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
   STEER_ERROR_MAX = 350     # max delta between torque cmd and torque motor
 
-  # Kommu Actuator params
-  ACTTR_STEER_MAX = 750
-  ACTTR_GAS_MAX = 1700
+# Kommu Actuator params
+class ActuatorControllerParams:
+
+  STEER_MAX = 700
+  STEER_DELTA_UP = 10
+  STEER_DELTA_DOWN = 30
+  STEER_DRIVER_ALLOWANCE = 1
+  STEER_DRIVER_MULTIPLIER = 1
+  STEER_DRIVER_FACTOR = 1
+
+  GAS_MAX = 1700
+  GAS_STEP = 2
 
 class CAR:
   PRIUS = "TOYOTA PRIUS 2017"

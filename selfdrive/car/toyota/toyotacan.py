@@ -38,12 +38,21 @@ def create_acttr_steer_command(packer, command, direction, enable, idx):
     "COUNTER_STEERING": idx & 0xF,
   }
 
-  #dat = packer.make_can_msg("TORQUE_COMMAND", 0, values)[2]
-  #crc = crc8_interceptor(dat[:-1])
-  #values["CHECKSUM_STEERING"] = crc
-
   return packer.make_can_msg("TORQUE_COMMAND", 0, values)
 
+def create_acttr_gas_command(packer, gas_amount, enable, idx):
+  values = {
+    "ENABLE": enable,
+    "COUNTER_PEDAL": idx & 0xF,
+  }
+
+  if enable:
+    # the value 3000 is a limiting constant, allow an addition of
+    # 2500/4095 * 3.3 = 2.01V.
+    values["GAS_COMMAND"] = gas_amount
+    values["GAS_COMMAND2"] = gas_amount
+
+    return packer.make_can_msg("GAS_COMMAND", 0, values)
 
 def create_accel_command(packer, accel, pcm_cancel, standstill_req, lead, acc_type):
   # TODO: find the exact canceling bit that does not create a chime

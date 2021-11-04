@@ -10,7 +10,7 @@ pedal_counter = 0
 pedal_press_state = 0
 PEDAL_COUNTER_THRES = 25
 PEDAL_UPPER_TRIG_THRES = 0.125
-PEDAL_NON_ZERO_THRES = 0.1
+PEDAL_NON_ZERO_THRES = 0.01
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -41,21 +41,24 @@ class CarState(CarStateBase):
                         cp.vl["SEATS_DOORS"]["DOOR_OPEN_RL"], cp.vl["SEATS_DOORS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = cp.vl["SEATS_DOORS"]["SEATBELT_DRIVER_UNLATCHED"] != 0
 
-    ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     if self.CP.enableGasInterceptor:
-      #ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) / 2.
-      #ret.gasPressed = ret.gas > 15
       self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800
 
     ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
+
     if self.CP.carFingerprint not in NON_CAN_CONTROLLED:
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+      ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
+      ret.steerWarning = False # spoof LKA active
     else:
       ret.gasPressed = ret.gas > 0.6
+      # Todo: change to brakepressed when brake pressure > X
+      ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
+      ret.steerWarning = cp.vl["EPS_STATUS"]["LKA_STATE"] not in [1, 5]
 
     ret.wheelSpeeds.fl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"] * CV.KPH_TO_MS
     ret.wheelSpeeds.fr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"] * CV.KPH_TO_MS
-
+    ret.wheelSpeeds.rl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"] * CV.KPH_TO_MS
     ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"] * CV.KPH_TO_MS
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
@@ -87,7 +90,6 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"]
     # we could use the override bit from dbc, but it's triggered at too high torque values
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steerWarning = cp.vl["EPS_STATUS"]["LKA_STATE"] not in [1, 5]
 
     if self.CP.carFingerprint == CAR.LEXUS_IS:
       ret.cruiseState.available = cp.vl["DSU_CRUISE"]["MAIN_ON"] != 0
@@ -112,7 +114,7 @@ class CarState(CarStateBase):
        (self.CP.carFingerprint in TSS2_CAR and self.acc_type == 1):
       self.low_speed_lockout = cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
 
-    if self.CP.carFingerprint in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor or \
+    if self.CP.carFingerprint in NO_STOP_TIMER_CAR or \
         self.CP.carFingerprint in NON_CAN_CONTROLLED:
       # ignore standstill in hybrid vehicles, since pcm allows to restart without
       # receiving any special command. Also if interceptor is detected
@@ -121,6 +123,8 @@ class CarState(CarStateBase):
       self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
       ret.cruiseState.standstill = self.pcm_acc_status == 7
 
+    # some cars under NON_CAN_CONTROLLED has no cruise buttons
+    # engage method using the pedal tap
     if self.CP.carFingerprint in NON_CAN_CONTROLLED:
       if self.is_cruise_latch:
         self.cruise_speed_counter += 1
@@ -132,8 +136,8 @@ class CarState(CarStateBase):
         if not self.is_cruise_latch:
           self.cruise_speed = ret.vEgo + (5 * CV.KPH_TO_MS)
           self.is_cruise_latch = True
-        if ret.brakePressed:
-          self.is_cruise_latch = False
+      if ret.brakePressed:
+        self.is_cruise_latch = False
 
       ret.cruiseState.enabled = self.is_cruise_latch
     else:
@@ -158,38 +162,37 @@ class CarState(CarStateBase):
     ''' Pedal engage logic '''
     global pedal_counter
     global pedal_press_state
-    print(pedal_counter, pedal_press_state, gas)
     if (state == 0):
       if (gas > PEDAL_UPPER_TRIG_THRES):
         pedal_counter += 1
         if (pedal_counter == PEDAL_COUNTER_THRES):
           pedal_counter = 0
           return False
-        if (pedal_counter > 2 and gas <= PEDAL_NON_ZERO_THRES):
-          pedal_press_state = 1
-          pedal_counter = 0
-        return False
-      if (state == 1):
-        pedal_counter += 1
-        if (pedal_counter == PEDAL_COUNTER_THRES):
-          pedal_counter = 0
-          pedal_press_state = 0
-          return False
-        if (gas > PEDAL_UPPER_TRIG_THRES):
-          pedal_press_state = 2
-          pedal_counter = 0
-        return False
-      if (state == 2):
-        pedal_counter += 1
-        if (pedal_counter == PEDAL_COUNTER_THRES):
-          pedal_counter = 0
-          pedal_press_state = 0
-          return False
-        if (gas <= PEDAL_NON_ZERO_THRES):
-          pedal_counter = 0
-          pedal_press_state = 0
-          return True
+      if (pedal_counter > 2 and gas <= PEDAL_NON_ZERO_THRES):
+        pedal_press_state = 1
+        pedal_counter = 0
       return False
+    if (state == 1):
+      pedal_counter += 1
+      if (pedal_counter == PEDAL_COUNTER_THRES):
+        pedal_counter = 0
+        pedal_press_state = 0
+        return False
+      if (gas > PEDAL_UPPER_TRIG_THRES):
+        pedal_press_state = 2
+        pedal_counter = 0
+      return False
+    if (state == 2):
+      pedal_counter += 1
+      if (pedal_counter == PEDAL_COUNTER_THRES):
+        pedal_counter = 0
+        pedal_press_state = 0
+        return False
+      if (gas <= PEDAL_NON_ZERO_THRES):
+        pedal_counter = 0
+        pedal_press_state = 0
+        return True
+    return False
 
   @staticmethod
   def get_can_parser(CP):

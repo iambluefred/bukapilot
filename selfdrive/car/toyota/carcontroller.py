@@ -4,10 +4,10 @@ from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, 
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command, create_lta_steer_command, \
-                                           create_acttr_steer_command
+                                           create_acttr_steer_command, create_acttr_gas_command
 from selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         MIN_ACC_SPEED, PEDAL_HYST_GAP, CarControllerParams, \
-                                        NON_CAN_CONTROLLED
+                                        NON_CAN_CONTROLLED, ActuatorControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
@@ -49,28 +49,26 @@ class CarController():
     interceptor_gas_cmd = 0.
     pcm_accel_cmd = actuators.gas - actuators.brake
 
-    if CS.CP.enableGasInterceptor:
-      # handle hysteresis when around the minimum acc speed
-      if CS.out.vEgo < MIN_ACC_SPEED:
-        self.use_interceptor = True
-      elif CS.out.vEgo > MIN_ACC_SPEED + PEDAL_HYST_GAP:
-        self.use_interceptor = False
-
-      if self.use_interceptor and enabled or CS.CP.carFingerprint in NON_CAN_CONTROLLED:
-        # only send negative accel when using interceptor. gas handles acceleration
-        # +0.06 offset to reduce ABS pump usage when OP is engaged
-        interceptor_gas_cmd = clip(actuators.gas, 0., 1.)
-        pcm_accel_cmd = 0.06 - actuators.brake
+    if CS.CP.enableGasInterceptor and CS.CP.carFingerprint in NON_CAN_CONTROLLED:
+      interceptor_gas_cmd = clip(actuators.gas, 0., 1.)
+      interceptor_gas_cmd = abs(interceptor_gas_cmd * ActuatorControllerParams.GAS_MAX)
 
     pcm_accel_cmd, self.accel_steady = accel_hysteresis(pcm_accel_cmd, self.accel_steady, enabled)
     pcm_accel_cmd = clip(pcm_accel_cmd * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
-    # steer torquei
+    # steer torque
+    # torque generated for KommuActuator
     if CS.CP.carFingerprint in NON_CAN_CONTROLLED:
-      new_steer = int(round(actuators.steer * CarControllerParams.ACTTR_STEER_MAX))
+      new_steer = int(round(actuators.steer * ActuatorControllerParams.STEER_MAX))
+      apply_steer = apply_std_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, ActuatorControllerParams)
+    # torque generated for lkas or lta
     else:
       new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
-    apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
+      apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
+      if not enabled and CS.pcm_acc_status:
+        # send pcm acc cancel cmd if drive is disabled but pcm is still on, or if the system can't be activated
+        pcm_cancel_cmd = 1
+
     self.steer_rate_limited = new_steer != apply_steer
 
     # Cut steering while we're in a known fault state (2s)
@@ -79,13 +77,6 @@ class CarController():
       apply_steer_req = 0
     else:
       apply_steer_req = 1
-
-    if CS.CP.carFingerprint not in NON_CAN_CONTROLLED:
-      if not enabled and CS.pcm_acc_status:
-        # send pcm acc cancel cmd if drive is disabled but pcm is still on, or if the system can't be activated
-        pcm_cancel_cmd = 1
-    else:
-      pcm_cancel_cmd = 0
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and CS.CP.carFingerprint not in NO_STOP_TIMER_CAR:
@@ -108,18 +99,13 @@ class CarController():
     # toyota can trace shows this message at 42Hz, with counter adding alternatively 1 and 2;
     # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
     # on consecutive messages
-    if CS.CP.carFingerprint in NON_CAN_CONTROLLED:
+    if CS.CP.carFingerprint in NON_CAN_CONTROLLED and CS.CP.enableGasInterceptor:
       steer_direction = True if (apply_steer >= 0) else False
       can_sends.append(create_acttr_steer_command(self.packer, apply_steer, steer_direction, enabled, frame))
     else:
       can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req, frame))
     if frame % 2 == 0 and CS.CP.carFingerprint in TSS2_CAR:
       can_sends.append(create_lta_steer_command(self.packer, 0, 0, frame // 2))
-
-    # LTA mode. Set ret.steerControlType = car.CarParams.SteerControlType.angle and whitelist 0x191 in the panda
-    # if frame % 2 == 0:
-    #   can_sends.append(create_steer_command(self.packer, 0, 0, frame // 2))
-    #   can_sends.append(create_lta_steer_command(self.packer, actuators.steeringAngleDeg, apply_steer_req, frame // 2))
 
     # we can spam can to cancel the system even if we are using lat only control
     if (frame % 3 == 0 and CS.CP.openpilotLongitudinalControl) or pcm_cancel_cmd:
@@ -133,10 +119,10 @@ class CarController():
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead, CS.acc_type))
 
-    if frame % 2 == 0 and CS.CP.enableGasInterceptor:
+    if frame % ActuatorControllerParams.GAS_STEP == 0 and CS.CP.enableGasInterceptor:
       # send exactly zero if gas cmd is zero. Interceptor will send the max between read value and gas cmd.
       # This prevents unexpected pedal range rescaling
-      can_sends.append(create_gas_command(self.packer, interceptor_gas_cmd, frame // 2))
+      can_sends.append(create_acttr_gas_command(self.packer, interceptor_gas_cmd, enabled, frame // ActuatorControllerParams.GAS_STEP))
 
     # ui mesg is at 100Hz but we send asap if:
     # - there is something to display
