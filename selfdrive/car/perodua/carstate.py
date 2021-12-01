@@ -26,7 +26,7 @@ class CarState(CarStateBase):
 
   def update(self, cp):
     ret = car.CarState.new_message()
-
+    
     # there is a backwheel speed, but it will overflow to 0 when reach 60kmh
     ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'] * CV.KPH_TO_MS
     ret.wheelSpeeds.rl = ret.wheelSpeeds.rr
@@ -38,28 +38,35 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw < 0.01
 
     # gas pedal
-    ret.gas = cp.vl["GAS_PEDAL_1"]['APPS_1']
+    ret.gas = cp.vl["GAS_PEDAL"]['APPS_1']
     # todo: let gas pressed legit
     ret.gasPressed = ret.gas > 0.6
     self.acttrGas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS']) /1800          # KommuActuator gas, read when stock pedal is being intercepted
 
     # brake pedal
-    ret.brake = cp.vl["BRAKE_PEDAL"]['BRAKE_PRESSURE']
+    ret.brake = cp.vl["BRAKE"]['BRAKE_PRESSURE']
 
     # perodua bezza has a lower resolution brake pressure sensor
-    if self.CP.carFingerprint == CAR.PERODUA_BEZZA:
+    if self.CP.carFingerprint == CAR.BEZZA:
       ret.brakePressed = ret.brake > 1.2
     else:
       ret.brakePressed = ret.brake > 1e-5
 
     # steering wheel
-    ret.steeringAngleDeg = cp.vl["STEERING_ANGLE_SENSOR"]['STEER_ANGLE']
-    steer_dir = 1 if (ret.steeringAngleDeg >= 0) else -1
-    ret.steeringTorque = cp.vl["STEERING_TORQUE"]['MAIN_TORQUE'] * steer_dir
-    ret.steeringTorqueEps = ret.steeringTorque/1000
+    if self.CP.carFingerprint == CAR.ATIVA:
+      ret.steeringAngleDeg = cp.vl["STEERING_MODULE"]['STEER_ANGLE']
+      ret.steeringTorque = cp.vl["STEERING_MODULE"]['MAIN_TORQUE']
+      ret.steeringTorqueEps = cp.vl["EPS_SHAFT_TORQUE"]['STEERING_TORQUE']
+    else:
+      ret.steeringAngleDeg = cp.vl["STEERING_ANGLE_SENSOR"]['STEER_ANGLE']
+      steer_dir = 1 if (ret.steeringAngleDeg >= 0) else -1
+      ret.steeringTorque = cp.vl["STEERING_TORQUE"]['MAIN_TORQUE'] * steer_dir
+      ret.steeringTorqueEps = ret.steeringTorque/1000
 
-    if self.CP.carFingerprint == CAR.PERODUA_AXIA:
-      ret.steeringPressed = bool(abs(ret.steeringTorque) > 15)
+    if self.CP.carFingerprint == CAR.AXIA:
+      ret.steeringPressed = bool(abs(ret.steeringTorque) > 16)
+    elif self.CP.carFingerprint == CAR.ATIVA:
+      ret.steeringPressed = bool(abs(ret.steeringTorque) > 25)
     else:
       ret.steeringPressed = bool(abs(ret.steeringTorque) > 150)
 
@@ -68,34 +75,47 @@ class CarState(CarStateBase):
 
     # todo: find this out and add it in
 #    ret.stockAeb = cp.vl["FWD_CAM1"]['AEB_BRAKE'] != 0                     # is stock AEB giving a braking signal?
-    ret.stockFcw = cp.vl["FWD_CAM3"]['AEB_ALARM'] != 0
+    if self.CP.carFingerprint != CAR.ATIVA:
+      ret.stockFcw = cp.vl["FWD_CAM3"]['AEB_ALARM'] != 0
 #    ret.espDisabled = cp.vl["ESC_CONTROL"]['STATUS'] != 0                  # electronic stability control status
 
-    # cruise state
-    ret.cruiseState.available = True
-    ret.cruiseState.nonAdaptive = False
-    ret.cruiseState.speed = self.cruise_speed
+      # cruise state
+      ret.cruiseState.available = True
+      ret.cruiseState.nonAdaptive = False
+      ret.cruiseState.speed = self.cruise_speed
 
-    # increase cruise_speed using pedal when engage
-    if self.is_cruise_latch:
-      self.cruise_speed_counter += 1
-      if self.cruise_speed_counter % 120 == 0 and self.acttrGas > 0.3:
-        self.cruise_speed += (5 * CV.KPH_TO_MS)
-        self.cruise_speed_counter = 0
+      # increase cruise_speed using pedal when engage
+      if self.is_cruise_latch:
+        self.cruise_speed_counter += 1
+        if self.cruise_speed_counter % 120 == 0 and self.acttrGas > 0.3:
+          self.cruise_speed += (5 * CV.KPH_TO_MS)
+          self.cruise_speed_counter = 0
 
     # latching cruiseState logic
-    if self.check_pedal_engage(ret.gas, pedal_press_state):
-      if not self.is_cruise_latch:
-        self.cruise_speed = ret.vEgo + (5 * CV.KPH_TO_MS)
-      self.is_cruise_latch = True
-    if ret.brakePressed:
-      self.is_cruise_latch = False
+      if self.check_pedal_engage(ret.gas, pedal_press_state):
+        if not self.is_cruise_latch:
+          self.cruise_speed = ret.vEgo + (5 * CV.KPH_TO_MS)
+        self.is_cruise_latch = True
+      if ret.brakePressed:
+        self.is_cruise_latch = False
 
-    ret.cruiseState.enabled = self.is_cruise_latch
+      ret.cruiseState.enabled = self.is_cruise_latch
+    else:
+      ret.cruiseState.available = cp.vl["PCM_BUTTONS"]["ACC_RDY"] != 0
+      ret.cruiseState.nonAdaptive = False
+      ret.cruiseState.speed = 7
+      if bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"]):
+        self.is_cruise_latch = True
+      if ret.brakePressed:
+        self.is_cruise_latch = False
+
+      ret.cruiseState.enabled = self.is_cruise_latch
+
     ret.cruiseState.standstill = ret.standstill
 
     # safety checks to engage
     can_gear = int(cp.vl["TRANSMISSION"]['GEAR'])
+
     ret.doorOpen = any([cp.vl["METER_CLUSTER"]['MAIN_DOOR'],
                      cp.vl["METER_CLUSTER"]['LEFT_FRONT_DOOR'],
                      cp.vl["METER_CLUSTER"]['RIGHT_BACK_DOOR'],
@@ -110,8 +130,12 @@ class CarState(CarStateBase):
     ret.genericToggle = bool(cp.vl["RIGHT_STALK"]["GENERIC_TOGGLE"])
 
     # blindspot sensors
-    ret.leftBlindspot = False
-    ret.rightBlindspot = False
+    if self.CP.enableBsm:
+      ret.leftBlindspot = False
+      ret.rightBlindspot = bool(cp.vl["BSM"]["R_BLINDSPOT"])
+    else:
+      ret.leftBlindspot = False
+      ret.rightBlindspot = False
 
     return ret
 
@@ -158,24 +182,35 @@ class CarState(CarStateBase):
     signals = [
       # sig_name, sig_address, default
       ("WHEELSPEED_F", "WHEEL_SPEED", 0.),
-      ("WHEELSPEED_B", "WHEEL_SPEED", 0.),
       ("GEAR", "TRANSMISSION", 0),
-      ("APPS_1", "GAS_PEDAL_1", 0.),
-      ("BRAKE_PRESSURE", "BRAKE_PEDAL", 0.),
-      ("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.),
+      ("APPS_1", "GAS_PEDAL", 0.),
+      ("BRAKE_PRESSURE", "BRAKE", 0.),
       ("INTERCEPTOR_GAS", "GAS_SENSOR", 0),
-      ("MAIN_TORQUE", "STEERING_TORQUE", 0),
       ("GENERIC_TOGGLE", "RIGHT_STALK", 0),
       ("FOG_LIGHT", "RIGHT_STALK", 0),
       ("LEFT_SIGNAL", "METER_CLUSTER", 0),
       ("RIGHT_SIGNAL", "METER_CLUSTER", 0),
       ("SEAT_BELT_WARNING", "METER_CLUSTER", 0),
-      ("AEB_ALARM", "FWD_CAM3", 0),
       ("MAIN_DOOR", "METER_CLUSTER", 1),
-      ("LEFT_FRONT_DOOR", "METER_CLUSTER", 1),
-      ("RIGHT_BACK_DOOR", "METER_CLUSTER", 1),
-      ("LEFT_BACK_DOOR", "METER_CLUSTER", 1),
     ]
     checks = []
+    
+    if CP.carFingerprint == CAR.ATIVA:
+      signals.append(("R_BLINDSPOT","BSM", 0))
+      signals.append(("STEER_ANGLE", "STEERING_MODULE", 0.))
+      signals.append(("MAIN_TORQUE", "STEERING_MODULE", 0.))
+      signals.append(("STEERING_TORQUE", "EPS_SHAFT_TORQUE", 0.))
+      signals.append(("ACC_RDY", "PCM_BUTTONS", 0))
+      signals.append(("SET_MINUS", "PCM_BUTTONS", 0))
+    else:
+      signals.append(("MAIN_TORQUE", "STEERING_TORQUE", 0))
+      signals.append(("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.))
+      signals.append(("AEB_ALARM", "FWD_CAM3", 0))
+      signals.append(("WHEELSPEED_B", "WHEEL_SPEED", 0.))
+      signals.append(("LEFT_FRONT_DOOR", "METER_CLUSTER", 1))
+      signals.append(("RIGHT_BACK_DOOR", "METER_CLUSTER", 1))
+      signals.append(("LEFT_BACK_DOOR", "METER_CLUSTER", 1))
+    
+
     # todo: make it such that enforce_checks=True
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0, enforce_checks=False)
