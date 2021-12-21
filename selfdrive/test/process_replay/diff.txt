@@ -1,0 +1,8 @@
+***** tested against commit AAA *****
+***** differences for segment ef1515efcccceded---2021-12-21--02-08-29--2---rlog.bz2 *****
+*** process: controlsd ***
+*** process: radard ***
+*** process: calibrationd ***
+*** process: dmonitoringd ***
+*** process: locationd ***
+*** process: paramsd ***
