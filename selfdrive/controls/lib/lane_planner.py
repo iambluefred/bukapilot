@@ -12,8 +12,8 @@ TRAJECTORY_SIZE = 33
 # model path is in the frame of EON's camera. TICI is 0.1 m away,
 # however the average measured path difference is 0.04 m
 if EON:
-  CAMERA_OFFSET = -0.12
-  PATH_OFFSET = -0.12
+  CAMERA_OFFSET = -0.06
+  PATH_OFFSET = 0.0
 elif TICI:
   CAMERA_OFFSET = 0.04
   PATH_OFFSET = 0.04
