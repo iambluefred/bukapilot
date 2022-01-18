@@ -4,6 +4,7 @@
 #include <string>
 
 #include <QDebug>
+#include <QPixmap>
 
 #ifndef QCOM
 #include "selfdrive/ui/qt/offroad/networking.h"
@@ -21,6 +22,7 @@
 #include "selfdrive/ui/qt/widgets/scrollview.h"
 #include "selfdrive/ui/qt/widgets/ssh_keys.h"
 #include "selfdrive/ui/qt/widgets/toggle.h"
+#include "selfdrive/ui/qt/widgets/nav_buttons.h"
 #include "selfdrive/ui/ui.h"
 #include "selfdrive/ui/qt/util.h"
 
@@ -30,7 +32,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   QList<ParamControl*> toggles;
 
   toggles.append(new ParamControl("OpenpilotEnabledToggle",
-                                  "Enable openpilot",
+                                  "Enable Bukapilot",
                                   "Use the openpilot system for adaptive cruise control and lane keep driver assistance. Your attention is required at all times to use this feature. Changing this setting takes effect when the car is powered off.",
                                   "../assets/offroad/icon_openpilot.png",
                                   this));
@@ -206,6 +208,8 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   osVersionLbl = new LabelControl("OS Version");
   versionLbl = new LabelControl("Version", "", QString::fromStdString(params.get("ReleaseNotes")).trimmed());
   lastUpdateLbl = new LabelControl("Last Update Check", "", "The last time openpilot successfully checked for an update. The updater only runs while the car is off.");
+  remainingUploadsLbl = new LabelControl("Remaining Uploads");
+
   updateBtn = new ButtonControl("Check for Update", "");
   connect(updateBtn, &ButtonControl::released, [=]() {
     if (params.getBool("IsOffroad")) {
@@ -219,15 +223,13 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   });
 
   QVBoxLayout *main_layout = new QVBoxLayout(this);
-  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl};
+  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl, remainingUploadsLbl};
   for (int i = 0; i < std::size(widgets); ++i) {
     main_layout->addWidget(widgets[i]);
     if (i < std::size(widgets) - 1) {
       main_layout->addWidget(horizontal_line());
     }
   }
-
-  setStyleSheet(R"(QLabel {font-size: 50px;})");
 
   fs_watch = new QFileSystemWatcher(this);
   QObject::connect(fs_watch, &QFileSystemWatcher::fileChanged, [=](const QString path) {
@@ -260,6 +262,7 @@ void SoftwarePanel::updateLabels() {
   gitBranchLbl->setText(QString::fromStdString(params.get("GitBranch")));
   gitCommitLbl->setText(QString::fromStdString(params.get("GitCommit")).left(10));
   osVersionLbl->setText(QString::fromStdString(Hardware::get_os_version()).trimmed());
+  remainingUploadsLbl->setText(QString::fromStdString(params.get("RemainingUploadSize")));
 }
 
 QWidget * network_panel(QWidget * parent) {
@@ -293,6 +296,7 @@ QWidget * network_panel(QWidget * parent) {
 
 void SettingsWindow::showEvent(QShowEvent *event) {
   panel_widget->setCurrentIndex(0);
+  header_label->setText("Device");
   nav_btns->buttons()[0]->setChecked(true);
 }
 
@@ -301,25 +305,34 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   // setup two main layouts
   sidebar_widget = new QWidget;
   QVBoxLayout *sidebar_layout = new QVBoxLayout(sidebar_widget);
-  sidebar_layout->setMargin(0);
   panel_widget = new QStackedWidget();
   panel_widget->setStyleSheet(R"(
-    border-radius: 30px;
-    background-color: #292929;
+    border-radius: 1px;
+    background-color: #202020;
+  )");
+
+  //setup panel header
+  header_label = new QLabel;
+  header_label -> setStyleSheet(R"(
+    border-radius: 0.1px;
+    font-size: 70px;
+    font-weight:500;
+    padding-left: 40px;
+    background-color: #303030;
+    margin-bottom:-50px;
   )");
 
   // close button
-  QPushButton *close_btn = new QPushButton("X");
+  QPushButton *close_btn = new QPushButton("x");
   close_btn->setStyleSheet(R"(
     font-size: 90px;
-    font-weight: bold;
-    border 1px grey solid;
-    border-radius: 100px;
-    background-color: #292929;
+    font-family: Calibri;
+    border 0px black solid;
+    border-radius: 75px;
+    background-color: #000000;
   )");
-  close_btn->setFixedSize(200, 200);
-  sidebar_layout->addSpacing(45);
-  sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
+  close_btn->setFixedSize(100, 100);
+  sidebar_layout->addWidget(close_btn, 0, Qt::AlignTop);
   QObject::connect(close_btn, &QPushButton::released, this, &SettingsWindow::closeSettings);
 
   // setup panels
@@ -341,21 +354,30 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     QObject::connect(map_panel, &MapPanel::closeSettings, this, &SettingsWindow::closeSettings);
   }
 #endif
-  const int padding = panels.size() > 3 ? 25 : 35;
+  const int padding = panels.size() > 3 ? 35 : 55;
 
   nav_btns = new QButtonGroup();
   for (auto &[name, panel] : panels) {
-    QPushButton *btn = new QPushButton(name);
+
+    QString img_dir = "../assets/kommu/";
+    img_dir.append(name);
+    img_dir.append(".png");
+
+    QPixmap pixmap(img_dir);
+
+    NavButton *btn = new NavButton(name,pixmap);
     btn->setCheckable(true);
     btn->setChecked(nav_btns->buttons().size() == 0);
+    btn->setFixedHeight(300);
     btn->setStyleSheet(QString(R"(
       QPushButton {
         color: grey;
         border: none;
         background: none;
-        font-size: 65px;
+        font-size: 50px;
         font-weight: 500;
-        padding-top: %1px;
+        padding-top: 50px;
+        padding-left: 150px;
         padding-bottom: %1px;
       }
       QPushButton:checked {
@@ -364,26 +386,29 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     )").arg(padding));
 
     nav_btns->addButton(btn);
-    sidebar_layout->addWidget(btn, 0, Qt::AlignRight);
+    sidebar_layout->addWidget(btn, 0, Qt::AlignLeft);
 
     panel->setContentsMargins(50, 25, 50, 25);
 
     ScrollView *panel_frame = new ScrollView(panel, this);
     panel_widget->addWidget(panel_frame);
 
-    QObject::connect(btn, &QPushButton::released, [=, w = panel_frame]() {
+    QObject::connect(btn, &QPushButton::released, [=, w = panel_frame, n=name]() {
       btn->setChecked(true);
       panel_widget->setCurrentWidget(w);
+      header_label->setText(n);
     });
   }
-  sidebar_layout->setContentsMargins(50, 50, 100, 50);
+  sidebar_layout->setContentsMargins(25, 25, 100, 200);
 
   // main settings layout, sidebar + main panel
-  QHBoxLayout *main_layout = new QHBoxLayout(this);
+  QGridLayout *main_layout = new QGridLayout(this);
 
   sidebar_widget->setFixedWidth(500);
-  main_layout->addWidget(sidebar_widget);
-  main_layout->addWidget(panel_widget);
+  header_label->setFixedHeight(175);
+  main_layout->addWidget(sidebar_widget,0,0,2,1);
+  main_layout->addWidget(header_label,0,1);
+  main_layout->addWidget(panel_widget,1,1);
 
   setStyleSheet(R"(
     * {

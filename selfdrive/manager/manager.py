@@ -33,9 +33,14 @@ def manager_init():
   params.clear_all(ParamKeyType.CLEAR_ON_MANAGER_START)
 
   default_params = [
+    ("CommunityFeaturesToggle", "1"),
     ("CompletedTrainingVersion", "0"),
     ("HasAcceptedTerms", "0"),
+    ("IsMetric", "1"),
+    ("IsRHD", "1"),
     ("OpenpilotEnabledToggle", "1"),
+    ("RecordFront", "1"),
+    ("UploadRaw", "1"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -72,6 +77,7 @@ def manager_init():
   params.put("GitCommit", get_git_commit(default=""))
   params.put("GitBranch", get_git_branch(default=""))
   params.put("GitRemote", get_git_remote(default=""))
+  params.put("RemainingUploadSize","Loading...") # Provide an initial value incase uploader fails
 
   # set dongle id
   reg_res = register(show_spinner=True)

@@ -42,6 +42,7 @@ private:
   LabelControl *osVersionLbl;
   LabelControl *versionLbl;
   LabelControl *lastUpdateLbl;
+  LabelControl *remainingUploadsLbl;
   ButtonControl *updateBtn;
 
   Params params;
@@ -69,4 +70,6 @@ private:
   QWidget *sidebar_widget;
   QButtonGroup *nav_btns;
   QStackedWidget *panel_widget;
+  QWidget *panel_header;
+  QLabel *header_label;
 };
