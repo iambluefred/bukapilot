@@ -63,7 +63,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1015. + STD_CARGO_KG
 
       ret.lateralTuning.pid.kf = 0.0000917
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.16], [0.41]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.16], [0.30]]
 
     elif candidate == CAR.BEZZA:
       ret.wheelbase = 2.455
