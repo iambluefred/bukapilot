@@ -52,7 +52,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 850. + STD_CARGO_KG
 
       ret.lateralTuning.pid.kf = 0.000106
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.14], [0.32]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.1425], [0.3205]]
       ret.longitudinalTuning.kpV = [0.8, 0.9, 1.0]
 
     elif candidate == CAR.MYVI:
