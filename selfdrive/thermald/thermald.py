@@ -117,7 +117,7 @@ def handle_fan_uno(max_cpu_temp, bat_temp, fan_speed, ignition):
   new_speed = int(interp(max_cpu_temp, [40.0, 70.0], [0, 100]))
 
   if not ignition:
-    new_speed = min(30, new_speed)
+    new_speed = min(60, new_speed)
 
   return new_speed
 
@@ -355,7 +355,7 @@ def thermald_thread():
       set_offroad_alert_if_changed("Offroad_ConnectivityNeeded", False)
       set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", False)
 
-    startup_conditions["up_to_date"] = True
+    startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates")
     startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 
