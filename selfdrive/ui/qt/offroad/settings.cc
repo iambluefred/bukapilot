@@ -34,17 +34,17 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   toggles.append(new ParamControl("OpenpilotEnabledToggle",
                                   "Enable Bukapilot",
                                   "Use the bukapilot system for adaptive cruise control and lane keep driver assistance. Your attention is required at all times to use this feature. Changing this setting takes effect when the car is powered off.",
-                                  "../assets/offroad/icon_openpilot.png",
+                                  "../assets/kommu/settings/kommu_steering_wheel_icon.png",
                                   this));
   toggles.append(new ParamControl("IsLdwEnabled",
                                   "Enable Lane Departure Warnings",
                                   "Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31mph (50kph).",
-                                  "../assets/offroad/icon_warning.png",
+                                  "../assets/kommu/settings/kommu_alert_sign.png",
                                   this));
   toggles.append(new ParamControl("IsRHD",
                                   "Enable Right-Hand Drive",
                                   "Allow bukapilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.",
-                                  "../assets/offroad/icon_openpilot_mirrored.png",
+                                  "../assets/kommu/settings/kommu_steering_wheel_icon_inverted.png",
                                   this));
   toggles.append(new ParamControl("IsMetric",
                                   "Use Metric System",
@@ -54,13 +54,13 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   toggles.append(new ParamControl("CommunityFeaturesToggle",
                                   "Enable Community Features",
                                   "Use features from the open source community that are not maintained or supported by kommu.ai and have not been confirmed to meet the standard safety model. These features include community supported cars and community supported hardware. Be extra cautious when using these features",
-                                  "../assets/offroad/icon_shell.png",
+                                  "../assets/kommu/settings/kommu_developer_icon.png",
                                   this));
 
   toggles.append(new ParamControl("UploadRaw",
                                   "Upload Raw Logs",
                                   "Upload full logs and full resolution video by default while on WiFi. If not enabled, individual logs can be marked for upload at my.comma.ai/useradmin.",
-                                  "../assets/offroad/icon_network.png",
+                                  "../assets/kommu/settings/kommu_upload_icon.png",
                                   this));
 
   ParamControl *record_toggle = new ParamControl("RecordFront",
@@ -151,17 +151,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     resetCalibBtn->setDescription(desc);
   });
 
-  ButtonControl *retrainingBtn = nullptr;
-  if (!params.getBool("Passive")) {
-    retrainingBtn = new ButtonControl("Review Training Guide", "REVIEW", "Review the rules, features, and limitations of openpilot");
-    connect(retrainingBtn, &ButtonControl::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to review the training guide?", this)) {
-        Params().remove("CompletedTrainingVersion");
-        emit reviewTrainingGuide();
-      }
-    });
-  }
-
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
   connect(uninstallBtn, &ButtonControl::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to uninstall?", this)) {
@@ -169,7 +158,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   });
 
-  for (auto btn : {dcamBtn, resetCalibBtn, retrainingBtn, uninstallBtn}) {
+  for (auto btn : {dcamBtn, resetCalibBtn, uninstallBtn}) {
     if (btn) {
       main_layout->addWidget(horizontal_line());
       connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
@@ -208,7 +197,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   osVersionLbl = new LabelControl("OS Version");
   versionLbl = new LabelControl("Version", "", QString::fromStdString(params.get("ReleaseNotes")).trimmed());
   lastUpdateLbl = new LabelControl("Last Update Check", "", "The last time openpilot successfully checked for an update. The updater only runs while the car is off.");
-  remainingUploadsLbl = new LabelControl("Remaining Uploads");
 
   updateBtn = new ButtonControl("Check for Update", "");
   connect(updateBtn, &ButtonControl::released, [=]() {
@@ -223,7 +211,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   });
 
   QVBoxLayout *main_layout = new QVBoxLayout(this);
-  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl, remainingUploadsLbl};
+  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl};
   for (int i = 0; i < std::size(widgets); ++i) {
     main_layout->addWidget(widgets[i]);
     if (i < std::size(widgets) - 1) {
@@ -262,7 +250,6 @@ void SoftwarePanel::updateLabels() {
   gitBranchLbl->setText(QString::fromStdString(params.get("GitBranch")));
   gitCommitLbl->setText(QString::fromStdString(params.get("GitCommit")).left(10));
   osVersionLbl->setText(QString::fromStdString(Hardware::get_os_version()).trimmed());
-  remainingUploadsLbl->setText(QString::fromStdString(params.get("RemainingUploadSize")));
 }
 
 QWidget * network_panel(QWidget * parent) {
@@ -337,7 +324,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
 
   // setup panels
   DevicePanel *device = new DevicePanel(this);
-  QObject::connect(device, &DevicePanel::reviewTrainingGuide, this, &SettingsWindow::reviewTrainingGuide);
   QObject::connect(device, &DevicePanel::showDriverView, this, &SettingsWindow::showDriverView);
 
   QList<QPair<QString, QWidget *>> panels = {
@@ -368,7 +354,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     NavButton *btn = new NavButton(name,pixmap);
     btn->setCheckable(true);
     btn->setChecked(nav_btns->buttons().size() == 0);
-    btn->setFixedHeight(300);
+    btn->setFixedHeight(175);
     btn->setStyleSheet(QString(R"(
       QPushButton {
         color: grey;
@@ -399,7 +385,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       header_label->setText(n);
     });
   }
-  sidebar_layout->setContentsMargins(25, 25, 100, 200);
+  sidebar_layout-> setSpacing(75);
+  sidebar_layout->setContentsMargins(25, 25, 100, 100);
 
   // main settings layout, sidebar + main panel
   QGridLayout *main_layout = new QGridLayout(this);
