@@ -11,11 +11,11 @@ ExitHandler do_exit;
 using namespace ublox;
 
 int main() {
-  LOGW("starting quecteld");
+  LOGW("starting ubloxd");
   AlignedBuffer aligned_buf;
   UbloxMsgParser parser;
 
-  PubMaster pm({"ubloxGnss","gpsLocationExternal"});
+  PubMaster pm({"ubloxGnss", "gpsLocationExternal"});
 
   Context * context = Context::create();
   SubSocket * subscriber = SubSocket::create(context, "ubloxRaw");
@@ -53,8 +53,8 @@ int main() {
         } catch (const std::exception& e) {
           LOGE("Error parsing ublox message %s", e.what());
         }
-        parser.reset();
 
+        parser.reset();
       }
       bytes_consumed += bytes_consumed_this_time;
     }

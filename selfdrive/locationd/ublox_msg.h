@@ -11,6 +11,7 @@
 #include "selfdrive/common/util.h"
 #include "selfdrive/locationd/generated/gps.h"
 #include "selfdrive/locationd/generated/ubx.h"
+#include "selfdrive/locationd/generated/quectel.h"
 
 using namespace std::string_literals;
 
@@ -92,21 +93,13 @@ class UbloxMsgParser {
   public:
     bool add_data(const uint8_t *incoming_data, uint32_t incoming_data_len, size_t &bytes_consumed);
     inline void reset() {bytes_in_parse_buf = 0;}
-    inline int needed_bytes();
+    inline int needed_bytes(const uint8_t *incoming_data);
     inline std::string data() {return std::string((const char*)msg_parse_buf, bytes_in_parse_buf);}
 
     std::pair<std::string, kj::Array<capnp::word>> gen_msg();
-    kj::Array<capnp::word> gen_nav_pvt(ubx_t::nav_pvt_t *msg);
-    kj::Array<capnp::word> gen_rxm_sfrbx(ubx_t::rxm_sfrbx_t *msg);
-    kj::Array<capnp::word> gen_rxm_rawx(ubx_t::rxm_rawx_t *msg);
-    kj::Array<capnp::word> gen_mon_hw(ubx_t::mon_hw_t *msg);
-    kj::Array<capnp::word> gen_mon_hw2(ubx_t::mon_hw2_t *msg);
+    kj::Array<capnp::word> gen_gps_loc_ext(quectel_t::pstmdrstate_t *msg);
 
   private:
-    inline bool valid_cheksum();
-    inline bool valid();
-    inline bool valid_so_far();
-
     std::unordered_map<int, std::unordered_map<int, std::string>> gps_subframes;
 
     size_t bytes_in_parse_buf = 0;
