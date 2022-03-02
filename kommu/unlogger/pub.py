@@ -9,7 +9,8 @@ def main():
     pm = messaging.PubMaster(['ubloxRaw'])
     dat = messaging.new_message('ubloxRaw', 1)
     while True:
-      dat.ubloxRaw = "$PSTMDRSTATE,83474129,2.43424,1.53425,180,19,2.1211,1.1111,3.22313,,1.332323,12.1*1E\r\n"
+      #dat.ubloxRaw = "$PSTMDRSENMSG,30,1385082689,16258,-336,2226*07\r\n"
+      dat.ubloxRaw = "$PSTMDRSENMSG,30,1385082689,16258,-336,2226*07\r\n$PSTMDRSENMSG,31,1385082689,119,-137,-103*1E\r\n"
       pm.send('ubloxRaw', dat)
       time.sleep(0.1)
 

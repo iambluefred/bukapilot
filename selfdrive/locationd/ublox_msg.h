@@ -97,7 +97,7 @@ class UbloxMsgParser {
     inline std::string data() {return std::string((const char*)msg_parse_buf, bytes_in_parse_buf);}
 
     std::pair<std::string, kj::Array<capnp::word>> gen_msg();
-    kj::Array<capnp::word> gen_gps_loc_ext(quectel_t::pstmdrstate_t *msg);
+    kj::Array<capnp::word> gen_gps_loc_ext(quectel_t::pstmdrsenmsg_t *msg);
 
   private:
     std::unordered_map<int, std::unordered_map<int, std::string>> gps_subframes;

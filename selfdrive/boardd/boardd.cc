@@ -523,6 +523,7 @@ void pigeon_thread() {
 
     // init pigeon on rising ignition edge
     // since it was turned off in low power mode
+    /*
     if((ignition && !ignition_last) || need_reset) {
       pigeon->init();
 
@@ -537,6 +538,7 @@ void pigeon_thread() {
       pigeon->stop();
       pigeon->set_power(false);
     }
+    */
 
     ignition_last = ignition;
 

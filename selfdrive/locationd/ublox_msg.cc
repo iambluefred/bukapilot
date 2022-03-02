@@ -32,9 +32,10 @@ inline int UbloxMsgParser::needed_bytes(const uint8_t *incoming_data) {
     }
     else {
       if((*(incoming_data++) == '\n')) {
-        needed_bytes+=3;
+        needed_bytes+=2;
         break;
       }
+      return -1;
     }
   }
   return needed_bytes;
@@ -74,8 +75,8 @@ std::pair<std::string, kj::Array<capnp::word>> UbloxMsgParser::gen_msg() {
   auto body = message->dat();
   std::string sentence = message->sentence();
 
-  if (sentence == "TMDRSTATE"){
-    return {"gpsLocationExternal", gen_gps_loc_ext(static_cast<quectel_t::pstmdrstate_t*>(body))};
+  if (sentence == "TMDRSENMSG"){
+    return {"gpsLocationExternal", gen_gps_loc_ext(static_cast<quectel_t::pstmdrsenmsg_t*>(body))};
   }
   else {
     LOGE("Unknown msg_id %s", sentence.c_str());
@@ -83,15 +84,15 @@ std::pair<std::string, kj::Array<capnp::word>> UbloxMsgParser::gen_msg() {
   }
 }
 
-kj::Array<capnp::word> UbloxMsgParser::gen_gps_loc_ext(quectel_t::pstmdrstate_t *msg) {
+kj::Array<capnp::word> UbloxMsgParser::gen_gps_loc_ext(quectel_t::pstmdrsenmsg_t *msg) {
   MessageBuilder msg_builder;
   auto gpsLoc = msg_builder.initEvent().initGpsLocationExternal();
 
   //std::string s_lat = msg->lat();
-
+  auto haha = msg->id_msg();
   gpsLoc.setSource(cereal::GpsLocationData::SensorSource::UBLOX);
   gpsLoc.setFlags(1);
-  gpsLoc.setLatitude(1 * 1e-07);
+  gpsLoc.setLatitude(1);
   gpsLoc.setLongitude(1.1 * 1e-07);
   gpsLoc.setAltitude(1.1 * 1e-03);
   gpsLoc.setSpeed(12 * 1e-03);
