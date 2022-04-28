@@ -18,7 +18,6 @@ class DevicePanel : public QWidget {
 public:
   explicit DevicePanel(QWidget* parent = nullptr);
 signals:
-  void reviewTrainingGuide();
   void showDriverView();
 };
 
@@ -61,7 +60,6 @@ protected:
 signals:
   void closeSettings();
   void offroadTransition(bool offroad);
-  void reviewTrainingGuide();
   void showDriverView();
 
 private:
@@ -69,4 +67,6 @@ private:
   QWidget *sidebar_widget;
   QButtonGroup *nav_btns;
   QStackedWidget *panel_widget;
+  QWidget *panel_header;
+  QLabel *header_label;
 };

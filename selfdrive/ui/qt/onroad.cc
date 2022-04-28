@@ -2,6 +2,10 @@
 
 #include <iostream>
 #include <QDebug>
+#include <QPixmap>
+#include <QIcon>
+#include <QFont>
+#include <QSize>
 
 #include "selfdrive/common/swaglog.h"
 #include "selfdrive/common/timing.h"
@@ -28,11 +32,16 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 
   main_layout->addWidget(split_wrapper);
 
+  //Kommu Addons
+  addons = new OnroadAddons(this);
+  main_layout->addWidget(addons);
+
   alerts = new OnroadAlerts(this);
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   QObject::connect(this, &OnroadWindow::update, alerts, &OnroadAlerts::updateState);
   QObject::connect(this, &OnroadWindow::offroadTransitionSignal, alerts, &OnroadAlerts::offroadTransition);
   QObject::connect(this, &OnroadWindow::offroadTransitionSignal, this, &OnroadWindow::offroadTransition);
+  QObject::connect(addons, &OnroadAddons::openSettings,this,&OnroadWindow::openSettings);
   main_layout->addWidget(alerts);
 
   // setup stacking order
@@ -100,7 +109,7 @@ void OnroadAlerts::updateState(const UIState &s) {
       // Handle controls timeout
       if (sm.rcv_frame("controlsState") < s.scene.started_frame) {
         // car is started, but controlsState hasn't been seen at all
-        updateAlert("openpilot Unavailable", "Waiting for controls to start", 0,
+        updateAlert("bukapilot Unavailable", "Waiting for controls to start", 0,
                     "controlsWaiting", cereal::ControlsState::AlertSize::MID, AudibleAlert::NONE);
       } else if ((sm.frame - sm.rcv_frame("controlsState")) > 5 * UI_FREQ) {
         // car is started, but controls is lagging or died
@@ -256,4 +265,18 @@ void NvgWindow::paintGL() {
     LOGW("slow frame time: %.2f", dt);
   }
   prev_draw_t = cur_draw_t;
+}
+
+
+OnroadAddons::OnroadAddons(QWidget *parent) : QWidget(parent) {
+
+  invi_btn = new QPushButton(parent);
+  invi_btn -> setStyleSheet("QPushButton { background-color: rgba(10, 0, 0, 0); }");;
+  invi_btn -> move(70,785);
+  invi_btn -> resize(200,200);
+
+  connect(invi_btn, &QPushButton::released, [=](){
+      emit openSettings();
+  });
+
 }
