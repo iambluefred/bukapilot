@@ -48,7 +48,7 @@ CameraInfo cameras_supported[CAMERA_ID_MAX] = {
     .frame_height = 1748,
     .frame_stride = 2912,
     .bayer = true,
-    .bayer_flip = 3,
+    .bayer_flip = 0,
     .hdr = true
   },
   [CAMERA_ID_OV8865] = {
@@ -65,7 +65,7 @@ CameraInfo cameras_supported[CAMERA_ID_MAX] = {
     .frame_height = 1748,
     .frame_stride = 2912,
     .bayer = true,
-    .bayer_flip = 3,
+    .bayer_flip = 0,
     .hdr = true
   },
   [CAMERA_ID_OV10640] = {
@@ -190,7 +190,7 @@ void cameras_init(VisionIpcServer *v, MultiCameraState *s, cl_device_id device_i
 
   // sensor is flipped in LP3
   // IMAGE_ORIENT = 3
-  init_array_imx298[0].reg_data = 3;
+  init_array_imx298[0].reg_data = 0;
 
   // 0   = ISO 100
   // 256 = ISO 200
