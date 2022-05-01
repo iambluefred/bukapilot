@@ -1,10 +1,8 @@
 What is bukapilot?
 ------
-***Todo: Add some images
-
 [bukapilot](http://github.com/kommuai/bukapilot) is an open source software for advanced driver's assistant system (ADAS). It is a maintained patchset based on [openpilot](http://github.com/commaai/openpilot) which aims to support all Malaysian vehicles especially for Perodua and Proton by using hardwares specially designed for them, while adding complete right hand drive support on top of the existing capability from openpilot.
 
-bukapilot performs the functions of Adaptive Cruise Control (ACC), Lane Keep Assist (LKA), Forward Collision Warning (FCW) and Lane Departure Warning (LDW) for a growing variety of supported [car makes, models and model years](#supported-cars). In addition, while bukapilot is engaged, a camera based Driver Monitoring (DM) feature alerts distracted and asleep drivers.
+bukapilot performs the functions of Adaptive Cruise Control (ACC), Lane Keep Assist (LKA), Forward Collision Warning (FCW) and Lane Departure Warning (LDW) for a growing variety of supported car [makes, models and model years](http://kommu.ai). In addition, while bukapilot is engaged, a camera based Driver Monitoring (DM) feature alerts distracted and asleep drivers.
 
 Integration with Stock Features
 ------
@@ -12,42 +10,23 @@ All supported vehicles:
 * Stock LKA is replaced by bukapilot LKA, which only functions when bukapilot is engaged by the user.
 * Stock LDW is replaced by bukapilot LDW.
 
-Additionally, on specific supported cars (see ACC column in [supported cars](#supported-cars)):
+Additionally, on specific supported cars:
 * Stock ACC is replaced by bukapilot ACC.
 * bukapilot FCW operates in addition to stock FCW.
 
 bukapilot should preserve all other vehicle's stock features, including, but are not limited to: FCW, Automatic Emergency Braking (AEB), auto high-beam, blind spot warning, and side collision warning.
 
-Supported Cars
+Limitations of bukapilot
 ------
 
-Bukapilot patchset modifies the code heavily to integrate with our hardware and backend services, thus we can't make any statement for openpilot supported cars.  Instead, we plan to offer commerical support for the following:
-
-| Make      | Model                         | ADAS     | LKAS                      | Gas                        | Brake         |
-| ----------| ------------------------------| ---------| --------------------------| ---------------------------| --------------|
-| Perodua   | Axia Advanced 2019            | ASA2.0   | KommuActuator<sup>1</sup> | KommuActuator<sup>1</sup>  | None          |
-
-<sup>1</sup>KommuActuator is a hardware used to provide steering control and stop-and-go capability to some of the bukapilot-supported cars that don't currently support CAN-enabled controls.
-
-KommuAssist Installation Instructions
-------
-Install bukapilot on a supported device by entering ``https://s4.kommu.ml/upload/bp/installer_openpilot`` during the installer setup.
-
-Follow these [video instructions](https://youtu.be/FktYvHD1PD0) to properly mount the device on the windshield. Note: bukapilot features an automatic pose calibration routine and bukapilot performance should not be affected by small pitch and yaw misalignments caused by imprecise device mounting.
-
-You will be able to engage bukapilot after reviewing the onboarding screens and finishing the calibration procedure.
-
-Limitations of bukapilot LKA and LDW
-------
-
-bukapilot LKA and bukapilot LDW do not automatically drive the vehicle or reduce the amount of attention that must be paid to operate your vehicle. The driver must always keep control of the steering wheel and be ready to correct the bukapilot LKA action at all times.
+bukapilot do not automatically drive the vehicle or reduce the amount of attention that must be paid to operate your vehicle. The driver must always keep control of the steering wheel and be ready to correct the bukapilot LKA action at all times.
 
 While changing lanes, bukapilot is not capable of looking next to you or checking your blind spot. Only nudge the wheel to initiate a lane change after you have confirmed it's safe to do so.
 
-Many factors can impact the performance of bukapilot LKA and bukapilot LDW, causing them to be unable to function as intended. These include, but are not limited to:
+Many factors can impact the performance of bukapilot, causing them to be unable to function as intended. These include, but are not limited to:
 
-* Poor visibility (heavy rain, snow, fog, etc.) or weather conditions that may interfere with sensor operation.
-* The road facing camera is obstructed, covered or damaged by mud, ice, snow, etc.
+* Very poor visibility (heavy rain, snow, fog, etc.) or weather conditions that may interfere with sensor operation.
+* The camera is obstructed, covered or damaged.
 * Obstruction caused by applying excessive paint or adhesive products (such as wraps, stickers, rubber coating, etc.) onto the vehicle.
 * The device is mounted incorrectly.
 * When in sharp curves, like on-off ramps, intersections etc...; bukapilot is designed to be limited in the amount of steering torque it can produce.
@@ -58,45 +37,6 @@ Many factors can impact the performance of bukapilot LKA and bukapilot LDW, caus
 * Driving on hills, narrow, or winding roads.
 
 The list above does not represent an exhaustive list of situations that may interfere with proper operation of bukapilot components. It is the driver's responsibility to be in control of the vehicle at all times.
-
-Limitations of bukapilot ACC and FCW
-------
-
-bukapilot ACC and bukapilot FCW are not systems that allow careless or inattentive driving. It is still necessary for the driver to pay close attention to the vehicle’s surroundings and to be ready to re-take control of the gas and the brake at all times.
-
-Many factors can impact the performance of bukapilot ACC and bukapilot FCW, causing them to be unable to function as intended. These include, but are not limited to:
-
-* Poor visibility (heavy rain, snow, fog, etc.) or weather conditions that may interfere with sensor operation.
-* The road facing camera or radar are obstructed, covered, or damaged by mud, ice, snow, etc.
-* Obstruction caused by applying excessive paint or adhesive products (such as wraps, stickers, rubber coating, etc.) onto the vehicle.
-* The device is mounted incorrectly.
-* Approaching a toll booth, a bridge or a large metal plate.
-* When driving on roads with pedestrians, cyclists, etc...
-* In presence of traffic signs or stop lights, which are not detected by bukapilot at this time.
-* When the posted speed limit is below the user selected set speed. bukapilot does not detect speed limits at this time.
-* In presence of vehicles in the same lane that are not moving.
-* When abrupt braking maneuvers are required. bukapilot is designed to be limited in the amount of deceleration and acceleration that it can produce.
-* When surrounding vehicles perform close cut-ins from neighbor lanes.
-* Driving on hills, narrow, or winding roads.
-* Extremely hot or cold temperatures.
-* Bright light (due to oncoming headlights, direct sunlight, etc.).
-* Interference from other equipment that generates radar waves.
-
-The list above does not represent an exhaustive list of situations that may interfere with proper operation of bukapilot components. It is the driver's responsibility to be in control of the vehicle at all times.
-
-Limitations of bukapilot DM
-------
-
-bukapilot DM should not be considered an exact measurement of the alertness of the driver.
-
-Many factors can impact the performance of bukapilot DM, causing it to be unable to function as intended. These include, but are not limited to:
-
-* Low light conditions, such as driving at night or in dark tunnels.
-* Bright light (due to oncoming headlights, direct sunlight, etc.).
-* The driver's face is partially or completely outside field of view of the driver facing camera.
-* The driver facing camera is obstructed, covered, or damaged.
-
-The list above does not represent an exhaustive list of situations that may interfere with proper operation of bukapilot components. A driver should not rely on bukapilot DM to assess their level of attention.
 
 User Data and Kommu Account
 ------
@@ -120,34 +60,6 @@ Community and Contributing
 bukapilot is developed by a local Malaysian team [Kommu](https://kommu.ai/) and by users like you. We welcome both pull requests and issues on [GitHub](http://github.com/kommuai/bukapilot). Bug fixes and new car ports are encouraged.
 
 And [follow us on Instagram](https://www.instagram.com/kommu.ai/).
-
-Directory Structure
-------
-    .
-    ├── cereal              # The messaging spec and libs used for all logs
-    ├── common              # Library like functionality we've developed here
-    ├── installer/updater   # Manages auto-updates of bukapilot
-    ├── opendbc             # Files showing how to interpret data from cars
-    ├── panda               # Code used to communicate on CAN
-    ├── phonelibs           # External libraries
-    ├── pyextra             # Extra python packages not shipped in NEOS
-    └── selfdrive           # Code needed to drive the car
-        ├── assets          # Fonts, images, and sounds for UI
-        ├── athena          # Allows communication with the app
-        ├── boardd          # Daemon to talk to the board
-        ├── camerad         # Driver to capture images from the camera sensors
-        ├── car             # Car specific code to read states and control actuators
-        ├── common          # Shared C/C++ code for the daemons
-        ├── controls        # Planning and controls
-        ├── debug           # Tools to help you debug and do car ports
-        ├── locationd       # Precise localization and vehicle parameter estimation
-        ├── logcatd         # Android logcat as a service
-        ├── loggerd         # Logger and uploader of car data
-        ├── modeld          # Driving and monitoring model runners
-        ├── proclogd        # Logs information from proc
-        ├── sensord         # IMU interface code
-        ├── test            # Unit tests, system tests, and a car simulator
-        └── ui              # The UI
 
 Licensing
 ------
