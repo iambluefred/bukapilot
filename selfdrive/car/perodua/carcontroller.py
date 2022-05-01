@@ -83,11 +83,13 @@ class CarController():
         if lead_visible:
           apply_brake = actuators.brake
 
+        can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.vEgo, CS.out.cruiseState.speed,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       v_target, apply_brake))
         can_sends.append(perodua_create_brake_command(self.packer, enabled, apply_brake, (frame/5) % 8))
         can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible))
+
 
     # KommuActuator controls
     else:
