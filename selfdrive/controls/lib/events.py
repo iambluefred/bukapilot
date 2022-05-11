@@ -146,7 +146,7 @@ class Alert:
 class NoEntryAlert(Alert):
   def __init__(self, alert_text_2, audible_alert=AudibleAlert.chimeError,
                visual_alert=VisualAlert.none, duration_hud_alert=2.):
-    super().__init__("openpilot Unavailable", alert_text_2, AlertStatus.normal,
+    super().__init__("bukapilot Unavailable", alert_text_2, AlertStatus.normal,
                      AlertSize.mid, Priority.LOW, visual_alert,
                      audible_alert, .4, duration_hud_alert, 3.)
 
@@ -331,7 +331,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.communityFeatureDisallowed: {
     # LOW priority to overcome Cruise Error
     ET.PERMANENT: Alert(
-      "openpilot Not Available",
+      "bukapilot Not Available",
       "Enable Community Features in Settings to Engage",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
@@ -382,11 +382,20 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.ldw, AudibleAlert.chimePrompt, 1., 2., 3.),
   },
 
+  EventName.promptDriverBrake: {
+    ET.PERMANENT: Alert(
+      "BRAKE!",
+      "Vehicle Does Not Have Auto Brake",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.ldw, AudibleAlert.chimePrompt, 1., 2., 3.),
+  },
+
+
   # ********** events only containing alerts that display while engaged **********
 
   EventName.gasPressed: {
     ET.PRE_ENABLE: Alert(
-      "openpilot will not brake while gas pressed",
+      "bukapilot will not brake while gas pressed",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, .0, .0, .1, creation_delay=1.),
@@ -484,6 +493,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.belowSteerSpeed: {
     ET.WARNING: below_steer_speed_alert,
+  },
+
+  EventName.belowLaneChangeSpeed: {
+    ET.WARNING: Alert(
+      "Below Auto Lane Change Speed",
+      "Manually Steer to Change Lane",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
   },
 
   EventName.preLaneChangeLeft: {
@@ -842,7 +859,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.noTarget: {
     ET.IMMEDIATE_DISABLE: Alert(
-      "openpilot Canceled",
+      "bukapilot Canceled",
       "No close lead car",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
@@ -851,7 +868,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.speedTooLow: {
     ET.IMMEDIATE_DISABLE: Alert(
-      "openpilot Canceled",
+      "bukapilot Canceled",
       "Speed too low",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
