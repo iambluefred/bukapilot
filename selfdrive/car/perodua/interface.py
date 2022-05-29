@@ -6,6 +6,7 @@ from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness,
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.perodua.values import CAR, ACC_CAR
 from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
+from common.params import Params
 
 EventName = car.CarEvent.EventName
 
@@ -23,6 +24,8 @@ class CarInterface(CarInterfaceBase):
 
     # perodua port is a community feature
     ret.communityFeature = True
+
+    disableLong = Params().get("DisableBukapilotLongitudinal") == b'1'
     ret.radarOffCan = True
 
     ret.steerRateCost = 0.7                # Lateral MPC cost on steering rate, higher value = sharper turn
@@ -42,7 +45,12 @@ class CarInterface(CarInterfaceBase):
     # common interfaces
     ret.transmissionType = car.CarParams.TransmissionType.automatic
     ret.enableApgs = False                 # advanced parking guidance system
-    ret.safetyParam = 1
+
+    if disableLong:
+      ret.safetyParam = 2
+    else:
+      ret.safetyParam = 1
+
     ret.enableGasInterceptor = 0x201 in fingerprint[0] or 0x401 in fingerprint[0]
     ret.openpilotLongitudinalControl = True
 
@@ -121,11 +129,13 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
       ret.lateralTuning.pid.kf = 0.0000007
 
-      ret.longitudinalTuning.kpBP = [0., 6, 13, 36]
+      ret.longitudinalTuning.kpBP = [0., 6, 13]
       ret.longitudinalTuning.kiBP = [0., 6, 13]
-      ret.longitudinalTuning.kpV = [4.1, 4.2, 2.0, 0.8]
-      ret.longitudinalTuning.kiV = [1.8, 1.8, 1.5]
+      ret.longitudinalTuning.kpV = [3.6, 4.1, 2.6]
+      ret.longitudinalTuning.kiV = [0.6, 1.5, 1.0]
 
+      ret.gasMaxBP = [0., 9., 35]
+      ret.gasMaxV = [0.5, 0.6, 0.4]
     else:
       ret.dashcamOnly = True
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
@@ -136,8 +146,8 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
       ret.enableBsm = True
-      ret.stoppingBrakeRate = 0.15  # reach stopping target smoothly
-      ret.startingBrakeRate = 0.2  # release brakes fast
+      ret.stoppingBrakeRate = 0.1  # reach stopping target smoothly
+      ret.startingBrakeRate = 0.05  # release brakes fast
 
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, tire_stiffness_factor=tire_stiffness_factor)
@@ -165,6 +175,12 @@ class CarInterface(CarInterfaceBase):
     if self.CP.carFingerprint not in ACC_CAR:
       # create events to warn user that their vehicle doesn't have brakes
       if self.CC.brake_pressed and (ret.cruiseState.speed >= ret.vEgo):
+        events.add(EventName.promptDriverBrake)
+
+    # events for ACC cars
+    if self.CP.carFingerprint in ACC_CAR:
+      # warning about the 3s only standstill brake
+      if ret.standstill and self.CC.pump_saturated:
         events.add(EventName.promptDriverBrake)
 
     ret.events = events.to_msg()

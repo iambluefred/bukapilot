@@ -94,21 +94,14 @@ def aeb_brake_command(packer, enabled, decel_cmd):
 
   return packer.make_can_msg("ADAS_AEB", 0, values)
 
-def perodua_create_brake_command(packer, enabled, decel_cmd, idx):
-  decel_req = decel_cmd > 0.1
-  #pump_speed = interp(decel_cmd, [0., 0.8], [0.4, 1.0])
-  pump_speed = 0.8
-
-  if (decel_req >= 0.6):
-      decel_req = 1.0
-
+def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, idx):
   values = {
     "COUNTER": idx,
-    "PUMP_REACTION1": pump_speed if (decel_req and enabled) else 0,
-    "BRAKE_REQ": decel_req,
+    "PUMP_REACTION1": pump,
+    "BRAKE_REQ": decel_req and enabled,
     "MAGNITUDE": (-1* decel_cmd) if (enabled and decel_req) else 0,
     "SET_ME_1_WHEN_ENGAGE": 1 if enabled else 0,
-    "PUMP_REACTION2": (-1* pump_speed) if (enabled and decel_req) else 0,
+    "PUMP_REACTION2": -1* pump,
   }
 
   dat = packer.make_can_msg("ACC_BRAKE", 0, values)[2]
@@ -117,13 +110,12 @@ def perodua_create_brake_command(packer, enabled, decel_cmd, idx):
 
   return packer.make_can_msg("ACC_BRAKE", 0, values)
 
-def perodua_create_accel_command(packer, v_ego, set_speed, acc_rdy, enabled, is_lead, des_speed, brake_amt, mult):
+def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, des_speed, brake_amt, mult, brake_pump):
 
-  is_braking = brake_amt > 0.0
-  
-  if v_ego > 2.5:
+  is_braking = (brake_amt > 0.0 and brake_pump > 0.0)
+  if des_speed > 3.0:
       des_speed = des_speed * (1+mult/10)
- 
+
   values = {
     "SET_SPEED": set_speed * CV.MS_TO_KPH,
     "FOLLOW_DISTANCE": 0,

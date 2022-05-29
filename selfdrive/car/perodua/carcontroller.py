@@ -11,6 +11,8 @@ from common.numpy_fast import clip, interp
 from common.realtime import DT_CTRL
 import cereal.messaging as messaging
 
+BRAKE_THRESHOLD = 0.2
+
 def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
@@ -22,6 +24,42 @@ def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
 
   return int(round(float(apply_torque)))
 
+def psd_brake(apply_brake, last_pump_start_ts, last_pump_end_ts, ts):
+  saturated = False
+
+  # reversed engineered from Ativa stock braking
+  # only brake when magnitude >= 0.2
+  if apply_brake < BRAKE_THRESHOLD:
+    pump = 0
+  elif apply_brake < 0.6:
+    pump = 0.4
+  elif apply_brake < 0.72:
+    pump = 0.5
+  elif apply_brake < 0.86:
+    pump = 0.6
+  elif apply_brake < 0.96:
+    pump = 0.7
+  else:
+    pump = 0.8
+
+  if apply_brake >= BRAKE_THRESHOLD:
+    last_pump_end_ts = ts
+    brake_req = 1
+  else:
+    last_pump_start_ts = ts
+    brake_req = 0
+
+  # once the pump is on, run it for at least 0.5s after apply_brake < BRAKE_THRESHOLD
+  if (ts - last_pump_end_ts <= 0.5 and apply_brake < BRAKE_THRESHOLD):
+    pump = 0.4
+
+  # todo : reset pump timer if:
+  # - we are applying steady state brakes and we haven't been running the pump
+  #   for more than 3s (to prevent pressure bleeding)
+  if (ts - last_pump_start_ts > 3 and apply_brake > BRAKE_THRESHOLD):
+    saturated = True
+
+  return pump, last_pump_start_ts, last_pump_end_ts, brake_req, saturated
 
 class CarControllerParams():
   def __init__(self, CP):
@@ -46,6 +84,9 @@ class CarControllerParams():
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.last_steer = 0
+    self.last_pump_start_ts = 0.
+    self.last_pump_end_ts = 0.
+    self.pump_saturated = False
     self.steer_rate_limited = False
     self.steering_direction = False
     self.brake_pressed = False
@@ -78,14 +119,18 @@ class CarController():
         can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, (frame/2) % 15))
 
       # CAN controlled longitudinal
-      if (frame % 5) == 0:
+      if (frame % 5) == 0 and CS.CP.safetyParam == 1:
+        ts = frame * DT_CTRL
 
+        # PSD brake logic
         apply_brake = actuators.brake
+        pump, self.last_pump_start_ts, self.last_pump_end_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, self.last_pump_end_ts, ts)
 
-        can_sends.append(perodua_create_accel_command(self.packer, CS.out.vEgo, CS.out.cruiseState.speed,
+        can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
+        can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speed,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
-                                                      v_target, apply_brake, apply_gas))
-        can_sends.append(perodua_create_brake_command(self.packer, enabled, apply_brake, (frame/5) % 8))
+                                                      v_target, apply_brake, apply_gas, pump))
+        can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, (frame/5) % 8))
         can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw))
 
     # KommuActuator controls
@@ -99,7 +144,7 @@ class CarController():
       can_sends.append(create_steer_command(self.packer, apply_steer, self.steering_direction, enabled, frame))
 
       # gas
-      if (frame % self.params.GAS_STEP) == 0:
+      if (frame % self.params.GAS_STEP) == 0 and CS.CP.safetyParam == 1:
         idx = frame // self.params.GAS_STEP
         apply_gas = clip(actuators.gas, 0., 1.)
         apply_gas = abs(apply_gas * self.params.GAS_MAX)

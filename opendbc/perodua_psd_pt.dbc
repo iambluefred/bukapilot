@@ -156,7 +156,7 @@ BO_ 627 ACC_CMD_HUD: 8 XXX
  SG_ SET_ME_1_2 : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_1 : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_0_WHEN_ENGAGE : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_CMD : 23|16@0+ (0.0103,0) [0|127] "" XXX
+ SG_ ACC_CMD : 23|16@0+ (0.0106,0) [0|127] "" XXX
  SG_ SET_1_WHEN_ENGAGE : 13|1@0+ (1,0) [0|1] "" XXX
 
 CM_ SG_ 627 FOLLOW_DISTANCE "3 is 0, 2 is 1, 1 is 2";
