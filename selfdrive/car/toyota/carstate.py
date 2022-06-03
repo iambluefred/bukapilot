@@ -43,6 +43,10 @@ class CarState(CarStateBase):
     ret.wheelSpeeds.rl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"] * CV.KPH_TO_MS
     ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"] * CV.KPH_TO_MS
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
+
+    if self.CP.carFingerprint == CAR.ALPHARD_TSS2:
+        ret.vEgoRaw *= 1.035
+
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     ret.standstill = ret.vEgoRaw < 0.001
