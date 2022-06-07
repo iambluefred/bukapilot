@@ -70,6 +70,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     tooDistracted @54;
     posenetInvalid @55;
     soundsUnavailable @56;
+    belowLaneChangeSpeed @105;
+    promptDriverBrake @106;
     preLaneChangeLeft @57;
     preLaneChangeRight @58;
     laneChange @59;
@@ -193,6 +195,9 @@ struct CarState {
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+
+  # HUD
+  frontDeparture @37: Bool; # stock front departure function
 
   struct WheelSpeeds {
     # optional wheel speeds

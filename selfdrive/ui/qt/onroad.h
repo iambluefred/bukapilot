@@ -7,6 +7,8 @@
 #include <QSoundEffect>
 #include <QStackedLayout>
 #include <QWidget>
+#include <QPushButton>
+#include <QLabel>
 
 #include "cereal/gen/cpp/log.capnp.h"
 #include "selfdrive/hardware/hw.h"
@@ -66,6 +68,22 @@ public slots:
   void update(const UIState &s);
 };
 
+//widget for settings invisible button
+class OnroadAddons : public QWidget {
+  Q_OBJECT
+
+public:
+  OnroadAddons(QWidget* parent=0);
+
+signals:
+  void openSettings();
+
+private:
+  QPushButton *invi_btn;
+
+};
+
+
 // container for all onroad widgets
 class OnroadWindow : public QWidget {
   Q_OBJECT
@@ -79,11 +97,15 @@ private:
   NvgWindow *nvg;
   QStackedLayout *main_layout;
   QHBoxLayout* split;
+  OnroadAddons *addons;
 
 signals:
   void update(const UIState &s);
   void offroadTransitionSignal(bool offroad);
+  void openSettings();
 
 private slots:
   void offroadTransition(bool offroad);
 };
+
+

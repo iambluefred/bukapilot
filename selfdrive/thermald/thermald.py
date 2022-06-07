@@ -114,10 +114,14 @@ def handle_fan_eon(max_cpu_temp, bat_temp, fan_speed, ignition):
 
 
 def handle_fan_uno(max_cpu_temp, bat_temp, fan_speed, ignition):
-  new_speed = int(interp(max_cpu_temp, [40.0, 80.0], [0, 80]))
+  new_speed = int(interp(max_cpu_temp, [40.0, 70.0], [0, 100]))
+
+  # remove humming at low temperature due to audible pwm for snowfan
+  if new_speed < 15:
+    new_speed = 0
 
   if not ignition:
-    new_speed = min(30, new_speed)
+    new_speed = min(80, new_speed)
 
   return new_speed
 
@@ -137,6 +141,7 @@ def thermald_thread():
   pandaState_sock = messaging.sub_sock('pandaState', timeout=pandaState_timeout)
   location_sock = messaging.sub_sock('gpsLocationExternal')
   managerState_sock = messaging.sub_sock('managerState', conflate=True)
+  gpsd_sock = messaging.sub_sock('gpsNMEA', timeout=5000)
 
   fan_speed = 0
   count = 0
@@ -318,6 +323,20 @@ def thermald_thread():
     now = datetime.datetime.utcnow()
 
     # show invalid date/time alert
+    if (now.year < 2000):
+      for tries in range(10):
+        gpsd = messaging.recv_sock(gpsd_sock, wait=True)
+        try:
+          if (gpsd.gpsNMEA.nmea[3:6] == "RMC"):
+            rmc_list = gpsd.gpsNMEA.nmea.split(",")
+            rmc_date_cmd = f"date -s \"20{rmc_list[9][4:6]}-{rmc_list[9][2:4]}-{rmc_list[9][0:2]}\""
+            rmc_time_cmd = f"date +%T -s \"{rmc_list[1][0:2]}:{rmc_list[1][2:4]}:{rmc_list[1][4:6]}\""
+            os.system(f"{rmc_date_cmd} && {rmc_time_cmd}")
+            break
+        except AttributeError:
+          cloudlog.info("RMC not found, datetime not set, retying in awhile")
+          break
+
     startup_conditions["time_valid"] = (now.year > 2020) or (now.year == 2020 and now.month >= 10)
     set_offroad_alert_if_changed("Offroad_InvalidTime", (not startup_conditions["time_valid"]))
 
@@ -355,7 +374,7 @@ def thermald_thread():
       set_offroad_alert_if_changed("Offroad_ConnectivityNeeded", False)
       set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", False)
 
-    startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates")
+    #startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates")
     startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 
@@ -365,8 +384,7 @@ def thermald_thread():
 
     # with 2% left, we killall, otherwise the phone will take a long time to boot
     startup_conditions["free_space"] = msg.deviceState.freeSpacePercent > 2
-    startup_conditions["completed_training"] = params.get("CompletedTrainingVersion") == training_version or \
-                                               params.get_bool("Passive")
+    startup_conditions["completed_training"] = True
     startup_conditions["not_driver_view"] = not params.get_bool("IsDriverViewEnabled")
     startup_conditions["not_taking_snapshot"] = not params.get_bool("IsTakingSnapshot")
     # if any CPU gets above 107 or the battery gets above 63, kill all processes
@@ -403,7 +421,7 @@ def thermald_thread():
     msg.deviceState.carBatteryCapacityUwh = max(0, power_monitor.get_car_battery_capacity())
 
     # Check if we need to disable charging (handled by boardd)
-    msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts)
+    msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts, started_seen)
 
     # Check if we need to shut down
     if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
