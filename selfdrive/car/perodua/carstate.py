@@ -1,11 +1,13 @@
 from cereal import car
 from collections import deque
+from math import ceil
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from common.numpy_fast import mean
 from selfdrive.config import Conversions as CV
 from selfdrive.car.interfaces import CarStateBase
 from selfdrive.car.perodua.values import DBC, CAR, ACC_CAR
+from time import time
 
 # todo: clean this part up
 pedal_counter = 0
@@ -13,6 +15,8 @@ pedal_press_state = 0
 PEDAL_COUNTER_THRES = 35
 PEDAL_UPPER_TRIG_THRES = 0.125
 PEDAL_NON_ZERO_THRES = 0.01
+
+SEC_HOLD_TO_STEP_SPEED = 1
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -26,6 +30,10 @@ class CarState(CarStateBase):
 
     self.is_plus_btn_latch = False
     self.is_minus_btn_latch = False
+    # shared by both + and - button, since release of another button will reset this
+    self.rising_edge_since = 0
+    self.last_frame = time() # todo: existing infra to reuse?
+    self.dt = 0
 
   def update(self, cp):
     ret = car.CarState.new_message()
@@ -33,7 +41,7 @@ class CarState(CarStateBase):
     # there is a backwheel speed, but it will overflow to 0 when reach 60kmh
     # perodua vehicles doesn't have a good standard for their wheelspeed scaling
     if self.CP.carFingerprint in CAR.MYVI_PSD:
-      ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'] * CV.KPH_TO_MS * 0.822
+      ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'] * CV.KPH_TO_MS * 0.83
     else:
       ret.wheelSpeeds.rr = cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'] * CV.KPH_TO_MS
 
@@ -130,35 +138,65 @@ class CarState(CarStateBase):
           self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgo)
           self.is_cruise_latch = True
     else:
+      ret.frontDeparture = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
+
+      ret.stockAeb = bool(cp.vl["LKAS_HUD"]['AEB_BRAKE'])
+      ret.stockFcw = bool(cp.vl["LKAS_HUD"]['AEB_ALARM'])
+
       ret.cruiseState.available = cp.vl["PCM_BUTTONS"]["ACC_RDY"] != 0
 
       # set speed logic
       # todo: check if the logic needs to be this complicated
+
+      minus_button = bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"])
+      plus_button = bool(cp.vl["PCM_BUTTONS"]["RES_PLUS"])
+
       if self.is_cruise_latch:
-        if bool(cp.vl["PCM_BUTTONS"]["RES_PLUS"]) and not self.is_plus_btn_latch:
-          self.cruise_speed += (5 * CV.KPH_TO_MS)
-          self.is_plus_btn_latch = True
+        cur_time = time()
+        self.dt += cur_time - self.last_frame
+        self.last_frame = cur_time
 
-        elif not bool(cp.vl["PCM_BUTTONS"]["RES_PLUS"]):
-          self.is_plus_btn_latch = False
+        if self.is_plus_btn_latch != plus_button: # rising or falling
+          if not plus_button: # released, falling
+            if cur_time - self.rising_edge_since < 1:
+              self.cruise_speed += CV.KPH_TO_MS
+          else: # pressed, rising, init
+            self.rising_edge_since = cur_time
+            self.dt = 0
+        elif plus_button: # is holding
+          while self.dt >= SEC_HOLD_TO_STEP_SPEED:
+            kph = self.cruise_speed * CV.MS_TO_KPH
+            kph += 5 - (kph % 5)  # step up to next nearest 5
+            self.cruise_speed = kph * CV.KPH_TO_MS
+            self.dt -= SEC_HOLD_TO_STEP_SPEED
 
-        if bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"]) and not self.is_minus_btn_latch:
-          self.cruise_speed = max(5 * CV.KPH_TO_MS, self.cruise_speed - (5 * CV.KPH_TO_MS))
-          self.is_minus_btn_latch = True
-
-        elif not bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"]):
-          self.is_minus_btn_latch = False
+        if self.is_minus_btn_latch != minus_button: # rising or falling
+          if not minus_button: # released, falling
+            if cur_time - self.rising_edge_since < 1:
+              self.cruise_speed -= CV.KPH_TO_MS
+          else: # pressed, rising
+            self.rising_edge_since = cur_time
+            self.dt = 0
+        elif minus_button: # is holding
+          while self.dt >= SEC_HOLD_TO_STEP_SPEED:
+            kph = self.cruise_speed * CV.MS_TO_KPH
+            kph = (ceil(kph / 5) - 1) * 5  # step down to next nearest 5
+            kph = max(30, kph)
+            self.cruise_speed = kph * CV.KPH_TO_MS
+            self.dt -= SEC_HOLD_TO_STEP_SPEED
 
       if not self.is_cruise_latch:
-
-        if bool(cp.vl["PCM_BUTTONS"]["RES_PLUS"]):
+        # activate cruise onReleased
+        if self.is_plus_btn_latch and not plus_button:
           self.is_cruise_latch = True
-          self.is_plus_btn_latch = True
 
-        if bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"]):
+        elif self.is_minus_btn_latch and not minus_button:
           self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgo)
-          self.is_minus_btn_latch = True
           self.is_cruise_latch = True
+
+
+      self.is_plus_btn_latch = plus_button
+      self.is_minus_btn_latch = minus_button
 
       if bool(cp.vl["PCM_BUTTONS"]["CANCEL"]):
         self.is_cruise_latch = False
@@ -265,6 +303,9 @@ class CarState(CarStateBase):
       signals.append(("LKAS_ENGAGED", "LKAS_HUD", 0))
       signals.append(("ACC_CMD", "ACC_CMD_HUD", 0))
       signals.append(("STEER_REQ", "STEERING_LKAS", 0))
+      signals.append(("FRONT_DEPART", "LKAS_HUD", 0))
+      signals.append(("AEB_BRAKE", "LKAS_HUD", 0))
+      signals.append(("AEB_ALARM", "LKAS_HUD", 0))
       signals.append(("SET_SPEED", "ACC_CMD_HUD", 0))
       signals.append(("LDA_ALERT", "LKAS_HUD", 0))
       signals.append(("GAS_PEDAL_STEP", "GAS_PEDAL_2", 0))

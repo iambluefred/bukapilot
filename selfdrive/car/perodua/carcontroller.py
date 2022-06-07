@@ -59,6 +59,11 @@ def psd_brake(apply_brake, last_pump_start_ts, last_pump_end_ts, ts):
   if (ts - last_pump_start_ts > 3 and apply_brake > BRAKE_THRESHOLD):
     saturated = True
 
+  # non tested: will try out
+  #  last_pump_start_ts = ts
+  #  pump = 0
+  #  brake_req = 0
+
   return pump, last_pump_start_ts, last_pump_end_ts, brake_req, saturated
 
 class CarControllerParams():
@@ -118,6 +123,10 @@ class CarController():
       if (frame % 2) == 0:
         can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, (frame/2) % 15))
 
+      # Toggle auto idle
+      # if (frame % 1000) == 0:
+      #  can_sends.append(make_can_msg(0x1ab, b'\x08\x00\x00\x00\x80\x40\x00\x04', 0))
+
       # CAN controlled longitudinal
       if (frame % 5) == 0 and CS.CP.safetyParam == 1:
         ts = frame * DT_CTRL
@@ -130,8 +139,8 @@ class CarController():
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speed,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       v_target, apply_brake, apply_gas, pump))
-        can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, (frame/5) % 8))
-        can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw))
+        can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, CS.out.stockAeb, (frame/5) % 8))
+        can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw, CS.out.stockFcw, CS.out.stockAeb, CS.out.frontDeparture))
 
     # KommuActuator controls
     else:

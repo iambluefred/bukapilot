@@ -105,20 +105,24 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.MYVI_PSD:
       ret.wheelbase = 2.5
-      ret.steerRatio = 16.74
+      ret.steerRatio = 17.24
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1025. + STD_CARGO_KG
 
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.18]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.20]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
       ret.lateralTuning.pid.kf = 0.0000007
 
       ret.longitudinalTuning.kpBP = [0., 6, 13]
       ret.longitudinalTuning.kiBP = [0., 6, 13]
-      ret.longitudinalTuning.kpV = [3.8, 4.0, 2.0]
-      ret.longitudinalTuning.kiV = [1.3, 1.2, 1.0]
+      ret.longitudinalTuning.kpV = [5.0, 5.0, 3.9]
+      ret.longitudinalTuning.kiV = [1.8, 1.6, 1.4]
 
+      ret.gasMaxBP = [0., 9., 35]
+      ret.gasMaxV = [0.5, 0.6, 0.7]
+
+      ret.stoppingBrakeRate = 0.2  # reach stopping target smoothly
     elif candidate == CAR.ATIVA:
       ret.wheelbase = 2.525
       ret.steerRatio = 16.74
@@ -137,6 +141,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.gasMaxBP = [0., 9., 35]
       ret.gasMaxV = [0.5, 0.6, 0.4]
+      ret.stoppingBrakeRate = 0.1  # reach stopping target smoothly
     else:
       ret.dashcamOnly = True
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
@@ -147,7 +152,6 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
       ret.enableBsm = True
-      ret.stoppingBrakeRate = 0.1  # reach stopping target smoothly
       ret.startingBrakeRate = 0.05  # release brakes fast
 
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
