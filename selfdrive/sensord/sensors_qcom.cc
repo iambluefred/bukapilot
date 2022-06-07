@@ -145,7 +145,8 @@ void sensor_loop() {
         switch (data.type) {
         case SENSOR_TYPE_ACCELEROMETER: {
           auto svec = log_event.initAcceleration();
-          svec.setV(data.acceleration.v);
+          float accel[3] = {-data.acceleration.v[0],-data.acceleration.v[1],data.acceleration.v[2]};
+          svec.setV(accel);
           svec.setStatus(data.acceleration.status);
           break;
         }
@@ -153,12 +154,14 @@ void sensor_loop() {
           auto svec = log_event.initMagneticUncalibrated();
           // assuming the uncalib and bias floats are contiguous in memory
           kj::ArrayPtr<const float> vs(&data.uncalibrated_magnetic.uncalib[0], 6);
-          svec.setV(vs);
+          float mag_uncalib[6] = {-vs[0],-vs[1],vs[2],-vs[3],-vs[4],vs[5]};
+          svec.setV(mag_uncalib);
           break;
         }
         case SENSOR_TYPE_MAGNETIC_FIELD: {
           auto svec = log_event.initMagnetic();
-          svec.setV(data.magnetic.v);
+          float mag[3] = {-data.magnetic.v[0],-data.magnetic.v[1],data.magnetic.v[2]};
+          svec.setV(mag);
           svec.setStatus(data.magnetic.status);
           break;
         }
@@ -166,12 +169,14 @@ void sensor_loop() {
           auto svec = log_event.initGyroUncalibrated();
           // assuming the uncalib and bias floats are contiguous in memory
           kj::ArrayPtr<const float> vs(&data.uncalibrated_gyro.uncalib[0], 6);
-          svec.setV(vs);
+          float gyro_uncalib[6] = {-vs[0],-vs[1],vs[2],-vs[3],-vs[4],vs[5]};
+          svec.setV(gyro_uncalib);
           break;
         }
         case SENSOR_TYPE_GYROSCOPE: {
           auto svec = log_event.initGyro();
-          svec.setV(data.gyro.v);
+          float gyro[3] = {-data.gyro.v[0],-data.gyro.v[1],data.gyro.v[2]};
+          svec.setV(gyro);
           svec.setStatus(data.gyro.status);
           break;
         }
