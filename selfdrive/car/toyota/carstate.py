@@ -45,6 +45,9 @@ class CarState(CarStateBase):
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
+    if self.CP.carFingerprint == CAR.ALPHARD_TSS2:
+      ret.vEgoRaw *= 1.035
+
     ret.standstill = ret.vEgoRaw < 0.001
 
     # Some newer models have a more accurate angle measurement in the TORQUE_SENSOR message. Use if non-zero
