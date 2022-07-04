@@ -2,20 +2,31 @@
 
 #include <QFontDatabase>
 
+#include "selfdrive/common/params.h"
 #include "selfdrive/hardware/hw.h"
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
   main_layout = new QStackedLayout(this);
   main_layout->setMargin(0);
 
+  homeWindow = new HomeWindow(this);
+  main_layout->addWidget(homeWindow);
+
   onboardingWindow = new OnboardingWindow(this);
   main_layout->addWidget(onboardingWindow);
+
+  QObject::connect(homeWindow, &HomeWindow::openTraining, [=]() {
+    Params().put("CompletedTrainingVersion", "b'0'");
+    main_layout->setCurrentWidget(onboardingWindow);
+  });
+  QObject::connect(homeWindow, &HomeWindow::openTerms, [=]() {
+    Params().put("HasAcceptedTerms", "b'0'");
+    main_layout->setCurrentWidget(onboardingWindow);
+  });
   QObject::connect(onboardingWindow, &OnboardingWindow::onboardingDone, [=]() {
     main_layout->setCurrentWidget(homeWindow);
   });
 
-  homeWindow = new HomeWindow(this);
-  main_layout->addWidget(homeWindow);
   QObject::connect(homeWindow, &HomeWindow::openSettings, this, &MainWindow::openSettings);
   QObject::connect(homeWindow, &HomeWindow::closeSettings, this, &MainWindow::closeSettings);
   QObject::connect(&qs, &QUIState::uiUpdate, homeWindow, &HomeWindow::update);
@@ -27,12 +38,16 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(settingsWindow);
   QObject::connect(settingsWindow, &SettingsWindow::closeSettings, this, &MainWindow::closeSettings);
   QObject::connect(&qs, &QUIState::offroadTransition, settingsWindow, &SettingsWindow::offroadTransition);
-  QObject::connect(settingsWindow, &SettingsWindow::reviewTrainingGuide, [=]() {
-    main_layout->setCurrentWidget(onboardingWindow);
-  });
   QObject::connect(settingsWindow, &SettingsWindow::showDriverView, [=] {
     homeWindow->showDriverView(true);
   });
+  QObject::connect(settingsWindow, &SettingsWindow::keepAwakeChanged, &device, &Device::setKeepAwake);
+
+  bool should_onboard = Params().get("HasAcceptedTerms") != Params().get("TermsVersion") &&
+    Params().get("CompletedTrainingVersion") != Params().get("TrainingVersion");
+  if (should_onboard) {
+    main_layout->setCurrentWidget(onboardingWindow);
+  }
 
   device.setAwake(true, true);
   QObject::connect(&qs, &QUIState::uiUpdate, &device, &Device::update);
@@ -42,20 +57,19 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     }
   });
   QObject::connect(&device, &Device::displayPowerChanged, [=]() {
-     if(main_layout->currentWidget() != onboardingWindow) {
-       closeSettings();
-     }
+    if(main_layout->currentWidget() != onboardingWindow) {
+      closeSettings();
+    }
   });
 
   // load fonts
-  QFontDatabase::addApplicationFont("../assets/fonts/opensans_regular.ttf");
-  QFontDatabase::addApplicationFont("../assets/fonts/opensans_bold.ttf");
-  QFontDatabase::addApplicationFont("../assets/fonts/opensans_semibold.ttf");
+  QFontDatabase::addApplicationFont("../assets/fonts/GlacialIndifference-Regular.otf");
+  QFontDatabase::addApplicationFont("../assets/fonts/GlacialIndifference-Bold.otf");
 
   // no outline to prevent the focus rectangle
   setStyleSheet(R"(
     * {
-      font-family: Inter;
+      font-family: Glacial Indifference;
       outline: none;
     }
   )");

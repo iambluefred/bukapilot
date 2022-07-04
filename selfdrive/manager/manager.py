@@ -33,9 +33,16 @@ def manager_init():
   params.clear_all(ParamKeyType.CLEAR_ON_MANAGER_START)
 
   default_params = [
+    ("CommunityFeaturesToggle", "1"),
     ("CompletedTrainingVersion", "0"),
     ("HasAcceptedTerms", "0"),
+    ("IsMetric", "1"),
+    ("IsRHD", "1"),
+    ("DisableBukapilotLongitudinal", "0"),
     ("OpenpilotEnabledToggle", "1"),
+    ("RecordFront", "1"),
+    ("UploadRaw", "1"),
+    ("MyviProfile", "standard"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -65,8 +72,15 @@ def manager_init():
   except PermissionError:
     print("WARNING: failed to make /dev/shm")
 
+  # get version
+  with open("/data/openpilot/RELEASES.md", "r") as f:
+    notes = f.read()
+    notes = notes[:notes.find("\n\n")]
+  version = notes.split(maxsplit=2)[1] # parse first line only
+
   # set version params
   params.put("Version", version)
+  params.put("ReleaseNotes", notes)
   params.put("TermsVersion", terms_version)
   params.put("TrainingVersion", training_version)
   params.put("GitCommit", get_git_commit(default=""))

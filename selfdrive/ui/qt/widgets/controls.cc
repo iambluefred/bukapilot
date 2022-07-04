@@ -7,8 +7,8 @@ QFrame *horizontal_line(QWidget *parent) {
   QFrame *line = new QFrame(parent);
   line->setFrameShape(QFrame::StyledPanel);
   line->setStyleSheet(R"(
-    margin-left: 40px;
-    margin-right: 40px;
+    margin-left: 10px;
+    margin-right: 10px;
     border-width: 1px;
     border-bottom-style: solid;
     border-color: gray;
@@ -36,7 +36,7 @@ AbstractControl::AbstractControl(const QString &title, const QString &desc, cons
 
   // title
   title_label = new QPushButton(title);
-  title_label->setStyleSheet("font-size: 50px; font-weight: 400; text-align: left;");
+  title_label->setStyleSheet("font-size: 50px; font-weight: 500; text-align: left;");
   hlayout->addWidget(title_label);
 
   main_layout->addLayout(hlayout);
@@ -73,7 +73,7 @@ ButtonControl::ButtonControl(const QString &title, const QString &text, const QS
     QPushButton {
       padding: 0;
       border-radius: 50px;
-      font-size: 35px;
+      font-size: 50px;
       font-weight: 500;
       color: #E4E4E4;
       background-color: #393939;
@@ -82,7 +82,24 @@ ButtonControl::ButtonControl(const QString &title, const QString &text, const QS
       color: #33E4E4E4;
     }
   )");
-  btn.setFixedSize(250, 100);
+  if (text.length() >=8) {
+  btn.setStyleSheet(R"(
+      QPushButton {
+        padding: 0;
+        border-radius: 50px;
+        font-size: 40px;
+        font-weight: 500;
+        color: #E4E4E4;
+        background-color: #393939;
+      }
+      QPushButton:disabled {
+        color: #33E4E4E4;
+      }
+    )");
+
+  }
+
+  btn.setFixedSize(300, 150);
   QObject::connect(&btn, &QPushButton::released, this, &ButtonControl::released);
   hlayout->addWidget(&btn);
 }
