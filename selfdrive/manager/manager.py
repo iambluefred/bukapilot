@@ -191,6 +191,10 @@ def main():
   if prepare_only:
     return
 
+  # flip screen, set to 1 first to trigger rotation
+  os.system("settings put system user_rotation 1")
+  os.system("settings put system user_rotation 3")
+
   # SystemExit on sigterm
   signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(1))
 
