@@ -1,3 +1,16 @@
+Version 4-firstbatch  (2022-07-04)
+=========================
+ * Update UI: Training guide page, font change, add offroad alerts
+ * Allow vision to leave power saver mode through ignition button and manual power on
+ * Solve intermittent device power off
+ * Change speed display to show GPS speed, NOT odometry speed
+ * Toyota Alphard: Fix revving and wheelspeed scaling
+ * Perodua PSD: Smoother low pump noise braking (lesser jerks)
+ * Perodua PSD: Solve pump pressure bleeding issue
+ * Perodua PSD: Enable stock Lane Departure Prevention when not engaged
+ * Perodua Semi ACC: Add lateral tunes presets through settings
+ * Support Toyota Corolla Cross 2021
+
 Version 3-firstbatch  (2022-06-06)
 =========================
  * Add full powersaver mode to 13 hours, battery can last at least 2 weeks idle with KommuAssist in power saver
