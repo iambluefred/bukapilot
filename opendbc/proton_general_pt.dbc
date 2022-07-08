@@ -1,0 +1,55 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX +
+
+BO_ 528 WHEELSPEED: 8 XXX
+ SG_ WHEELSPEED_FRONT : 7|16@0+ (0.0088,-0.0704) [0|16777215] "" XXX
+ SG_ WHEELSPEED_BACK : 23|16@0+ (0.0011,-0.0704) [0|65535] "" XXX
+
+BO_ 277 TRANSMISSION: 8 XXX
+ SG_ GEAR : 49|2@0+ (1,0) [0|1] "" XXX
+ SG_ GAS : 38|7@0+ (0.00999,-0.08) [0|1] "" XXX
+
+BO_ 1296 METER_CLUSTER: 8 XXX
+ SG_ DOOR : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ LIGHT : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ HANDBRAKE : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ SEATBELT : 48|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 257 BRAKE_PEDAL: 8 XXX
+ SG_ BRAKE_ENGAGE : 56|1@0+ (1,0) [0|1] "" XXX
+
+VAL_ 277 GEAR 1 "N" 2 "D" 3 "S" 0 "P"
