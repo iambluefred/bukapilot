@@ -8,7 +8,7 @@ BOOTSTUB_ADDRESS = 0x8000000
 BLOCK_SIZE_FX = 0x800
 APP_ADDRESS_FX = 0x8004000
 DEVICE_SERIAL_NUMBER_ADDR_FX = 0x1FFF79C0
-DEFAULT_FW_FN = os.path.join(BASEDIR, "board", "obj", "panda.bin.signed")
+DEFAULT_FW_FN = os.path.join(BASEDIR, "board", "obj", "icptr.bin.signed")
 DEFAULT_BOOTSTUB_FN = os.path.join(BASEDIR, "board", "obj", "bootstub.panda.bin")
 
 BLOCK_SIZE_H7 = 0x400
