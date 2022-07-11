@@ -14,7 +14,6 @@ def register_user(imei, serial):
 
   # make sure the algo is the same with rsj!
   dongle_id = SHA224.new(data=(imei + serial).encode()).hexdigest()[:16]
-  params.put("RsjDongle", dongle_id)
 
   # first, try to login, WE MUST BE ABLE TO LOGIN IF DONGLE EXISTS
   # TODO: review threat model

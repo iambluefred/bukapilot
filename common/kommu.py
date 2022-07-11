@@ -47,7 +47,7 @@ def refresh_session():
 
   data = {
       "method": "password",
-      "password_identifier": params.get("RsjDongle"),
+      "password_identifier": params.get("DongleId"),
       "password": HARDWARE.get_imei(1) + HARDWARE.get_serial(),
   }
   resp = requests.post(init.json()["ui"]["action"], data=data)
