@@ -30,21 +30,15 @@ def flash_panda(panda_serial: str) -> Panda:
 
   panda_version = "bootstub" if panda.bootstub else panda.get_version()
   panda_signature = b"" if panda.bootstub else panda.get_signature()
-  cloudlog.warning(f"Panda {panda_serial} connected, version: {panda_version}, signature {panda_signature.hex()[:16]}, expected {fw_signature.hex()[:16]}")
+  cloudlog.warning(f"Safety {panda_serial} connected, version: {panda_version}, signature {panda_signature.hex()[:16]}, expected {fw_signature.hex()[:16]}")
 
-  if panda.bootstub or panda_signature != fw_signature:
+  if panda_signature != fw_signature:
     cloudlog.info("Panda firmware out of date, update required")
     panda.flash()
     cloudlog.info("Done flashing")
 
   if panda.bootstub:
-    bootstub_version = panda.get_version()
-    cloudlog.info(f"Flashed firmware not booting, flashing development bootloader. Bootstub version: {bootstub_version}")
-    panda.recover()
-    cloudlog.info("Done flashing bootloader")
-
-  if panda.bootstub:
-    cloudlog.info("Panda still not booting, exiting")
+    cloudlog.info("Safety still not booting, exiting")
     raise AssertionError
 
   panda_signature = panda.get_signature()
@@ -91,7 +85,8 @@ def main() -> NoReturn:
       if len(panda_serials) == 0:
         continue
 
-      cloudlog.info(f"{len(panda_serials)} panda(s) found, connecting - {panda_serials}")
+      cloudlog.info(f"{len(panda_serials)} Safety(s) found, waiting for 4 secs before connecting - {panda_serials}")
+      time.sleep(4)
 
       # Flash pandas
       pandas = []
@@ -106,7 +101,7 @@ def main() -> NoReturn:
           cloudlog.event("heartbeat lost", deviceState=health, serial=panda.get_usb_serial())
 
         if first_run:
-          cloudlog.info(f"Resetting panda {panda.get_usb_serial()}")
+          cloudlog.info(f"Resetting Safety {panda.get_usb_serial()}")
           panda.reset()
 
       # sort pandas to have deterministic order
