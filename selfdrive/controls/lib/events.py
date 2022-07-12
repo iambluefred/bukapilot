@@ -340,6 +340,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.warningSoft, 2.),
   },
 
+  EventName.promptDriverBrake: {
+    ET.PERMANENT: Alert(
+      "BRAKE!",
+      "",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.ldw, AudibleAlert.promptRepeat, 2.),
+  },
+
   EventName.ldw: {
     ET.PERMANENT: Alert(
       "Lane Departure Detected",
@@ -445,6 +453,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
 
   EventName.belowSteerSpeed: {
     ET.WARNING: below_steer_speed_alert,
+  },
+
+  EventName.belowLaneChangeSpeed: {
+    ET.WARNING: Alert(
+      "Below Auto Lane Change Speed",
+      "Manually Steer to Change Lane",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.promptRepeat, .1),
   },
 
   EventName.preLaneChangeLeft: {
