@@ -63,8 +63,8 @@ class Calibrator():
     self.param_put = param_put
 
     # Read saved calibration
-    params = Params()
-    calibration_params = params.get("CalibrationParams")
+    self.params = Params()
+    calibration_params = self.params.get("CalibrationParams")
     self.wide_camera = TICI and params.get_bool('EnableWideCamera')
     rpy_init = RPY_INIT
     valid_blocks = 0
@@ -130,7 +130,9 @@ class Calibrator():
 
     # If spread is too high, assume mounting was changed and reset to last block.
     # Make the transition smooth. Abrupt transitions are not good foor feedback loop through supercombo model.
-    if max(self.calib_spread) > MAX_ALLOWED_SPREAD and self.cal_status == Calibration.CALIBRATED:
+    need_reset |= max(self.calib_spread) > MAX_ALLOWED_SPREAD and self.cal_status == Calibration.CALIBRATED
+    need_reset |= self.params.get("CalibrationParams") is None
+    if need_reset:
       self.reset(self.rpys[self.block_idx - 1], valid_blocks=INPUTS_NEEDED, smooth_from=self.rpy)
 
     write_this_cycle = (self.idx == 0) and (self.block_idx % (INPUTS_WANTED//5) == 5)

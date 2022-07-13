@@ -48,6 +48,7 @@ private slots:
   void updateCalibDescription();
 
 private:
+  ButtonControl *resetCalibBtn;
   Params params;
 };
 
