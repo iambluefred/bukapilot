@@ -368,12 +368,7 @@ class Panda(object):
 
   # Returns tuple with health packet version and CAN packet/USB packet version
   def get_packets_versions(self):
-    dat = self._handle.controlRead(Panda.REQUEST_IN, 0xdd, 0, 0, 2)
-    if dat:
-      a = struct.unpack("BB", dat)
-      return (a[0], a[1])
-    else:
-      return (0, 0)
+    return (self.HEALTH_PACKET_VERSION, self.CAN_PACKET_VERSION)
 
   def is_white(self):
     return self.get_type() == Panda.HW_TYPE_WHITE_PANDA
