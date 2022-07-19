@@ -58,9 +58,9 @@ class LeadMpc():
     self.cur_state[0].x_ego = 0.0
 
     if lead is not None and lead.status:
-      if lead.dRel <= 11.2:
+      if lead.dRel <= 100.2:
         # -0.015x^2 + 1.4x - 2.6
-        x_lead = max(0.0, (-0.015*lead.dRel**2) + 1.4*lead.dRel - 2.6)
+        x_lead = max(0.0, lead.dRel/2)
       else:
         x_lead = lead.dRel
       v_lead = max(0.0, lead.vLead)
