@@ -173,6 +173,9 @@ def manager_thread() -> None:
 def main() -> None:
   prepare_only = os.getenv("PREPAREONLY") is not None
 
+  # Start gpsd even earlier to set time
+  managed_processes['gpsd'].start()
+
   manager_init()
 
   # Start UI early so prepare can happen in the background
