@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import datetime
+import json
 import os
 import signal
 import subprocess
@@ -10,6 +11,7 @@ from typing import List, Tuple, Union
 import cereal.messaging as messaging
 import selfdrive.sentry as sentry
 from common.basedir import BASEDIR
+from common.features import Features
 from common.params import Params, ParamKeyType
 from common.text_window import TextWindow
 from selfdrive.boardd.set_time import set_time
@@ -71,6 +73,11 @@ def manager_init() -> None:
   except PermissionError:
     print("WARNING: failed to make /dev/shm")
 
+  # set release notes
+  with open("/data/openpilot/RELEASES.md", "rb") as f:
+    r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
+    params.put("ReleaseNotes", r.decode("utf-8"))
+
   # set version params
   params.put("Version", get_version())
   params.put("TermsVersion", terms_version)
@@ -79,10 +86,22 @@ def manager_init() -> None:
   params.put("GitBranch", get_short_branch(default=""))
   params.put("GitRemote", get_origin(default=""))
 
-  # set release notes
-  with open("/data/openpilot/RELEASES.md", "rb") as f:
-    r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
-    params.put("ReleaseNotes", r.decode("utf-8"))
+  # set default feature dict
+  if params.get("FeaturesDict") is None:
+    d = {
+        "features": {
+          "MyviAzri":       1 << 0,
+          "MyviKevin":      1 << 1,
+          },
+        "packages": {
+          "default": [],
+          "myvi-a": ["MyviAzri"],
+          "myvi-b": ["MyviKevin"],
+        },
+        "version": 1,
+        }
+    params.put("FeaturesDict", json.dumps(d))
+    Features().set_package("default")
 
   # set dongle id
   reg_res = register(show_spinner=True)
