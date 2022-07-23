@@ -234,6 +234,8 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
       updateLabels();
     }
   });
+
+  addItem(new FeaturesControl());
 }
 
 void SoftwarePanel::showEvent(QShowEvent *event) {

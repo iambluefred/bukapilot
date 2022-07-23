@@ -8,8 +8,9 @@
 #include <QStackedWidget>
 #include <QWidget>
 
-
+#include "selfdrive/common/features.h"
 #include "selfdrive/ui/qt/widgets/controls.h"
+#include "selfdrive/ui/qt/widgets/input.h"
 
 // ********** settings window + top-level panels **********
 class SettingsWindow : public QFrame {
@@ -84,4 +85,27 @@ private:
   void showEvent(QShowEvent *event) override;
   QString getIPAddress();
   LabelControl *ipaddress;
+};
+
+class FeaturesControl : public ButtonControl {
+  Q_OBJECT
+
+public:
+  FeaturesControl() : ButtonControl("Features Package", "SET", "Warning: Only use under guidance of a support staff.") {
+    package_label = new QLabel();
+    package_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    package_label->setStyleSheet("color: #aaaaaa");
+    package_label->setText(Params().get("FeaturesPackage").c_str());
+    hlayout->insertWidget(1, package_label);
+    connect(this, &ButtonControl::clicked, [=] {
+      QString package = InputDialog::getText("Enter feature package name", this);
+      if (package.length() > 0) {
+        Features().set_package(package.toStdString());
+        package_label->setText(Params().get("FeaturesPackage").c_str());
+      }
+    });
+  }
+
+private:
+  QLabel *package_label;
 };
