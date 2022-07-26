@@ -27,10 +27,12 @@ class ToyotaFlags(IntFlag):
 class CAR:
   # Toyota
   ALPHARD_TSS2 = "TOYOTA ALPHARD 2020"
+  ALPHARDH_TSS2 = "TOYOTA ALPHARD HYBRID 2021"
   AVALON = "TOYOTA AVALON 2016"
   AVALON_2019 = "TOYOTA AVALON 2019"
   AVALONH_2019 = "TOYOTA AVALON HYBRID 2019"
-  AVALON_TSS2 = "TOYOTA AVALON 2022"
+  AVALON_TSS2 = "TOYOTA AVALON 2022"  # TSS 2.5
+  AVALONH_TSS2 = "TOYOTA AVALON HYBRID 2022"
   CAMRY = "TOYOTA CAMRY 2018"
   CAMRYH = "TOYOTA CAMRY HYBRID 2018"
   CAMRY_TSS2 = "TOYOTA CAMRY 2021"  # TSS 2.5
@@ -51,8 +53,10 @@ class CAR:
   RAV4 = "TOYOTA RAV4 2017"
   RAV4H = "TOYOTA RAV4 HYBRID 2017"
   RAV4_TSS2 = "TOYOTA RAV4 2019"
+  RAV4_TSS2_2022 = "TOYOTA RAV4 2022"
   RAV4H_TSS2 = "TOYOTA RAV4 HYBRID 2019"
-  MIRAI = "TOYOTA MIRAI 2021" # TSS 2.5
+  RAV4H_TSS2_2022 = "TOYOTA RAV4 HYBRID 2022"
+  MIRAI = "TOYOTA MIRAI 2021"  # TSS 2.5
   SIENNA = "TOYOTA SIENNA 2018"
 
   # Lexus
@@ -64,6 +68,7 @@ class CAR:
   LEXUS_NX = "LEXUS NX 2018"
   LEXUS_NXH = "LEXUS NX HYBRID 2018"
   LEXUS_NX_TSS2 = "LEXUS NX 2020"
+  LEXUS_NXH_TSS2 = "LEXUS NX HYBRID 2020"
   LEXUS_RC = "LEXUS RC 2020"
   LEXUS_RX = "LEXUS RX 2016"
   LEXUS_RXH = "LEXUS RX HYBRID 2017"
@@ -204,6 +209,10 @@ FINGERPRINTS = {
   CAR.ALPHARD_TSS2: [
   {
     36: 8, 37: 8, 51: 0, 170: 8, 180: 8, 186: 4, 401: 8, 426: 6, 452: 8, 464: 8, 466: 8, 467: 8, 544: 4, 545: 5, 550: 8, 552: 4, 562: 6, 608: 8, 610: 8, 614: 8, 643: 7, 658: 8, 680: 8, 681: 8, 682: 2, 684: 8, 685: 8, 705: 8, 725: 2, 728: 2, 740: 5, 742: 8, 743: 8, 765: 8, 800: 8, 810: 2, 812: 3, 824: 2, 835: 8, 836: 8, 845: 5, 849: 4, 869: 7, 870: 7, 871: 2, 877: 8, 896: 8, 897: 8, 900: 6, 902: 6, 905: 8, 911: 8, 913: 8, 916: 3, 918: 8, 921: 8, 933: 8, 944: 8, 945: 8, 951: 8, 955: 8, 956: 8, 979: 2, 992: 8, 998: 5, 999: 7, 1000: 8, 1001: 8, 1002: 8, 1008: 2, 1014: 8, 1017: 8, 1020: 8, 1041: 8, 1042: 8, 1043: 8, 1044: 8, 1056: 8, 1059: 1, 1076: 8, 1077: 8, 1082: 8, 1083: 8, 1114: 8, 1161: 8, 1162: 8, 1163: 8, 1172: 8, 1175: 8, 1187: 8, 1189: 8, 1190: 8, 1195: 8, 1196: 8, 1212: 8, 1228: 8, 1234: 8, 1235: 8, 1237: 8, 1279: 8, 1408: 8, 1409: 8, 1410: 8, 1422: 8, 1552: 8, 1553: 8, 1554: 8, 1556: 8, 1557: 8, 1561: 8, 1562: 8, 1568: 8, 1569: 8, 1570: 8, 1571: 8, 1572: 8, 1584: 8, 1589: 8, 1592: 8, 1593: 8, 1595: 8, 1599: 8, 1656: 8, 1728: 8, 1745: 8, 1775: 8, 1779: 8, 1904: 8, 1912: 8, 1990: 8, 1998: 8, 2015: 8, 2024: 8
+  }],
+  CAR.ALPHARDH_TSS2: [
+  {
+    36: 8, 37: 8, 170: 8, 180: 8, 295: 8, 296: 8, 401: 8, 426: 6, 452: 8, 466: 8, 467: 8, 550: 8, 552: 4, 560: 7, 562: 6, 581: 5, 608: 8, 610: 8, 643: 7, 658: 8, 713: 8, 740: 5, 742: 8, 743: 8, 764: 8, 765: 8, 766: 8, 792: 8, 800: 8, 810: 2, 812: 3, 818: 8, 824: 8, 835: 8, 836: 8, 845: 5, 849: 4, 863: 8, 869: 7, 870: 7, 871: 2, 877: 8, 889: 8, 896: 8, 897: 8, 900: 6, 902: 6, 905: 8, 911: 8, 913: 8, 916: 3, 918: 8, 921: 8, 933: 8, 944: 8, 945: 8, 950: 8, 951: 8, 953: 3, 955: 8, 956: 8, 979: 2, 987: 8, 992: 8, 998: 5, 999: 7, 1000: 8, 1001: 8, 1002: 8, 1017: 8, 1020: 8, 1041: 8, 1042: 8, 1043: 8, 1044: 8, 1056: 8, 1057: 8, 1059: 1, 1076: 8, 1077: 8, 1082: 8, 1114: 8, 1161: 8, 1162: 8, 1163: 8, 1164: 8, 1165: 8, 1166: 8, 1167: 8, 1172: 8, 1176: 8, 1177: 8, 1178: 8, 1179: 8, 1180: 8, 1181: 8, 1184: 8, 1185: 8, 1186: 8, 1187: 8, 1189: 8, 1190: 8, 1191: 8, 1192: 8, 1195: 8, 1196: 8, 1197: 8, 1198: 8, 1199: 8, 1212: 8, 1221: 8, 1228: 8, 1232: 8, 1235: 8, 1264: 8, 1279: 8, 1362: 8, 1408: 8, 1409: 8, 1410: 8, 1422: 8, 1552: 8, 1553: 8, 1554: 8, 1555: 8, 1556: 8, 1557: 8, 1561: 8, 1568: 8, 1569: 8, 1570: 8, 1571: 8, 1572: 8, 1584: 8, 1589: 8, 1592: 8, 1593: 8, 1595: 8, 1599: 8, 1656: 8, 1666: 8, 1667: 8, 1728: 8, 1775: 8, 1777: 8, 1779: 8
   }],
 }
 
@@ -1805,7 +1814,9 @@ DBC = {
   CAR.AVALON_2019: dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
   CAR.AVALONH_2019: dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
   CAR.AVALON_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
+  CAR.AVALONH_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.RAV4_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
+  CAR.RAV4_TSS2_2022: dbc_dict('toyota_nodsu_pt_generated', None),
   CAR.COROLLA_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.COROLLAH_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.LEXUS_ES_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
@@ -1815,23 +1826,33 @@ DBC = {
   CAR.LEXUS_IS: dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
   CAR.LEXUS_CTH: dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
   CAR.RAV4H_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
+  CAR.RAV4H_TSS2_2022: dbc_dict('toyota_nodsu_pt_generated', None),
   CAR.LEXUS_NXH: dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
   CAR.LEXUS_NX: dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
   CAR.LEXUS_NX_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
+  CAR.LEXUS_NXH_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.PRIUS_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.MIRAI: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.ALPHARD_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
+  CAR.ALPHARDH_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
 }
 
 # These cars have non-standard EPS torque scale factors. All others are 73
 EPS_SCALE = defaultdict(lambda: 73, {CAR.PRIUS: 66, CAR.COROLLA: 88, CAR.LEXUS_IS: 77, CAR.LEXUS_RC: 77, CAR.LEXUS_CTH: 100, CAR.PRIUS_V: 100})
 
 # Toyota/Lexus Safety Sense 2.0 and 2.5
-TSS2_CAR = {CAR.RAV4_TSS2, CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2, CAR.RAV4H_TSS2,
+TSS2_CAR = {CAR.RAV4_TSS2, CAR.RAV4_TSS2_2022, CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2, CAR.RAV4H_TSS2, CAR.RAV4H_TSS2_2022,
             CAR.LEXUS_RX_TSS2, CAR.LEXUS_RXH_TSS2, CAR.HIGHLANDER_TSS2, CAR.HIGHLANDERH_TSS2, CAR.PRIUS_TSS2, CAR.CAMRY_TSS2, CAR.CAMRYH_TSS2,
-            CAR.MIRAI, CAR.LEXUS_NX_TSS2, CAR.ALPHARD_TSS2, CAR.AVALON_TSS2}
+            CAR.MIRAI, CAR.LEXUS_NX_TSS2, CAR.LEXUS_NXH_TSS2, CAR.ALPHARD_TSS2, CAR.AVALON_TSS2, CAR.AVALONH_TSS2, CAR.ALPHARDH_TSS2}
 
 NO_DSU_CAR = TSS2_CAR | {CAR.CHR, CAR.CHRH, CAR.CAMRY, CAR.CAMRYH}
+
+# these cars have a radar which sends ACC messages instead of the camera
+RADAR_ACC_CAR = {CAR.RAV4H_TSS2_2022, CAR.RAV4_TSS2_2022}
+
+EV_HYBRID_CAR = {CAR.AVALONH_2019, CAR.AVALONH_TSS2, CAR.CAMRYH, CAR.CAMRYH_TSS2, CAR.CHRH, CAR.COROLLAH_TSS2, CAR.HIGHLANDERH, CAR.HIGHLANDERH_TSS2, CAR.PRIUS,
+                 CAR.PRIUS_V, CAR.RAV4H, CAR.RAV4H_TSS2, CAR.RAV4H_TSS2_2022, CAR.LEXUS_CTH, CAR.MIRAI, CAR.LEXUS_ESH, CAR.LEXUS_ESH_TSS2, CAR.LEXUS_NXH, CAR.LEXUS_RXH,
+                 CAR.LEXUS_RXH_TSS2, CAR.LEXUS_NXH_TSS2, CAR.PRIUS_TSS2, CAR.ALPHARDH_TSS2}
 
 # no resume button press required
 NO_STOP_TIMER_CAR = TSS2_CAR | {CAR.PRIUS_V, CAR.RAV4H, CAR.HIGHLANDERH, CAR.HIGHLANDER, CAR.SIENNA, CAR.LEXUS_ESH}
