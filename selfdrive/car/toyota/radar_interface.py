@@ -6,6 +6,9 @@ from selfdrive.car.interfaces import RadarInterfaceBase
 
 
 def _create_radar_can_parser(car_fingerprint):
+  if DBC[car_fingerprint]['radar'] is None:
+      return None
+
   if car_fingerprint in TSS2_CAR:
     RADAR_A_MSGS = list(range(0x180, 0x190))
     RADAR_B_MSGS = list(range(0x190, 0x1a0))
