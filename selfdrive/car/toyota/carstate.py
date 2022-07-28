@@ -97,6 +97,9 @@ class CarState(CarStateBase):
       self.acc_type = cp_cam.vl["ACC_CONTROL"]["ACC_TYPE"]
       ret.stockFcw = bool(cp_cam.vl["ACC_HUD"]["FCW"])
 
+    ret.stockAdas.laneDepartureHUD = cp.vl["LKAS_HUD"]["LDA_ALERT"] == 3
+    ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKA"]["STEER_REQUEST"]
+
     # some TSS2 cars have low speed lockout permanently set, so ignore on those cars
     # these cars are identified by an ACC_TYPE value of 2.
     # TODO: it is possible to avoid the lockout and gain stop and go if you
@@ -157,6 +160,8 @@ class CarState(CarStateBase):
       ("TURN_SIGNALS", "BLINKERS_STATE"),
       ("LKA_STATE", "EPS_STATUS"),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK"),
+      ("LDA_ALERT", "LKAS_HUD"),
+      ("STEER_REQUEST", "STEERING_LKA"),
     ]
 
     checks = [
@@ -171,6 +176,8 @@ class CarState(CarStateBase):
       ("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 33),
       ("STEER_TORQUE_SENSOR", 50),
+      ("LKAS_HUD", 0), # TODO: figure out why freq is inconsistent
+      ("STEERING_LKA", 42),
     ]
 
     if CP.flags & ToyotaFlags.HYBRID:

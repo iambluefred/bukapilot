@@ -48,8 +48,12 @@ class CarController():
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
     self.steer_rate_limited = new_steer != apply_steer
 
-    # Cut steering while we're in a known fault state (2s)
-    if not active or CS.steer_state in (9, 25):
+    # allow stock lane departure prevention passthrough
+    stockLdw = CS.out.stockAdas.laneDepartureHUD
+    if stockLdw:
+      apply_steer = CS.out.stockAdas.ldpSteerV
+
+    if not stockLdw and not active:
       apply_steer = 0
       apply_steer_req = 0
     else:
@@ -110,7 +114,7 @@ class CarController():
     # - there is something to display
     # - there is something to stop displaying
     fcw_alert = hud_alert == VisualAlert.fcw
-    steer_alert = hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw)
+    steer_alert = hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw) or stockLdw
 
     send_ui = False
     if ((fcw_alert or steer_alert) and not self.alert_active) or \
