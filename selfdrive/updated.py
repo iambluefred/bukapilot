@@ -128,12 +128,12 @@ def set_params(new_version: bool, failed_count: int, exception: Optional[str]) -
       with open(os.path.join(FINALIZED, "RELEASES.md"), "rb") as f:
         r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
       try:
-        params.put("ReleaseNotes", parse_markdown(r.decode("utf-8")))
+        params.put("ReleaseNotes", r.decode("utf-8"))
       except Exception:
         params.put("ReleaseNotes", r + b"\n")
     except Exception:
       params.put("ReleaseNotes", "")
-    params.put_bool("UpdateAvailable", True)
+  params.put_bool("UpdateAvailable", new_version)
 
   # Handle user prompt
   for alert in ("Offroad_UpdateFailed", "Offroad_ConnectivityNeeded", "Offroad_ConnectivityNeededPrompt"):

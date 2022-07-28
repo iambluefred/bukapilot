@@ -5,6 +5,7 @@ from typing import List, Optional
 from functools import lru_cache
 
 from common.basedir import BASEDIR
+from common.params import Params
 from selfdrive.swaglog import cloudlog
 
 TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam']
@@ -64,9 +65,7 @@ def get_normalized_origin(default: Optional[str] = None) -> Optional[str]:
 
 @cache
 def get_version() -> str:
-  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "common", "version.h")) as _versionf:
-    version = _versionf.read().split('"')[1]
-  return version
+  return Params().get("ReleaseNotes", encoding="utf-8").split(maxsplit=3)[1]
 
 @cache
 def get_short_version() -> str:

@@ -122,10 +122,10 @@ def handle_fan_eon(controller, max_cpu_temp, fan_speed, ignition):
 
 
 def handle_fan_uno(controller, max_cpu_temp, fan_speed, ignition):
-  new_speed = int(interp(max_cpu_temp, [40.0, 80.0], [0, 80]))
+  new_speed = int(interp(max_cpu_temp, [50.0, 70.0], [0, 90]))
 
   if not ignition:
-    new_speed = min(30, new_speed)
+    new_speed = min(80, new_speed)
 
   return new_speed
 
@@ -327,7 +327,6 @@ def thermald_thread(end_event, hw_queue):
     startup_conditions["time_valid"] = (now.year > 2020) or (now.year == 2020 and now.month >= 10)
     set_offroad_alert_if_changed("Offroad_InvalidTime", (not startup_conditions["time_valid"]))
 
-    startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates") or params.get_bool("SnoozeUpdate")
     startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 
