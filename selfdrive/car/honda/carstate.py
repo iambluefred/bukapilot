@@ -74,13 +74,18 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
 
   if CP.carFingerprint in HONDA_BOSCH:
     signals += [
-      ("EPB_STATE", "EPB_STATUS"),
       ("IMPERIAL_UNIT", "CAR_SPEED"),
     ]
     checks += [
-      ("EPB_STATUS", 50),
       ("CAR_SPEED", 10),
     ]
+    if CP.carFingerprint not in (CAR.CITY_BOSCH):
+      signals += [
+        ("EPB_STATE", "EPB_STATUS"),
+      ]
+      checks += [
+        ("EPB_STATUS", 50),
+      ]
 
     if not CP.openpilotLongitudinalControl:
       signals += [
@@ -91,7 +96,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
       ]
       checks += [
         ("ACC_HUD", 10),
-        ("ACC_CONTROL", 50),
+        ("ACC_CONTROL", 0),
       ]
   else:  # Nidec signals
     signals += [("CRUISE_SPEED_PCM", "CRUISE"),
@@ -102,7 +107,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     else:
       checks.append(("CRUISE_PARAMS", 50))
 
-  if CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E):
+  if CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CITY_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E):
     signals.append(("DRIVERS_DOOR_OPEN", "SCM_FEEDBACK"))
   elif CP.carFingerprint == CAR.ODYSSEY_CHN:
     signals.append(("DRIVERS_DOOR_OPEN", "SCM_BUTTONS"))
@@ -181,7 +186,7 @@ class CarState(CarStateBase):
 
     # ******************* parse out can *******************
     # TODO: find wheels moving bit in dbc
-    if self.CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E):
+    if self.CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CITY_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E):
       ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 0.1
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
     elif self.CP.carFingerprint == CAR.ODYSSEY_CHN:
@@ -315,7 +320,7 @@ class CarState(CarStateBase):
 
   def get_can_parser(self, CP):
     signals, checks = get_can_signals(CP, self.gearbox_msg, self.main_on_sig_msg)
-    bus_pt = 1 if CP.carFingerprint in HONDA_BOSCH else 0
+    bus_pt = 0 if CP.carFingerprint in HONDA_BOSCH else 1
     return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, bus_pt)
 
   @staticmethod
@@ -339,7 +344,7 @@ class CarState(CarStateBase):
         ("BRAKE_COMMAND", 50),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 2)
+    return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 0)
 
   @staticmethod
   def get_body_can_parser(CP):

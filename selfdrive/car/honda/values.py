@@ -69,6 +69,7 @@ class CAR:
   CIVIC = "HONDA CIVIC 2016"
   CIVIC_BOSCH = "HONDA CIVIC (BOSCH) 2019"
   CIVIC_BOSCH_DIESEL = "HONDA CIVIC SEDAN 1.6 DIESEL 2019"
+  CITY_BOSCH = "HONDA CITY (BOSCH) 2020"
   ACURA_ILX = "ACURA ILX 2016"
   CRV = "HONDA CR-V 2016"
   CRV_5G = "HONDA CR-V 2017"
@@ -86,6 +87,14 @@ class CAR:
   RIDGELINE = "HONDA RIDGELINE 2017"
   INSIGHT = "HONDA INSIGHT 2019"
   HONDA_E = "HONDA E 2020"
+
+FINGERPRINTS = {
+  # Placeholder fingerprint
+  CAR.CITY_BOSCH: [{
+    57: 3, 148: 8, 228: 5, 304: 8, 330: 8, 344: 8, 380: 8, 399: 7, 401: 8, 420: 8, 427: 3, 428: 8, 432: 7, 441: 5, 456: 8, 457: 8, 464: 8, 467: 8, 477: 8, 493: 5, 495: 8, 662: 4, 767: 8, 773: 7, 777: 8, 780: 8, 784: 8, 804: 8, 806: 8, 808: 8, 829: 8, 862: 8, 884: 8, 891: 8, 929: 8, 1302: 8, 2015: 8
+    }],
+}
+
 
 FW_VERSIONS = {
   CAR.ACCORD: {
@@ -1347,6 +1356,7 @@ DBC = {
   CAR.CIVIC: dbc_dict('honda_civic_touring_2016_can_generated', 'acura_ilx_2016_nidec'),
   CAR.CIVIC_BOSCH: dbc_dict('honda_civic_hatchback_ex_2017_can_generated', None),
   CAR.CIVIC_BOSCH_DIESEL: dbc_dict('honda_accord_2018_can_generated', None),
+  CAR.CITY_BOSCH: dbc_dict('honda_civic_hatchback_ex_2017_can_generated', None),
   CAR.CRV: dbc_dict('honda_crv_touring_2016_can_generated', 'acura_ilx_2016_nidec'),
   CAR.CRV_5G: dbc_dict('honda_crv_ex_2017_can_generated', None, body_dbc='honda_crv_ex_2017_body_generated'),
   CAR.CRV_EU: dbc_dict('honda_crv_executive_2016_can_generated', 'acura_ilx_2016_nidec'),
@@ -1373,5 +1383,5 @@ HONDA_NIDEC_ALT_PCM_ACCEL = {CAR.ODYSSEY}
 HONDA_NIDEC_ALT_SCM_MESSAGES = {CAR.ACURA_ILX, CAR.ACURA_RDX, CAR.CRV, CAR.CRV_EU, CAR.FIT, CAR.FREED, CAR.HRV, CAR.ODYSSEY_CHN,
                                 CAR.PILOT, CAR.PASSPORT, CAR.RIDGELINE}
 HONDA_BOSCH = {CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_5G,
-               CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E}
+               CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.CITY_BOSCH}
 HONDA_BOSCH_ALT_BRAKE_SIGNAL = {CAR.ACCORD, CAR.CRV_5G, CAR.ACURA_RDX_3G}
