@@ -16,7 +16,7 @@ QDialogBase::QDialogBase(QWidget *parent) : QDialog(parent) {
     * {
       outline: none;
       color: white;
-      font-family: Inter;
+      font-family: Glacial Indifference;
     }
     QDialogBase {
       background-color: black;
