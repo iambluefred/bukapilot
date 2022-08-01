@@ -4,6 +4,7 @@ from selfdrive.hardware import EON, TICI, PC
 from selfdrive.manager.process import PythonProcess, NativeProcess, DaemonProcess
 
 WEBCAM = os.getenv("USE_WEBCAM") is not None
+NOSENSOR = "NOSENSOR" in os.environ
 
 procs = [
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
@@ -11,13 +12,14 @@ procs = [
   NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], unkillable=True, driverview=True),
   NativeProcess("clocksd", "selfdrive/clocksd", ["./clocksd"]),
   NativeProcess("dmonitoringmodeld", "selfdrive/modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), driverview=True),
+  NativeProcess("gpsd", "selfdrive/sensord", ["./gpsd"], enabled=EON, persistent=True),
   NativeProcess("logcatd", "selfdrive/logcatd", ["./logcatd"]),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"]),
   NativeProcess("modeld", "selfdrive/modeld", ["./modeld"]),
   NativeProcess("navd", "selfdrive/ui/navd", ["./navd"], enabled=(PC or TICI), persistent=True),
   NativeProcess("proclogd", "selfdrive/proclogd", ["./proclogd"]),
   NativeProcess("sensord", "selfdrive/sensord", ["./sensord"], enabled=not PC, persistent=EON, sigkill=EON),
-  NativeProcess("ubloxd", "selfdrive/locationd", ["./ubloxd"], enabled=(not PC or WEBCAM)),
+  NativeProcess("ubloxd", "selfdrive/locationd", ["./ubloxd"], enabled=(not PC or WEBCAM) and not NOSENSOR),
   NativeProcess("ui", "selfdrive/ui", ["./ui"], persistent=True, watchdog_max_dt=(5 if TICI else None)),
   NativeProcess("soundd", "selfdrive/ui/soundd", ["./soundd"], persistent=True),
   NativeProcess("locationd", "selfdrive/locationd", ["./locationd"]),
