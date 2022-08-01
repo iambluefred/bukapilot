@@ -222,6 +222,15 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+    setDistance @7 :SetDistance;
+
+    enum SetDistance {
+      unknown @0;
+      chill @1;
+      normal @2;
+      aggresive @3;
+      auto @4;
+    }
   }
 
   enum GearShifter {

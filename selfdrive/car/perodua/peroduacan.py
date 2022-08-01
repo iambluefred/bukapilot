@@ -2,7 +2,15 @@ from common.numpy_fast import clip, interp
 from cereal import car
 from selfdrive.config import Conversions as CV
 
-VisualAlert = car.CarControl.HUDControl.VisualAlert
+SetDistance = car.CarState.CruiseState.SetDistance
+
+def compute_set_distance(state):
+  if state == SetDistance.aggresive:
+    return 2
+  elif state == SetDistance.normal:
+    return 1
+  else:
+    return 0
 
 def lkc_checksum(addr,dat):
   return ( addr + len(dat) + 1 + 1 + sum(dat)) & 0xFF
@@ -125,12 +133,12 @@ def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, ae
 
   return packer.make_can_msg("ACC_BRAKE", 0, values)
 
-def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, des_speed, brake_amt, brake_pump):
+def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, des_speed, brake_amt, brake_pump, set_distance):
   is_braking = (brake_amt > 0.0 or brake_pump > 0.0)
 
   values = {
     "SET_SPEED": set_speed * CV.MS_TO_KPH,
-    "FOLLOW_DISTANCE": 0,
+    "FOLLOW_DISTANCE": compute_set_distance(set_distance),
     "IS_LEAD": is_lead,
     "IS_ACCEL": (not is_braking) and enabled,
     "IS_DECEL": is_braking and enabled,
