@@ -143,7 +143,7 @@ class CarController():
 
         mult = CS.out.vEgo * (apply_gas - apply_brake)
         des_speed = max(0, CS.out.vEgo + mult)
-        can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speed,
+        can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
         can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, CS.out.stockAeb, (frame/5) % 8))
