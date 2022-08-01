@@ -6,6 +6,7 @@ import signal
 import subprocess
 import sys
 import traceback
+from multiprocessing import Process
 from typing import List, Tuple, Union
 
 import cereal.messaging as messaging
@@ -14,7 +15,6 @@ from common.basedir import BASEDIR
 from common.features import Features
 from common.params import Params, ParamKeyType
 from common.text_window import TextWindow
-from selfdrive.boardd.set_time import set_time
 from selfdrive.hardware import HARDWARE, PC
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
@@ -27,13 +27,31 @@ from selfdrive.version import is_dirty, get_commit, get_version, get_origin, get
 
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 
+MIN_DATE = datetime.datetime(year=2022, month=4, day=1)
 
-def manager_init() -> None:
-  # update system time from panda
-  set_time(cloudlog)
+done_bootlog = False
+
+def try_bootlog(can_block = False) -> bool:
+  sys_time = datetime.datetime.today()
+  time_valid = sys_time > MIN_DATE
+
+  if not time_valid and not can_block:
+    return False
+
+  if not time_valid:
+    # set time from gps
+    os.system("/data/openpilot/selfdrive/sensord/set_time")
 
   # save boot log
   subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+  return True
+
+def manager_init() -> None:
+  global done_bootlog
+  done_bootlog = try_bootlog(False)
+
+  if done_bootlog:
+    cloudlog.info("System time valid")
 
   params = Params()
   params.clear_all(ParamKeyType.CLEAR_ON_MANAGER_START)
@@ -203,6 +221,14 @@ def main() -> None:
   # Start UI early so prepare can happen in the background
   if not prepare_only:
     managed_processes['ui'].start()
+
+  global done_bootlog
+  if not done_bootlog:
+    sys_time = datetime.datetime.today()
+    p = Process(target=try_bootlog, args=(True,))
+    p.start()
+    cur_time = datetime.datetime.today()
+    cloudlog.info(f"adjusting time from '{sys_time}' to '{cur_time}'")
 
   manager_prepare()
 
