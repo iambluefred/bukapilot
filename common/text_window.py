@@ -12,6 +12,9 @@ class TextWindow:
                                         stdin=subprocess.PIPE,
                                         cwd=os.path.join(BASEDIR, "selfdrive", "ui"),
                                         close_fds=True)
+
+      os.system("settings put system user_rotation 1")
+      os.system("settings put system user_rotation 3")
     except OSError:
       self.text_proc = None
 

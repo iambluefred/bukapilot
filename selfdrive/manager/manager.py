@@ -224,6 +224,10 @@ def main() -> None:
   if not prepare_only:
     managed_processes['ui'].start()
 
+  # flip screen, set to 1 first to trigger rotation
+  os.system("settings put system user_rotation 1")
+  os.system("settings put system user_rotation 3")
+
   global done_bootlog
   if not done_bootlog:
     sys_time = datetime.datetime.today()
