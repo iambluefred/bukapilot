@@ -60,6 +60,10 @@ def manager_init() -> None:
     ("CompletedTrainingVersion", "0"),
     ("HasAcceptedTerms", "0"),
     ("OpenpilotEnabledToggle", "1"),
+    ("IsMetric", "1"),
+    ("IsLdwEnabled", "1"),
+    ("IsRHD", "1"),
+    ("RecordFront", "1"),
     ("RsjSession", "invalidsession"),
   ]
   if not PC:
