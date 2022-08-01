@@ -182,13 +182,15 @@ void OnroadHud::updateState(const UIState &s) {
   const SubMaster &sm = *(s.sm);
   const auto cs = sm["controlsState"].getControlsState();
 
-  float maxspeed = cs.getVCruise();
+  float maxspeed = sm["carState"].getCarState().getCruiseState().getSpeedCluster() * MS_TO_KPH;
   bool cruise_set = maxspeed > 0 && (int)maxspeed != SET_SPEED_NA;
   if (cruise_set && !s.scene.is_metric) {
     maxspeed *= KM_TO_MILE;
   }
   QString maxspeed_str = cruise_set ? QString::number(std::nearbyint(maxspeed)) : "N/A";
-  float cur_speed = std::max(0.0, sm["carState"].getCarState().getVEgo() * (s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH));
+  float cur_speed_hud = sm["carState"].getCarState().getVEgoCluster();
+  float cur_speed =  (cur_speed_hud == 0.0) ? sm["carState"].getCarState().getVEgo() : cur_speed_hud;
+  cur_speed = std::max(0.0, cur_speed * (s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH));
   float temp = sm["deviceState"].getDeviceState().getAmbientTempC() * (s.scene.is_metric ? 1 : 1.8);
   temp += s.scene.is_metric ? 0 : 32;
 

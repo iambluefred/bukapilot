@@ -142,6 +142,7 @@ struct CarState {
 
   # car speed
   vEgo @1 :Float32;         # best estimate of speed
+  vEgoCluster @40 :Float32; # best estimate of HUD speed
   aEgo @16 :Float32;        # best estimate of acceleration
   vEgoRaw @17 :Float32;     # unfiltered speed from CAN sensors
   yawRate @22 :Float32;     # best estimate of yaw rate
@@ -222,6 +223,7 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+    speedCluster @6 :Float32;  # Set speed as shown on instrument cluster
     setDistance @7 :SetDistance;
 
     enum SetDistance {

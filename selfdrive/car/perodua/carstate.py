@@ -6,7 +6,7 @@ from opendbc.can.can_define import CANDefine
 from common.numpy_fast import mean
 from selfdrive.config import Conversions as CV
 from selfdrive.car.interfaces import CarStateBase
-from selfdrive.car.perodua.values import DBC, CAR, ACC_CAR
+from selfdrive.car.perodua.values import DBC, CAR, ACC_CAR, HUD_MULTIPLIER
 from time import time
 
 # todo: clean this part up
@@ -49,6 +49,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'],
     )
     ret.vEgoRaw = mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
+    ret.vEgoCluster = ret.vEgoRaw * HUD_MULTIPLIER
 
     # unfiltered speed from CAN sensors
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
@@ -196,7 +197,7 @@ class CarState(CarStateBase):
           self.is_cruise_latch = True
 
         elif self.is_minus_btn_latch and not minus_button:
-          self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgo)
+          self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgoCluster)
           self.is_cruise_latch = True
 
 
@@ -211,7 +212,8 @@ class CarState(CarStateBase):
 
     # set speed in range of 30 - 130kmh only
     self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
-    ret.cruiseState.speed = self.cruise_speed
+    ret.cruiseState.speedCluster = self.cruise_speed
+    ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
     ret.cruiseState.standstill = ret.standstill
     ret.cruiseState.nonAdaptive = False
     ret.cruiseState.enabled = self.is_cruise_latch
