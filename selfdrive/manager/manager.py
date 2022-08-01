@@ -79,6 +79,11 @@ def manager_init() -> None:
   params.put("GitBranch", get_short_branch(default=""))
   params.put("GitRemote", get_origin(default=""))
 
+  # set release notes
+  with open("/data/openpilot/RELEASES.md", "rb") as f:
+    r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
+    params.put("ReleaseNotes", r.decode("utf-8"))
+
   # set dongle id
   reg_res = register(show_spinner=True)
   if reg_res:
