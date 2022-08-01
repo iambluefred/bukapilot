@@ -23,6 +23,8 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
     self.shifter_values = can_define.dv["TRANSMISSION"]['GEAR']
+    if CP.carFingerprint in ACC_CAR:
+      self.set_distance_values = can_define.dv['ACC_CMD_HUD']['FOLLOW_DISTANCE']
     self.is_cruise_latch = False
     self.cruise_speed = 30 * CV.KPH_TO_MS
     self.cruise_speed_counter = 0
@@ -133,6 +135,9 @@ class CarState(CarStateBase):
         if self.check_pedal_engage(ret.gas, pedal_press_state):
           self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgo)
           self.is_cruise_latch = True
+
+      # set distance as SetDistance.normal
+      ret.cruiseState.setDistance = 2
     else:
       ret.stockAdas.frontDepartureHUD = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
       ret.stockAdas.laneDepartureHUD = bool(cp.vl["LKAS_HUD"]["LDA_ALERT"])
@@ -142,6 +147,8 @@ class CarState(CarStateBase):
       ret.stockFcw = bool(cp.vl["LKAS_HUD"]['AEB_ALARM'])
 
       ret.cruiseState.available = cp.vl["PCM_BUTTONS"]["ACC_RDY"] != 0
+      distance_val = int(cp.vl["ACC_CMD_HUD"]['FOLLOW_DISTANCE'])
+      ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
 
       # set speed logic
       # todo: check if the logic needs to be this complicated
@@ -307,6 +314,7 @@ class CarState(CarStateBase):
       signals.append(("AEB_BRAKE", "LKAS_HUD", 0))
       signals.append(("AEB_ALARM", "LKAS_HUD", 0))
       signals.append(("SET_SPEED", "ACC_CMD_HUD", 0))
+      signals.append(("FOLLOW_DISTANCE", "ACC_CMD_HUD", 0))
       signals.append(("LDA_ALERT", "LKAS_HUD", 0))
       signals.append(("GAS_PEDAL_STEP", "GAS_PEDAL_2", 0))
     else:

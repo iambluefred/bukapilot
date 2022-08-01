@@ -2,6 +2,7 @@
 import os
 import numpy as np
 
+from cereal import car
 from common.realtime import sec_since_boot
 from common.numpy_fast import clip, interp
 from selfdrive.swaglog import cloudlog
@@ -16,6 +17,8 @@ else:
 
 from casadi import SX, vertcat
 
+SetDistance = car.CarState.CruiseState.SetDistance
+
 LONG_MPC_DIR = os.path.dirname(os.path.abspath(__file__))
 EXPORT_DIR = os.path.join(LONG_MPC_DIR, "c_generated_code")
 JSON_FILE = "acados_ocp_long.json"
@@ -24,7 +27,7 @@ SOURCES = ['lead0', 'lead1', 'cruise']
 
 X_DIM = 3
 U_DIM = 1
-PARAM_DIM= 4
+PARAM_DIM = 5
 COST_E_DIM = 5
 COST_DIM = COST_E_DIM + 1
 CONSTR_DIM = 4
@@ -49,18 +52,27 @@ T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N+1) for idx in range(N
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 MIN_ACCEL = -3.5
-T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
-STOP_DISTANCE = 6.8
+STOP_DISTANCE = 6.0
+
+def get_T_FOLLOW(set_distance=SetDistance.normal):
+  if set_distance == SetDistance.aggresive:
+    return 0.9
+  elif set_distance == SetDistance.normal:
+    return 1.45
+  elif set_distance == SetDistance.chill:
+    return 2.3
+  else:
+    return 1.45
 
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * COMFORT_BRAKE)
 
-def get_safe_obstacle_distance(v_ego):
+def get_safe_obstacle_distance(v_ego, T_FOLLOW):
   return (v_ego**2) / (2 * COMFORT_BRAKE) + T_FOLLOW * v_ego + STOP_DISTANCE
 
-def desired_follow_distance(v_ego, v_lead):
-  return get_safe_obstacle_distance(v_ego) - get_stopped_equivalence_factor(v_lead)
+def desired_follow_distance(v_ego, v_lead, T_FOLLOW = get_T_FOLLOW()):
+  return get_safe_obstacle_distance(v_ego, T_FOLLOW) - get_stopped_equivalence_factor(v_lead)
 
 
 def gen_long_model():
@@ -88,7 +100,8 @@ def gen_long_model():
   a_max = SX.sym('a_max')
   x_obstacle = SX.sym('x_obstacle')
   prev_a = SX.sym('prev_a')
-  model.p = vertcat(a_min, a_max, x_obstacle, prev_a)
+  t_follow = SX.sym('t_follow')
+  model.p = vertcat(a_min, a_max, x_obstacle, prev_a, t_follow)
 
   # dynamics model
   f_expl = vertcat(v_ego, a_ego, j_ego)
@@ -122,11 +135,12 @@ def gen_long_mpc_solver():
   a_min, a_max = ocp.model.p[0], ocp.model.p[1]
   x_obstacle = ocp.model.p[2]
   prev_a = ocp.model.p[3]
+  T_FOLLOW = ocp.model.p[4]
 
   ocp.cost.yref = np.zeros((COST_DIM, ))
   ocp.cost.yref_e = np.zeros((COST_E_DIM, ))
 
-  desired_dist_comfort = get_safe_obstacle_distance(v_ego)
+  desired_dist_comfort = get_safe_obstacle_distance(v_ego, T_FOLLOW)
 
   # The main cost in normal operation is how close you are to the "desired" distance
   # from an obstacle at every timestep. This obstacle can be a lead car
@@ -153,7 +167,7 @@ def gen_long_mpc_solver():
 
   x0 = np.zeros(X_DIM)
   ocp.constraints.x0 = x0
-  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0])
+  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0, 1.45])
 
   # We put all constraint cost weights to 0 and only set them at runtime
   cost_weights = np.zeros(CONSTR_DIM)
@@ -301,6 +315,7 @@ class LongitudinalMpc:
     self.cruise_max_a = max_a
 
   def update(self, carstate, radarstate, v_cruise, prev_accel_constraint=False):
+    T_FOLLOW = get_T_FOLLOW(carstate.cruiseState.setDistance)
     v_ego = self.x0[1]
     a_ego = self.x0[2]
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
@@ -325,7 +340,7 @@ class LongitudinalMpc:
     v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
                                v_lower,
                                v_upper)
-    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped)
+    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, T_FOLLOW)
 
     x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     self.source = SOURCES[np.argmin(x_obstacles[0])]
@@ -334,6 +349,7 @@ class LongitudinalMpc:
       self.params[:,3] = np.copy(self.prev_a)
     else:
       self.params[:,3] = a_ego
+    self.params[:,4] = T_FOLLOW
 
     self.run()
     if (np.any(lead_xv_0[:,0] - self.x_sol[:,0] < CRASH_DISTANCE) and

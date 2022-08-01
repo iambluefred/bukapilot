@@ -13,6 +13,7 @@ from selfdrive.controls.lib.events import Events
 from selfdrive.controls.lib.vehicle_model import VehicleModel
 
 GearShifter = car.CarState.GearShifter
+SetDistance = car.CarState.CruiseState.SetDistance
 EventName = car.CarEvent.EventName
 
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
@@ -256,6 +257,14 @@ class CarStateBase(ABC):
         'S': GearShifter.sport, 'L': GearShifter.low, 'B': GearShifter.brake
     }
     return d.get(gear, GearShifter.unknown)
+
+  @staticmethod
+  def parse_set_distance(val_str: str) -> car.CarState.CruiseState.SetDistance:
+    d: Dict[str, car.CarState.CruiseState.SetDistance] = {
+        '1BAR': SetDistance.aggresive, '2BAR': SetDistance.normal, '3BAR': SetDistance.chill,
+        '4BAR': SetDistance.auto,
+    }
+    return d.get(val_str, SetDistance.normal)
 
   @staticmethod
   def get_cam_can_parser(CP):

@@ -145,7 +145,7 @@ class CarController():
         des_speed = max(0, CS.out.vEgo + mult)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speed,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
-                                                      des_speed, apply_brake, pump))
+                                                      des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
         can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, CS.out.stockAeb, (frame/5) % 8))
         can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw, CS.out.stockFcw, CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD))
 
