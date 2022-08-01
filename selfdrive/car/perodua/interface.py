@@ -7,6 +7,7 @@ from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.perodua.values import CAR, ACC_CAR
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 
+from common.features import Features
 from common.params import Params
 
 EventName = car.CarEvent.EventName
@@ -60,15 +61,16 @@ class CarInterface(CarInterfaceBase):
 
       ret.lateralTuning.pid.kf = 0.0000917
 
-      if Params().get("MyviProfile", encoding="utf-8") == "azri":
+      f = Features()
+      if f.has("MyviAzri"):
         ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.16], [0.41]]
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11  , 22], [380, 670]]
-      elif Params().get("MyviProfile", encoding="utf-8") == "kevin":
+        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11, 22], [380, 670]]
+      elif f.has("MyviKevin"):
         ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.32]]
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11  , 28], [390, 650]]
+        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11, 28], [390, 650]]
       else:
         ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.32]]
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11  , 28], [390, 580]]
+        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11, 28], [390, 580]]
 
     elif candidate == CAR.BEZZA:
       ret.wheelbase = 2.455
