@@ -98,5 +98,9 @@ def build(spinner: Spinner, dirty: bool = False) -> None:
 
 if __name__ == "__main__" and not PREBUILT:
   spinner = Spinner()
+
+  os.system("settings put system user_rotation 1")
+  os.system("settings put system user_rotation 3")
+
   spinner.update_progress(0, 100)
   build(spinner, is_dirty())
