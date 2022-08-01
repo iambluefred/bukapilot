@@ -369,6 +369,7 @@ def fetch_update(wait_helper: WaitTimeHelper) -> bool:
 
   return new_version
 
+MIN_DATE = datetime.datetime(year=2022, month=4, day=1)
 
 def main() -> None:
   params = Params()
@@ -387,6 +388,11 @@ def main() -> None:
   proc = psutil.Process()
   if psutil.LINUX:
     proc.ionice(psutil.IOPRIO_CLASS_BE, value=7)
+
+  while True:
+    if datetime.datetime.today() > MIN_DATE:
+      break
+    time.sleep(1)
 
   # Check if we just performed an update
   if Path(os.path.join(STAGING_ROOT, "old_openpilot")).is_dir():
