@@ -90,8 +90,8 @@ def manager_init() -> None:
   if params.get("FeaturesDict") is None:
     d = {
         "features": {
-          "MyviAzri":       1 << 0,
-          "MyviKevin":      1 << 1,
+          "MyviAzri":     1 << 0,
+          "MyviKevin":    1 << 1,
           },
         "packages": {
           "default": [],
