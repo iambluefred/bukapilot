@@ -13,6 +13,8 @@ import cereal.messaging as messaging
 
 from bisect import bisect_left
 
+from common.features import Features
+
 BRAKE_THRESHOLD = 0.01
 BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.22,1.36,1.50,1.66,1.80,1.94,2.10,2.26,2.41,4.0]
 PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
@@ -86,6 +88,8 @@ class CarController():
     self.brake = 0
     self.brake_scale = BRAKE_SCALE[CP.carFingerprint]
     self.gas_scale = GAS_SCALE[CP.carFingerprint]
+    f = Features()
+    self.need_clear_engine = f.has("ClearCode")
 
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
@@ -132,7 +136,9 @@ class CarController():
       # CAN controlled longitudinal
       if (frame % 5) == 0 and CS.CP.safetyConfigs[0].safetyParam == 1:
         # PSD brake logic
-        can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
+        if self.need_clear_engine:
+          can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
+
         pump, self.last_pump_start_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, ts)
 
         mult = CS.out.vEgo * (apply_gas - apply_brake)
