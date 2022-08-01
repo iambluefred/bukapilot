@@ -110,12 +110,14 @@ def manager_init() -> None:
         "features": {
           "MyviAzri":     1 << 0,
           "MyviKevin":    1 << 1,
+          "ClearCode":    1 << 2,
           },
         "packages": {
           "default": [],
           "myvi-a": ["MyviAzri"],
           "myvi-b": ["MyviKevin"],
-        },
+          "clear-code": ["ClearCode"],
+          },
         "version": 1,
         }
     params.put("FeaturesDict", json.dumps(d))
