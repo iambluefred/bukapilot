@@ -166,10 +166,10 @@ class CarController():
         #can_sends.append(make_can_msg(427, b'\x08\x00\x00\x00\x80\x40\x00\x7c', 0))
 
       # CAN controlled longitudinal
+      
+      can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
       if (frame % 5) == 0 and CS.CP.safetyParam == 1:
         # PSD brake logic
-
-        can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
         pump, self.last_pump_start_ts, self.last_pump_end_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, self.last_pump_end_ts, ts)
 
         # standstill
