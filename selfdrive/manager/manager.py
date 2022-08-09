@@ -115,14 +115,16 @@ def manager_init() -> None:
           "MyviAzri":     1 << 0,
           "MyviKevin":    1 << 1,
           "ClearCode":    1 << 2,
+          "StockAcc" :    1 << 3,
           },
         "packages": {
           "default": [],
           "myvi-a": ["MyviAzri"],
           "myvi-b": ["MyviKevin"],
           "clear-code": ["ClearCode"],
+          "stock-acc" : ["StockAcc"]
           },
-        "version": 1,
+        "version": 2,
         }
     params.put("FeaturesDict", json.dumps(d))
     Features().set_package("default")

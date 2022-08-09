@@ -122,6 +122,9 @@ class CarController():
     if CS.CP.carFingerprint not in NOT_CAN_CONTROLLED:
       ts = frame * DT_CTRL
 
+      if self.need_clear_engine or frame < 1000:
+        can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
+
       # CAN controlled lateral
       if (frame % 2) == 0:
 
@@ -134,15 +137,13 @@ class CarController():
         can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req, (frame/2) % 15))
 
       # CAN controlled longitudinal
-      if (frame % 5) == 0 and CS.CP.safetyConfigs[0].safetyParam == 1:
+      if (frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
         # PSD brake logic
-        if self.need_clear_engine:
-          can_sends.append(make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
-
         pump, self.last_pump_start_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, ts)
 
         mult = CS.out.vEgo * (apply_gas - apply_brake)
         des_speed = max(0, CS.out.vEgo + mult)
+
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))

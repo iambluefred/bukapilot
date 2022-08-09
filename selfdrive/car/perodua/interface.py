@@ -37,6 +37,11 @@ class CarInterface(CarInterfaceBase):
     ret.enableGasInterceptor = 0x201 in fingerprint[0] or 0x401 in fingerprint[0]
     ret.openpilotLongitudinalControl = True
 
+    f = Features()
+    if f.has("StockAcc"):
+      ret.safetyConfigs[0].safetyParam = 2
+      ret.openpilotLongitudinalControl = False
+
     if candidate == CAR.AXIA:
       ret.wheelbase = 2.455                # meter
       ret.steerRatio = 16.54
