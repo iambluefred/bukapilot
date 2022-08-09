@@ -109,24 +109,25 @@ def manager_init() -> None:
   params.put("GitRemote", get_origin(default=""))
 
   # set default feature dict
-  if params.get("FeaturesDict") is None:
-    d = {
-        "features": {
-          "MyviAzri":     1 << 0,
-          "MyviKevin":    1 << 1,
-          "ClearCode":    1 << 2,
-          "StockAcc" :    1 << 3,
-          },
-        "packages": {
-          "default": [],
-          "myvi-a": ["MyviAzri"],
-          "myvi-b": ["MyviKevin"],
-          "clear-code": ["ClearCode"],
-          "stock-acc" : ["StockAcc"]
-          },
-        "version": 2,
-        }
-    params.put("FeaturesDict", json.dumps(d))
+  new_dict = {
+      "features": {
+        "MyviAzri":     1 << 0,
+        "MyviKevin":    1 << 1,
+        "ClearCode":    1 << 2,
+        "StockAcc" :    1 << 3,
+        },
+      "packages": {
+        "default": [],
+        "myvi-a": ["MyviAzri"],
+        "myvi-b": ["MyviKevin"],
+        "clear-code": ["ClearCode"],
+        "stock-acc" : ["StockAcc"]
+        },
+      "version": 2,
+      }
+  cur_dict = params.get("FeaturesDict")
+  if cur_dict is None or (json.loads(cur_dict)["version"] < new_dict["version"]):
+    params.put("FeaturesDict", json.dumps(new_dict))
     Features().set_package("default")
 
   # set dongle id
