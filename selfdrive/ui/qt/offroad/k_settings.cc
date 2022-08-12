@@ -6,6 +6,10 @@
 
 #include <QDebug>
 
+#ifndef QCOM
+#include "selfdrive/ui/qt/offroad/networking.h"
+#endif
+
 #include "selfdrive/common/params.h"
 #include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"

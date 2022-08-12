@@ -40,7 +40,7 @@ def try_bootlog(can_block = False) -> bool:
 
   if not time_valid:
     # set time from gps
-    os.system("/data/openpilot/selfdrive/sensord/set_time")
+    os.system(BASEDIR + "/selfdrive/sensord/set_time")
 
   # save boot log
   subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
@@ -96,7 +96,7 @@ def manager_init() -> None:
     print("WARNING: failed to make /dev/shm")
 
   # set release notes
-  with open("/data/openpilot/RELEASES.md", "rb") as f:
+  with open(BASEDIR + "/RELEASES.md", "rb") as f:
     r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
     params.put("ReleaseNotes", r.decode("utf-8"))
 
