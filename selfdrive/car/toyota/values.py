@@ -8,7 +8,7 @@ from selfdrive.config import Conversions as CV
 Ecu = car.CarParams.Ecu
 MIN_ACC_SPEED = 19. * CV.MPH_TO_MS
 PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
-
+HUD_MULTIPLIER = 1.07
 
 class CarControllerParams:
   ACCEL_MAX = 1.5  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
