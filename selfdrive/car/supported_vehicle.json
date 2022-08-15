@@ -1,0 +1,130 @@
+{"standard": 
+  [   
+    {
+      "brand": "Perodua",
+      "model": "Ativa",
+      "year": "2019-2022",
+      "variant": "AV",
+      "acc_low_speed": true,
+      "acc_stop_and_go": false,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Perodua",
+      "model": "Myvi",
+      "year": "2022",
+      "variant": "AV",
+      "acc_low_speed": true,
+      "acc_stop_and_go": false,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Alphard",
+      "year": "2019-2022",
+      "variant": "2.5V, Hybrid",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Camry",
+      "year": "2018-2022",
+      "variant": "V, Hybrid",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Corolla",
+      "year": "2019-2022",
+      "variant": "G, Hybrid",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Corolla Cross",
+      "year": "2022",
+      "variant": "V, Hybrid",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Prius",
+      "year": "2021-2022",
+      "variant": "All",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Lexus",
+      "model": "ES",
+      "year": "2019-2022",
+      "variant": "All",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Lexus",
+      "model": "NX",
+      "year": "2020-2022",
+      "variant": "All",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Lexus",
+      "model": "UX",
+      "year": "2020-2022",
+      "variant": "All",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Lexus",
+      "model": "RX",
+      "year": "2020-2022",
+      "variant": "All",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    }
+  ],
+  "semi_acc":
+  [
+    {
+      "brand": "Perodua",
+      "model": "Axia",
+      "year": "2019-2022",
+      "variant": "GXtra, SE, Style, AV",
+      "semi_acc": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Perodua",
+      "model": "Bezza",
+      "year": "2020-2022",
+      "variant": "X, AV",
+      "semi_acc": true,
+      "lkc_torque": "High"
+    },
+    {
+      "brand": "Perodua",
+      "model": "Myvi",
+      "year": "2017-2021",
+      "variant": "G, X, H, AV",
+      "semi_acc": true,
+      "lkc_torque": "High"
+    }
+  ]
+}
