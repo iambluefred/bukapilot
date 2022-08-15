@@ -14,6 +14,8 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
     self.shifter_values = can_define.dv["GEAR_PACKET"]["GEAR"]
+    if self.CP.carFingerprint not in (CAR.LEXUS_IS, CAR.LEXUS_RC):
+      self.set_distance_values = can_define.dv['PCM_CRUISE_2']['PCM_FOLLOW_DISTANCE']
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
 
     # On cars with cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
@@ -89,6 +91,11 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.available = cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0
       ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
+      ret.cruiseState.speedCluster = cp.vl["PCM_CRUISE_SM"]["UI_SET_SPEED"] * CV.KPH_TO_MS
+
+      distance_val = int(cp.vl["PCM_CRUISE_2"]['PCM_FOLLOW_DISTANCE'])
+      #ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
+      ret.cruiseState.setDistance = car.CarState.CruiseState.SetDistance.normal
 
     if self.CP.carFingerprint in RADAR_ACC_CAR:
       self.acc_type = cp.vl["ACC_CONTROL"]["ACC_TYPE"]
@@ -175,6 +182,7 @@ class CarState(CarStateBase):
       ("WHEEL_SPEEDS", 80),
       ("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 33),
+      ("PCM_CRUISE_SM", 0),
       ("STEER_TORQUE_SENSOR", 50),
       ("LKAS_HUD", 0), # TODO: figure out why freq is inconsistent
       ("STEERING_LKA", 42),
@@ -194,6 +202,7 @@ class CarState(CarStateBase):
     else:
       signals.append(("MAIN_ON", "PCM_CRUISE_2"))
       signals.append(("SET_SPEED", "PCM_CRUISE_2"))
+      signals.append(("PCM_FOLLOW_DISTANCE", "PCM_CRUISE_2"))
       signals.append(("LOW_SPEED_LOCKOUT", "PCM_CRUISE_2"))
       checks.append(("PCM_CRUISE_2", 33))
 
