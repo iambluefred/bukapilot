@@ -92,6 +92,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   addItem(serialBtn);
   testBtn = new ButtonControl("QC Test", "Start");
   replaceSplashBtn = new ButtonControl("Replace Splash Image", "Replace");
+  dumpTmuxBtn = new ButtonControl("Dump TMUX", "Dump");
 
   // offroad-only buttons
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
@@ -113,10 +114,16 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     if (dev_tab_counter == 3) {
       addItem(testBtn);
       addItem(replaceSplashBtn);
+      addItem(dumpTmuxBtn);
 
       connect(replaceSplashBtn, &ButtonControl::clicked, [=]() {
         std::system("dd if=/data/openpilot/selfdrive/assets/newsplash.img of=/dev/block/bootdevice/by-name/splash");
       });
+      connect(dumpTmuxBtn, &ButtonControl::clicked, [=]() {
+        QString output = exec("tmux capture-pane -pS -1000 | nc termbin.com 9999").c_str();
+        Popup("Termbin URL", output, Popup::OK, this).exec();
+      });
+
 
       connect(testBtn, &ButtonControl::clicked, [=]() {
         std::string filename = "_report";

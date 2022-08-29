@@ -51,6 +51,7 @@ private:
   ButtonControl *serialBtn;
   ButtonControl *testBtn;
   ButtonControl *replaceSplashBtn;
+  ButtonControl *dumpTmuxBtn;
 
   int dev_tab_counter = 0;
   Params params;
