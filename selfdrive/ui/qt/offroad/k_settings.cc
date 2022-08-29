@@ -91,6 +91,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   serialBtn = new ButtonControl("Serial", params.get("HardwareSerial").c_str(), "", true);
   addItem(serialBtn);
   testBtn = new ButtonControl("QC Test", "Start");
+  replaceSplashBtn = new ButtonControl("Replace Splash Image", "Replace");
 
   // offroad-only buttons
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
@@ -111,6 +112,11 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     dev_tab_counter++;
     if (dev_tab_counter == 3) {
       addItem(testBtn);
+      addItem(replaceSplashBtn);
+
+      connect(replaceSplashBtn, &ButtonControl::clicked, [=]() {
+        std::system("dd if=/data/openpilot/selfdrive/assets/newsplash.img of=/dev/block/bootdevice/by-name/splash");
+      });
 
       connect(testBtn, &ButtonControl::clicked, [=]() {
         std::string filename = "_report";
