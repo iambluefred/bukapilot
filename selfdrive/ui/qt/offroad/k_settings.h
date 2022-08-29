@@ -50,6 +50,7 @@ private:
   ButtonControl *resetCalibBtn;
   ButtonControl *serialBtn;
   ButtonControl *testBtn;
+  ButtonControl *replaceSplashBtn;
 
   int dev_tab_counter = 0;
   Params params;
