@@ -1,3 +1,9 @@
+Version 6-longOverhaul  (2022-09-02)
+=========================
+ * New distance profile
+ * Offset camera skew so that vehicles will slightly (negligible) lean to the right
+ * Added more internal QC tools and vehicle porting tools
+
 Version 5-longOverhaul  (2022-08-15)
 =========================
  * bukapilot speed display matches stock speedometer
