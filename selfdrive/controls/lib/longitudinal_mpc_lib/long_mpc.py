@@ -53,22 +53,21 @@ T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 MIN_ACCEL = -3.5
 COMFORT_BRAKE = 2.5
-HARSH_BRAKE = 3.5
-UNCERTAINTY_BRAKE = 7.5
+HARSH_BRAKE = 2.25
 STOP_DISTANCE = 6.0
 
 def get_T_FOLLOW(set_distance=SetDistance.normal):
   if set_distance == SetDistance.aggresive:
-    return 1.55
+    return 1.5
   elif set_distance == SetDistance.normal:
-    return 1.8
+    return 1.75
   elif set_distance == SetDistance.chill:
-    return 2.05
+    return 2.0
   else:
     return 1.8
 
 def get_stopped_equivalence_factor(v_lead):
-  return (v_lead**2) / (2 * HARSH_BRAKE) + (v_lead**2)/(2 * UNCERTAINTY_BRAKE)
+  return (v_lead**2) / (2 * HARSH_BRAKE)
 
 def get_safe_obstacle_distance(v_ego, T_FOLLOW):
   return (v_ego**2) / (2 * COMFORT_BRAKE) + T_FOLLOW * v_ego + STOP_DISTANCE
