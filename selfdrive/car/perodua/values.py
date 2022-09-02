@@ -55,7 +55,7 @@ DBC = {
 }
 
 BRAKE_SCALE = defaultdict(lambda: 1, {CAR.ATIVA: 2.95, CAR.MYVI_PSD: 2.95})
-GAS_SCALE = defaultdict(lambda: 2600, {CAR.ATIVA: 0.4, CAR.MYVI_PSD: 0.33})
+GAS_SCALE = defaultdict(lambda: 2600, {CAR.ATIVA: 0.4, CAR.MYVI_PSD: 0.35})
 
 NOT_CAN_CONTROLLED = set([CAR.ARUZ, CAR.AXIA, CAR.BEZZA, CAR.MYVI])
 
