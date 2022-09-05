@@ -33,6 +33,7 @@ class PowerMonitoring:
     self.car_voltage_mV = 12e3                  # Low-passed version of peripheralState voltage
     self.car_voltage_instant_mV = 12e3          # Last value of peripheralState voltage
     self.integration_lock = threading.Lock()
+    self.max_time_offroad_s = 15*60 if self.params.get("PowerSaver") else MAX_TIME_OFFROAD_S
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
@@ -166,7 +167,7 @@ class PowerMonitoring:
 
     now = sec_since_boot()
     disable_charging = False
-    disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
+    disable_charging |= (now - offroad_timestamp) > self.max_time_offroad_s
     disable_charging &= not ignition
     disable_charging &= (not self.params.get_bool("DisablePowerDown"))
     disable_charging |= self.params.get_bool("ForcePowerDown")

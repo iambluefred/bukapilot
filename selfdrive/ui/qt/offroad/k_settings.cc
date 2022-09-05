@@ -45,10 +45,10 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/kommu/icon_bukapilot_mirrored.png",
     },
     {
-      "IsMetric",
-      "Use Metric System",
-      "Display speed in km/h instead of mph.",
-      "../assets/offroad/icon_metric.png",
+      "PowerSaver",
+      "Power Saver Mode",
+      "Shutdown the device immediately 15 minutes after inactivity.",
+      "../assets/offroad/icon_battery.png",
     },
     {
       "RecordFront",
