@@ -19,6 +19,15 @@
       "lkc_torque": "High"
     },
     {
+      "brand": "Honda",
+      "model": "City",
+      "year": "2019-2022",
+      "variant": "V-Sensing",
+      "acc_low_speed": false,
+      "acc_stop_and_go": false,
+      "lkc_torque": "High"
+    },
+    {
       "brand": "Toyota",
       "model": "Alphard",
       "year": "2019-2022",
