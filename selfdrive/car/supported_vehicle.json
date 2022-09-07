@@ -19,6 +19,15 @@
       "lkc_torque": "High"
     },
     {
+      "brand": "Proton",
+      "model": "X50",
+      "year": "2019-2022",
+      "variant": "Flagship",
+      "acc_low_speed": true,
+      "acc_stop_and_go": true,
+      "lkc_torque": "High"
+    },
+    {
       "brand": "Honda",
       "model": "City",
       "year": "2019-2022",

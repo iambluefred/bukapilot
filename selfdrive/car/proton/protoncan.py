@@ -40,10 +40,8 @@ def create_can_steer_command(packer, steer, steer_req, raw_cnt):
   values = {
     "LKAS_ENGAGED1": steer_req,
     "LKAS_ENGAGED2": steer_req,
-    "UNKNOWN": 1,
-    "STEER_CMD": steer if steer_req else 0,
-    # steer positive is clockwise
-    "STEER_DIR": 1 if (steer >= 0 or not steer_req) else 0,
+    "STEER_CMD": abs(steer) if steer_req else 0,
+    "STEER_DIR": 1 if steer <= 0 else 0,
     "COUNTER": raw_cnt,
     "SET_ME_1_1": 1,
     "SET_ME_1_2": 1,
@@ -55,70 +53,41 @@ def create_can_steer_command(packer, steer, steer_req, raw_cnt):
 
   dat = packer.make_can_msg("ADAS_LKAS", 0, values)[2]
   crc = get_crc8_8h2f(dat[:-1])
-  values["CHECKSUM"] = 0
-
+  values["CHECKSUM"] = crc
   return packer.make_can_msg("ADAS_LKAS", 0, values)
 
-def create_hud(packer, steer, steer_req, raw_cnt):
+def create_hud(packer, steer, steer_req, ldw, rlane, llane):
   """Creates a CAN message for the Perodua LKA Steer Command."""
+  steer_dir = steer >= 0
   values = {
-    "LANE_DEPARTURE_WARNING_RIGHT": 0,
-    "LANE_DEPARTURE_WARNING_LEFT": 0,
+    "LANE_DEPARTURE_WARNING_RIGHT": ldw and not steer_dir,
+    "LANE_DEPARTURE_WARNING_LEFT": ldw and steer_dir,
     "LEFT_LANE_VISIBLE_DISENGAGE": 0,
     "RIGHT_LANE_VISIBLE_DISENGAGE": 0,
-    "STEER_REQ_RIGHT": 1 if steer_req else 0,
-    "STEER_REQ_LEFT": 1 if steer_req else 0,
+    "STEER_REQ_RIGHT": steer_req,
+    "STEER_REQ_LEFT": steer_req,
     "STEER_REQ_MAJOR": 1 if steer_req else 0,
-    "STEER_CMD": 0x91 if steer_req else 0x4b,
-    "NEW_SIGNAL_2": 0x3f if steer_req else 0x3f,
-    "NEW_SIGNAL_1": 0xaa if steer_req else 0x3d,
+    "LLANE_CHAR": 0x91 if steer_req else 0x4b,
+    "CURVATURE": 0x3f if steer_req else 0x3f,
+    "RLANE_CHAR": 0xaa if steer_req else 0x3d,
   }
 
   dat = packer.make_can_msg("LKAS", 0, values)[2]
   return packer.make_can_msg("LKAS", 0, values)
 
-def create_car_detect(packer, steer, steer_req, raw_cnt):
+def create_lead_detect(packer, is_lead, steer_req):
   """Creates a CAN message for the Perodua LKA Steer Command."""
   values = {
-    "LEFT_LANE_CAR_DIST": 0,
-    "NEW_SIGNAL_1": 0x7e,
-    "NEW_SIGNAL_2": 0x7e,
-    "LEFT_LANE_CAR_EXIST": 0,
-    "RIGHT_LANE_CAR_DIST": 0,
-    "RIGHT_LANE_CAR_EXIST": 0,
-  }
-
-  dat = packer.make_can_msg("ADAS_CAR_DETECT", 0, values)[2]
-  return packer.make_can_msg("ADAS_CAR_DETECT", 0, values)
-
-def create_lead_detect(packer, steer, steer_req, raw_cnt):
-  """Creates a CAN message for the Perodua LKA Steer Command."""
-  values = {
-    "LEAD_DISTANCE": 0,
+    "LEAD_DISTANCE": 30,
     "NEW_SIGNAL_1": 0x7f,
     "NEW_SIGNAL_2": 0x7e,
-    "IS_LEAD2": 0,
-    "IS_LEAD1": 0,
+    "IS_LEAD2": is_lead,
+    "IS_LEAD1": is_lead,
     "LEAD_TOO_NEAR": 0,
   }
 
   dat = packer.make_can_msg("ADAS_LEAD_DETECT", 0, values)[2]
   return packer.make_can_msg("ADAS_LEAD_DETECT", 0, values)
-
-def create_heartbeat(packer, steer, steer_req, raw_cnt):
-  """Creates a CAN message for the Perodua LKA Steer Command."""
-  values = {
-    "COUNTER": raw_cnt,
-    "NEW_SIGNAL_1": 1537,
-    "NEW_SIGNAL_2": 32773,
-    "NEW_SIGNAL_3": 128,
-  }
-
-  dat = packer.make_can_msg("ADAS_HEARTBEAT", 0, values)[2]
-  crc = get_crc8_8h2f(dat[:-1])
-  values["CHECKSUM"] = crc
-
-  return packer.make_can_msg("ADAS_HEARTBEAT", 0, values)
 
 def create_pcm(packer, steer, steer_req, raw_cnt):
   """Creates a CAN message for the Perodua LKA Steer Command."""
@@ -137,6 +106,21 @@ def create_pcm(packer, steer, steer_req, raw_cnt):
 
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
+def send_buttons(packer, count):
+  """Spoof ACC Button Command."""
+  values = {
+    "SET_BUTTON": 0,
+    "RES_BUTTON": 1,
+    "NEW_SIGNAL_1": 1,
+    "NEW_SIGNAL_2": 1,
+    "SET_ME_BUTTON_PRESSED": 1,
+    "COUNTER": count,
+  }
 
+  dat = packer.make_can_msg("ACC_BUTTONS", 0, values)[2]
+  crc = get_crc8_8h2f(dat[:-1])
+  values["CHECKSUM"] = crc
+
+  return packer.make_can_msg("ACC_BUTTONS", 0, values)
 
 init_lut_crc8_8h2f()
