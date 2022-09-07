@@ -72,7 +72,7 @@ class CarState(CarStateBase):
     ret.stockAeb = False
     ret.stockFcw = False
 
-    ret.cruiseState.available = cp.vl["PCM_BUTTONS"]["ACC_ON_OFF_BUTTON"] != 0
+    ret.cruiseState.available = any([cp.vl["PCM_BUTTONS"]["ACC_ON_OFF_BUTTON"], cp.vl["PCM_BUTTONS"]["GAS_OVERRIDE"]])
     distance_val = int(cp.vl["PCM_BUTTONS"]['SET_DISTANCE'])
     ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
 
@@ -124,6 +124,7 @@ class CarState(CarStateBase):
       ("ACC_SET", "PCM_BUTTONS", 0.),
       ("ACC_SET_SPEED", "PCM_BUTTONS", 0.),
       ("ACC_ON_OFF_BUTTON", "PCM_BUTTONS", 0.),
+      ("GAS_OVERRIDE", "PCM_BUTTONS", 0.),
       ("GEAR", "TRANSMISSION", 0),
       ("APPS_1", "GAS_PEDAL", 0.),
       ("BRAKE_PRESSURE", "BRAKE", 0.),

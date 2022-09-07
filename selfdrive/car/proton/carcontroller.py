@@ -1,6 +1,6 @@
 from cereal import car
 from selfdrive.car import make_can_msg
-from selfdrive.car.proton.protoncan import create_can_steer_command, create_hud, create_car_detect, create_lead_detect, create_heartbeat, create_pcm
+from selfdrive.car.proton.protoncan import create_can_steer_command, create_hud, create_lead_detect, send_buttons
 from selfdrive.car.proton.values import CAR, DBC, BRAKE_SCALE, GAS_SCALE
 from opendbc.can.packer import CANPacker
 from common.numpy_fast import clip, interp
@@ -39,6 +39,7 @@ class CarController():
     self.steering_direction = False
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
+    self.last_resume_frame = 0
 
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
@@ -55,23 +56,17 @@ class CarController():
     ts = frame * DT_CTRL
 
     if CS.out.genericToggle:
-      #can_sends.append(make_can_msg(0x1b0, b'\x01\x12\x48\x03\x00\x35\x08\xff', 0))
-      can_sends.append(create_can_steer_command(self.packer, 600, 1, (frame/2) % 15))
-      #can_sends.append(create_hud(self.packer, apply_steer, 1, (frame/2) % 15))
-      #can_sends.append(create_lead_detect(self.packer, apply_steer, 1, (frame/2) % 15))
-      #can_sends.append(create_heartbeat(self.packer, apply_steer, 1, (frame/2) % 15))
-      #can_sends.append(create_car_detect(self.packer, apply_steer, 1, (frame/2) % 15))
-      #can_sends.append(create_pcm(self.packer, apply_steer, 1, (frame/2) % 15))
-
+      can_sends.append(send_buttons(self.packer, frame % 16))
 
     # CAN controlled lateral running at 50hz
-    if (frame % 1) == 0:
-      can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, (frame/2) % 15))
-      #can_sends.append(create_hud(self.packer, apply_steer, enabled, (frame/2) % 15))
-      #can_sends.append(create_lead_detect(self.packer, apply_steer, enabled, (frame/2) % 15))
-      #can_sends.append(create_heartbeat(self.packer, apply_steer, enabled, (frame/2) % 15))
-      #can_sends.append(create_car_detect(self.packer, apply_steer, enabled, (frame/2) % 15))
-      #can_sends.append(create_pcm(self.packer, apply_steer, enabled, (frame/2) % 15))
+    if (frame % 2) == 0:
+      can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, (frame/2) % 16))
+      can_sends.append(create_hud(self.packer, apply_steer, enabled, ldw, rlane_visible, llane_visible))
+      can_sends.append(create_lead_detect(self.packer, lead_visible, enabled))
+
+    if CS.out.cruiseState.standstill and enabled:
+      # Spam resume button to resume from standstill at max freq of 10 Hz
+      can_sends.append(send_buttons(self.packer, frame % 16))
 
     self.last_steer = apply_steer
     new_actuators = actuators.copy()
