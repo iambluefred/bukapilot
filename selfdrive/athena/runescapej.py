@@ -14,6 +14,7 @@ def register_user(imei, serial):
 
   # make sure the algo is the same with rsj!
   dongle_id = SHA224.new(data=(imei + serial).encode()).hexdigest()[:16]
+  params.put("DongleId", dongle_id)
 
   # first, try to login, WE MUST BE ABLE TO LOGIN IF DONGLE EXISTS
   # TODO: review threat model
@@ -25,6 +26,7 @@ def register_user(imei, serial):
   if auth:
     return dongle_id
 
+  params.put("DongleId", "")
   init = requests.get(WEB_BASE + "/self-service/registration/api")
   if init.status_code != 200:
     raise Exception("can't init kratos flow")
