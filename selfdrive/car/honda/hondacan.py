@@ -137,6 +137,7 @@ def create_ui_commands(packer, CP, pcm_speed, hud, is_metric, idx, stock_hud):
 
   # Todo: Right now Honda City Malaysia can work by not blocking 0x33d (LKAS_HUD) but it faults once awhile.
   # If we do block it, it keeps faulting. For some reason, 0x33d has a constant value of b'\x00\x00\x80\x48\x00'
+  # It could be that the bus which 0x33d is sent is wrong, it should be sent to into the camera instead
   lkas_hud_values = {
     'SET_ME_X41': 0x41,
     'SET_ME_X48': 0x48,
