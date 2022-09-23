@@ -137,6 +137,23 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalActuatorDelayLowerBound = 0.22
       ret.longitudinalActuatorDelayUpperBound = 0.40
 
+    elif candidate == CAR.ALZA:
+      ret.wheelbase = 2.750
+      ret.steerRatio = 16.74
+      ret.centerToFront = ret.wheelbase * 0.44
+      tire_stiffness_factor = 0.9871
+      ret.mass = 1170. + STD_CARGO_KG
+      ret.wheelSpeedFactor = 1.48
+
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.20]]
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
+      ret.lateralTuning.pid.kf = 0.0000007
+
+      ret.longitudinalTuning.kpBP = [0., 5., 20.]
+      ret.longitudinalTuning.kpV = [1.6, 1.6, 0.7]
+      ret.longitudinalActuatorDelayLowerBound = 0.42
+      ret.longitudinalActuatorDelayUpperBound = 0.60
+
     else:
       ret.dashcamOnly = True
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
@@ -180,7 +197,7 @@ class CarInterface(CarInterfaceBase):
         events.add(EventName.promptDriverBrake)
 
     # events for ACC cars
-    if self.CP.carFingerprint in ACC_CAR:
+    if self.CP.carFingerprint in ACC_CAR and self.CP.carFingerprint != CAR.ALZA:
       # warning about the 3s only standstill brake
       if ret.standstill and self.CC.pump_saturated:
         events.add(EventName.promptDriverBrake)
