@@ -464,7 +464,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       "Below Auto Lane Change Speed",
       "Manually Steer to Change Lane",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.promptRepeat, .1),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.none, .1),
   },
 
   EventName.preLaneChangeLeft: {
