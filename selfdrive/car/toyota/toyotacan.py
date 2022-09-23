@@ -1,7 +1,7 @@
-from cereal import car
-SetDistance = car.CarState.CruiseState.SetDistance
+#from cereal import car
+#SetDistance = car.CarState.CruiseState.SetDistance
 
-def compute_set_distance(state):
+'''def compute_set_distance(state):
   if state == SetDistance.aggresive:
     return 3
   elif state == SetDistance.normal:
@@ -9,7 +9,7 @@ def compute_set_distance(state):
   elif state == SetDistance.chill:
     return 1
   else:
-    return 0
+    return 0'''
 
 def create_steer_command(packer, steer, steer_req, raw_cnt):
   """Creates a CAN message for the Toyota Steer Command."""
@@ -46,7 +46,7 @@ def create_accel_command(packer, accel, pcm_cancel, standstill_req, lead, acc_ty
   values = {
     "ACCEL_CMD": accel,
     "ACC_TYPE": acc_type,
-    "DISTANCE": compute_set_distance(distance),
+    "DISTANCE": distance,
     "MINI_CAR": lead,
     "PERMIT_BRAKING": 1,
     "RELEASE_STANDSTILL": not standstill_req,
