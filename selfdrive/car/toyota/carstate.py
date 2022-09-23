@@ -14,8 +14,8 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
     self.shifter_values = can_define.dv["GEAR_PACKET"]["GEAR"]
-    if self.CP.carFingerprint not in (CAR.LEXUS_IS, CAR.LEXUS_RC):
-      self.set_distance_values = can_define.dv['PCM_CRUISE_2']['PCM_FOLLOW_DISTANCE']
+    if self.CP.carFingerprint in TSS2_CAR:
+      self.set_distance_values = can_define.dv['PCM_CRUISE_SM']['DISTANCE_LINES']
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
 
     # On cars with cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
@@ -26,6 +26,8 @@ class CarState(CarStateBase):
 
     self.low_speed_lockout = False
     self.acc_type = 1
+    self.distance_btn = 0
+    self.raw_distance = 0
 
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
@@ -95,16 +97,18 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cp.vl["PCM_CRUISE_2"]["SET_SPEED"] * CV.KPH_TO_MS
       ret.cruiseState.speedCluster = cp.vl["PCM_CRUISE_SM"]["UI_SET_SPEED"] * CV.KPH_TO_MS
 
-      distance_val = int(cp.vl["PCM_CRUISE_2"]['PCM_FOLLOW_DISTANCE'])
-      #ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
-      ret.cruiseState.setDistance = car.CarState.CruiseState.SetDistance.normal
-
     if self.CP.carFingerprint in RADAR_ACC_CAR:
       self.acc_type = cp.vl["ACC_CONTROL"]["ACC_TYPE"]
       ret.stockFcw = bool(cp.vl["ACC_HUD"]["FCW"])
     elif self.CP.carFingerprint in TSS2_CAR:
       self.acc_type = cp_cam.vl["ACC_CONTROL"]["ACC_TYPE"]
       ret.stockFcw = bool(cp_cam.vl["ACC_HUD"]["FCW"])
+
+      self.distance_btn = 1 if cp_cam.vl["ACC_CONTROL"]["DISTANCE"] == 1 else 0
+      self.raw_distance = int(cp.vl["PCM_CRUISE_SM"]['DISTANCE_LINES'])
+      ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(self.raw_distance, None))
+    else:
+      ret.cruiseState.setDistance = car.CarState.CruiseState.SetDistance.normal
 
     ret.stockAdas.laneDepartureHUD = cp.vl["LKAS_HUD"]["LDA_ALERT"] == 3
     ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKA"]["STEER_REQUEST"]
@@ -207,7 +211,6 @@ class CarState(CarStateBase):
     else:
       signals.append(("MAIN_ON", "PCM_CRUISE_2"))
       signals.append(("SET_SPEED", "PCM_CRUISE_2"))
-      signals.append(("PCM_FOLLOW_DISTANCE", "PCM_CRUISE_2"))
       signals.append(("LOW_SPEED_LOCKOUT", "PCM_CRUISE_2"))
       checks.append(("PCM_CRUISE_2", 33))
 
@@ -236,6 +239,10 @@ class CarState(CarStateBase):
         ("ACC_HUD", 1),
       ]
 
+    if CP.carFingerprint in TSS2_CAR:
+      signals.append(("DISTANCE_LINES", "PCM_CRUISE_SM"))
+      checks.append(("PCM_CRUISE_SM", 0))
+
     return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 0)
 
   @staticmethod
@@ -260,6 +267,10 @@ class CarState(CarStateBase):
         ("ACC_CONTROL", 33),
         ("ACC_HUD", 1),
       ]
+
+
+    if CP.carFingerprint in TSS2_CAR:
+      signals.append(("DISTANCE", "ACC_CONTROL", 0))
 
     # Todo: Change back to bus 2 as the source
     return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 0)
