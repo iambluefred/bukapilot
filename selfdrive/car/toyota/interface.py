@@ -229,6 +229,13 @@ class CarInterface(CarInterfaceBase):
 
     if ret.enableGasInterceptor:
       set_long_tune(ret.longitudinalTuning, LongTunes.PEDAL)
+    elif candidate == (CAR.ALPHARD_TSS2, CAR.ALPHARDH_TSS2):
+      ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
+      set_long_tune(ret.longitudinalTuning, LongTunes.SPECIAL)
+    elif candidate == (CAR.LEXUS_NX_TSS2):
+      ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
+      set_long_tune(ret.longitudinalTuning, LongTunes.SPECIAL)
+
     elif candidate in TSS2_CAR:
       set_long_tune(ret.longitudinalTuning, LongTunes.TSS2)
       ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
