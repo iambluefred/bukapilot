@@ -58,13 +58,13 @@ STOP_DISTANCE = 6.0
 
 def get_T_FOLLOW(set_distance=SetDistance.normal):
   if set_distance == SetDistance.aggresive:
-    return 1.5
+    return 1.45
   elif set_distance == SetDistance.normal:
     return 1.75
   elif set_distance == SetDistance.chill:
-    return 2.0
+    return 1.9
   else:
-    return 1.8
+    return 1.75
 
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * HARSH_BRAKE)
