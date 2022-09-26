@@ -11,8 +11,8 @@ PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
 HUD_MULTIPLIER = 1.07
 
 class CarControllerParams:
-  ACCEL_MAX = 1.5  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
-  ACCEL_MIN = -3.5  # m/s2
+  ACCEL_MAX = 1.2  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
+  ACCEL_MIN = -4.0  # m/s2
 
   STEER_MAX = 1500
   STEER_DELTA_UP = 10       # 1.5s time to peak torque
