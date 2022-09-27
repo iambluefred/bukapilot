@@ -41,14 +41,14 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
   ]
 
   checks = [
-    ("ENGINE_DATA", 100),
-    ("WHEEL_SPEEDS", 50),
-    ("STEERING_SENSORS", 100),
-    ("SEATBELT_STATUS", 10),
-    ("CRUISE", 10),
-    ("POWERTRAIN_DATA", 100),
-    ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
+    ("ENGINE_DATA", 0),
+    ("WHEEL_SPEEDS", 0),
+    ("STEERING_SENSORS", 0),
+    ("SEATBELT_STATUS", 0),
+    ("CRUISE", 0),
+    ("POWERTRAIN_DATA", 0),
+    ("VSA_STATUS", 0),
+    ("STEER_STATUS", 0),
     ("STEER_MOTOR_TORQUE", 0), # TODO: not on every car
   ]
 
@@ -59,32 +59,32 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     ]
   else:
     checks += [
-      ("SCM_FEEDBACK", 10),
-      ("SCM_BUTTONS", 25),
+      ("SCM_FEEDBACK", 0),
+      ("SCM_BUTTONS", 0),
     ]
 
   if CP.carFingerprint in (CAR.CRV_HYBRID, CAR.CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
-    checks.append((gearbox_msg, 50))
+    checks.append((gearbox_msg, 0))
   else:
-    checks.append((gearbox_msg, 100))
+    checks.append((gearbox_msg, 0))
 
   if CP.carFingerprint in HONDA_BOSCH_ALT_BRAKE_SIGNAL:
     signals.append(("BRAKE_PRESSED", "BRAKE_MODULE"))
-    checks.append(("BRAKE_MODULE", 50))
+    checks.append(("BRAKE_MODULE", 0))
 
   if CP.carFingerprint in HONDA_BOSCH:
     signals += [
       ("IMPERIAL_UNIT", "CAR_SPEED"),
     ]
     checks += [
-      ("CAR_SPEED", 10),
+      ("CAR_SPEED", 0),
     ]
     if CP.carFingerprint not in (CAR.CITY_BOSCH):
       signals += [
         ("EPB_STATE", "EPB_STATUS"),
       ]
       checks += [
-        ("EPB_STATUS", 50),
+        ("EPB_STATUS", 0),
       ]
 
     if not CP.openpilotLongitudinalControl:
@@ -95,7 +95,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
         ("AEB_STATUS", "ACC_CONTROL"),
       ]
       checks += [
-        ("ACC_HUD", 10),
+        ("ACC_HUD", 0),
         ("ACC_CONTROL", 0),
       ]
   else:  # Nidec signals
@@ -105,7 +105,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     if CP.carFingerprint == CAR.ODYSSEY_CHN:
       checks.append(("CRUISE_PARAMS", 10))
     else:
-      checks.append(("CRUISE_PARAMS", 50))
+      checks.append(("CRUISE_PARAMS", 0))
 
   if CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CITY_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E):
     signals.append(("DRIVERS_DOOR_OPEN", "SCM_FEEDBACK"))
@@ -121,33 +121,33 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
                 ("DOOR_OPEN_RR", "DOORS_STATUS"),
                 ("WHEELS_MOVING", "STANDSTILL")]
     checks += [
-      ("DOORS_STATUS", 3),
-      ("STANDSTILL", 50),
+      ("DOORS_STATUS", 0),
+      ("STANDSTILL", 0),
     ]
 
   if CP.carFingerprint == CAR.CIVIC:
     signals += [("IMPERIAL_UNIT", "HUD_SETTING"),
                 ("EPB_STATE", "EPB_STATUS")]
     checks += [
-      ("HUD_SETTING", 50),
-      ("EPB_STATUS", 50),
+      ("HUD_SETTING", 0),
+      ("EPB_STATUS", 0),
     ]
   elif CP.carFingerprint in (CAR.ODYSSEY, CAR.ODYSSEY_CHN):
     signals.append(("EPB_STATE", "EPB_STATUS"))
-    checks.append(("EPB_STATUS", 50))
+    checks.append(("EPB_STATUS", 0))
 
   # add gas interceptor reading if we are using it
   if CP.enableGasInterceptor:
     signals.append(("INTERCEPTOR_GAS", "GAS_SENSOR"))
     signals.append(("INTERCEPTOR_GAS2", "GAS_SENSOR"))
-    checks.append(("GAS_SENSOR", 50))
+    checks.append(("GAS_SENSOR", 0))
 
   if CP.openpilotLongitudinalControl:
     signals += [
       ("BRAKE_ERROR_1", "STANDSTILL"),
       ("BRAKE_ERROR_2", "STANDSTILL")
     ]
-    checks.append(("STANDSTILL", 50))
+    checks.append(("STANDSTILL", 0))
 
   return signals, checks
 
@@ -321,7 +321,7 @@ class CarState(CarStateBase):
   def get_can_parser(self, CP):
     signals, checks = get_can_signals(CP, self.gearbox_msg, self.main_on_sig_msg)
     bus_pt = 0 if CP.carFingerprint in HONDA_BOSCH else 1
-    return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, bus_pt)
+    return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 0)
 
   @staticmethod
   def get_cam_can_parser(CP):
@@ -357,5 +357,5 @@ class CarState(CarStateBase):
         ("BSM_STATUS_RIGHT", 3),
       ]
       bus_body = 0 # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
-      return CANParser(DBC[CP.carFingerprint]["body"], signals, checks, bus_body)
+      return CANParser(DBC[CP.carFingerprint]["body"], signals, checks, 0)
     return None

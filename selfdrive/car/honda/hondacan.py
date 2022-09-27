@@ -140,7 +140,7 @@ def create_ui_commands(packer, CP, pcm_speed, hud, is_metric, idx, stock_hud):
   # It could be that the bus which 0x33d is sent is wrong, it should be sent to into the camera instead
   lkas_hud_values = {
     'SET_ME_X41': 0x41,
-    'SET_ME_X48': 0x48,
+  #  'SET_ME_X48': 0x48,
     'STEERING_REQUIRED': hud.steer_required,
     'SOLID_LANES': hud.lanes,
     'BEEP': 0,
