@@ -116,7 +116,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.0000007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [1.55, 1.52, 0.8]
+      ret.longitudinalTuning.kpV = [1.4, 1.4, 0.7]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -162,7 +162,7 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.deadzoneBP = [0., 8.05]
       ret.longitudinalTuning.deadzoneV = [.0, .14]
       ret.longitudinalTuning.kiBP = [0., 5., 20.]
-      ret.longitudinalTuning.kiV = [.15, .10, .04]
+      ret.longitudinalTuning.kiV = [.20, .12, .07]
 
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds

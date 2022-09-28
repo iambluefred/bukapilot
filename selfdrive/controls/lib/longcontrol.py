@@ -68,10 +68,12 @@ class LongControl():
 
       v_target = speeds[0]
       v_target_future = speeds[-1]
+      des_speed = v_target_upper
     else:
       v_target = 0.0
       v_target_future = 0.0
       a_target = 0.0
+      des_speed = 0
 
     # TODO: This check is not complete and needs to be enforced by MPC
     a_target = clip(a_target, ACCEL_MIN_ISO, ACCEL_MAX_ISO)
@@ -115,4 +117,4 @@ class LongControl():
     self.last_output_accel = output_accel
     final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
 
-    return final_accel
+    return final_accel, des_speed
