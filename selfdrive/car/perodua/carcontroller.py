@@ -141,9 +141,9 @@ class CarController():
         # PSD brake logic
         pump, self.last_pump_start_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, ts)
 
-        mult = CS.out.vEgo * (apply_gas - apply_brake)
-        des_speed = max(0, CS.out.vEgo + mult)
-
+        des_speed = actuators.speed
+        if apply_gas:
+          des_speed *= (1.0 + apply_gas)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
