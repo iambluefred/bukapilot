@@ -32,12 +32,12 @@ COST_E_DIM = 5
 COST_DIM = COST_E_DIM + 1
 CONSTR_DIM = 4
 
-X_EGO_OBSTACLE_COST = 3.
+X_EGO_OBSTACLE_COST = 5.
 X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
-J_EGO_COST = 2.
-A_CHANGE_COST = 200.
+J_EGO_COST = 3.
+A_CHANGE_COST = .5
 DANGER_ZONE_COST = 200.
 CRASH_DISTANCE = .5
 LEAD_DANGER_FACTOR = 0.75
@@ -54,11 +54,11 @@ T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 MIN_ACCEL = -3.5
 COMFORT_BRAKE = 2.5
-HARSH_BRAKE = 2.28
+HARSH_BRAKE = 2.3
 STOP_DISTANCE = 5.6
-T_FOLLOW_CHILL = 2.0
-T_FOLLOW_NORMAL = 1.7
-T_FOLLOW_AGGRO = 1.5
+T_FOLLOW_CHILL = 1.65
+T_FOLLOW_NORMAL = 1.45
+T_FOLLOW_AGGRO = 1.25
 
 def get_desired_tf(set_distance=SetDistance.normal):
   if set_distance == SetDistance.aggresive:
@@ -74,7 +74,7 @@ def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * HARSH_BRAKE)
 
 def get_safe_obstacle_distance(v_ego, desired_tf):
-  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE
+  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE - 1.25 + desired_tf
 
 def desired_follow_distance(v_ego, v_lead, desired_tf = get_desired_tf()):
   return get_safe_obstacle_distance(v_ego, desired_tf) - get_stopped_equivalence_factor(v_lead)
@@ -256,8 +256,8 @@ class LongitudinalMpc:
   def get_cost_multipliers(self):
     tfs = [T_FOLLOW_AGGRO, T_FOLLOW_NORMAL, T_FOLLOW_CHILL]
     a_change_tf = interp(self.desired_tf, tfs, [0.9, 1., 1.1])
-    j_ego_tf = interp(self.desired_tf, tfs, [1., 3., 5.])
-    d_zone_tf = interp(self.desired_tf, tfs, [1., 0.8, 0.6])
+    j_ego_tf = interp(self.desired_tf, tfs, [1., 1., 1.])
+    d_zone_tf = interp(self.desired_tf, tfs, [1., 0.9, 0.8])
     return (a_change_tf, j_ego_tf, d_zone_tf)
 
   def set_weights_for_lead_policy(self):

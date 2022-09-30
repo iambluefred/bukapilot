@@ -16,8 +16,8 @@ from bisect import bisect_left
 from common.features import Features
 
 BRAKE_THRESHOLD = 0.01
-BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.22,1.36,1.50,1.66,1.80,1.94,2.10,2.26,2.41,4.0]
-PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
+BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,1.66,1.80,1.94,4.0]
+PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3]
 
 def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
   # slow rate if steer torque increases in magnitude
@@ -34,13 +34,15 @@ def compute_gb(accel):
   gb = float(accel) / 4.0
   return clip(gb, 0.0, 1.0), clip(-gb, 0.0, 1.0)
 
-def psd_brake(apply_brake, last_pump_start_ts, ts):
+def psd_brake(apply_brake, last_pump_start_ts, ts, last_pump):
   saturated = False
 
   # reversed engineered from Ativa stock braking
   # this is necessary for noiseless pump braking
   pump = PUMP_VALS[bisect_left(BRAKE_MAG, apply_brake)]
-
+  if abs(pump - last_pump) > 0.1:
+    pump = last_pump + clip(pump - last_pump, -0.1, 0.1)
+  last_pump = pump
   if apply_brake >= BRAKE_THRESHOLD:
     brake_req = 1
   else:
@@ -53,7 +55,7 @@ def psd_brake(apply_brake, last_pump_start_ts, ts):
   if (ts - last_pump_start_ts > 5 and apply_brake > BRAKE_THRESHOLD):
     saturated = True
 
-  return pump, last_pump_start_ts, brake_req, saturated
+  return pump, last_pump_start_ts, brake_req, saturated, last_pump
 
 class CarControllerParams():
   def __init__(self, CP):
@@ -90,7 +92,7 @@ class CarController():
     self.gas_scale = GAS_SCALE[CP.carFingerprint]
     f = Features()
     self.need_clear_engine = f.has("ClearCode")
-
+    self.last_pump = 0
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
 
@@ -134,20 +136,19 @@ class CarController():
             apply_steer = -CS.out.stockAdas.ldpSteerV
 
         steer_req = enabled or stockLdw
-        can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req, (frame/2) % 15))
+        can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req, (frame/2) % 16))
 
       # CAN controlled longitudinal
       if (frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
         # PSD brake logic
-        pump, self.last_pump_start_ts, brake_req, self.pump_saturated = psd_brake(apply_brake, self.last_pump_start_ts, ts)
+        pump, self.last_pump_start_ts, brake_req, self.pump_saturated, self.last_pump = psd_brake(apply_brake, self.last_pump_start_ts, ts, self.last_pump)
 
-        des_speed = actuators.speed
-        if apply_gas:
-          des_speed *= (1.0 + apply_gas)
+        boost = interp(CS.out.vEgo, [0., 3], [1.4, 2.1])
+        des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
-        can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, CS.out.stockAeb, (frame/5) % 8))
+        can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, (frame/5) % 8))
         can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw, CS.out.stockFcw, CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD))
 
     # KommuActuator controls
@@ -180,8 +181,6 @@ class CarController():
 
     self.last_steer = apply_steer
     new_actuators = actuators.copy()
-    if CS.out.gasPressed:
-      new_actuators.accel = 0.5
     new_actuators.steer = apply_steer / steer_max_interp
 
     return new_actuators, can_sends

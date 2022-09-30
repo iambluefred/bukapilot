@@ -116,7 +116,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.0000007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [1.4, 1.4, 0.7]
+      ret.longitudinalTuning.kpV = [0.6, 0.55, 0.4]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -128,14 +128,14 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1035. + STD_CARGO_KG
       ret.wheelSpeedFactor = 1.48
 
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.20]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.22]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
       ret.lateralTuning.pid.kf = 0.0000007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [1.6, 1.6, 0.7]
-      ret.longitudinalActuatorDelayLowerBound = 0.22
-      ret.longitudinalActuatorDelayUpperBound = 0.40
+      ret.longitudinalTuning.kpV = [0.6, 0.55, 0.4]
+      ret.longitudinalActuatorDelayLowerBound = 0.42
+      ret.longitudinalActuatorDelayUpperBound = 0.60
 
     elif candidate == CAR.ALZA:
       ret.wheelbase = 2.750
@@ -150,7 +150,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.0000007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [1.6, 1.6, 0.7]
+      ret.longitudinalTuning.kpV = [0.6, 0.55, 0.4]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -159,10 +159,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
 
     if candidate in ACC_CAR:
-      ret.longitudinalTuning.deadzoneBP = [0., 8.05]
-      ret.longitudinalTuning.deadzoneV = [.0, .14]
-      ret.longitudinalTuning.kiBP = [0., 5., 20.]
-      ret.longitudinalTuning.kiV = [.20, .12, .07]
+      ret.longitudinalTuning.kiBP = [0.]
+      ret.longitudinalTuning.kiV = [0.]
 
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
