@@ -234,8 +234,7 @@ class CarInterface(CarInterfaceBase):
       set_long_tune(ret.longitudinalTuning, LongTunes.SPECIAL)
     elif candidate == (CAR.LEXUS_NX_TSS2):
       ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
-      set_long_tune(ret.longitudinalTuning, LongTunes.SPECIAL)
-
+      set_long_tune(ret.longitudinalTuning, LongTunes.LEXUS)
     elif candidate in TSS2_CAR:
       set_long_tune(ret.longitudinalTuning, LongTunes.TSS2)
       ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
