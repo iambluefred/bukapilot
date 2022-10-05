@@ -92,6 +92,10 @@ class LongControl():
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
       self.v_pid = v_target
+      
+      # Reset PID when manual gas input is seen
+      if CS.gasPressed:
+        self.reset(CS.vEgo)
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
