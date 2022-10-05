@@ -38,6 +38,13 @@ def set_long_tune(tune, name):
     tune.kpV = [1.3, 1.1, 0.7]
     tune.kiBP = [0., 5., 12., 20., 27.]
     tune.kiV = [.53, .35, .30, .22, .1]
+  elif name == LongTunes.LEXUS:
+    tune.deadzoneBP = [0., 8.05]
+    tune.deadzoneV = [.0, .14]
+    tune.kpBP = [0., 5., 20.]
+    tune.kpV = [2.5, 2.0, 1.3]
+    tune.kiBP = [0., 5., 12., 20., 27.]
+    tune.kiV = [.65, .45, .37, .25, .12]
   elif name == LongTunes.TSS2 or name == LongTunes.PEDAL:
     tune.deadzoneBP = [0., 8.05]
     tune.deadzoneV = [.0, .14]
