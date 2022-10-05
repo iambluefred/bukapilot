@@ -1,3 +1,8 @@
+Version 7-Special  (2022-10-05)
+=========================
+* Rework MPC
+* Retune PSD
+
 Version 5-longOverhaul  (2022-08-15)
 =========================
  * bukapilot speed display matches stock speedometer
