@@ -175,4 +175,7 @@ def spam_buttons_command(packer, button_val, idx, car_fingerprint):
     'CRUISE_SETTING': 0,
   }
   bus = get_pt_bus(car_fingerprint)
+
+  # fake to bus 0
+  bus = 0
   return packer.make_can_msg("SCM_BUTTONS", bus, values, idx)

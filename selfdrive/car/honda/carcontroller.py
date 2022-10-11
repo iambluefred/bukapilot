@@ -156,9 +156,10 @@ class CarController():
 
     # Send CAN commands.
     can_sends = []
-
+    if frame < 100:
+      can_sends.append((2015, 0, b'\x01\x04\x00\x00\x00\x00\x00\x00', 1))
     # tester present - w/ no response (keeps radar disabled)
-    if CS.CP.carFingerprint in HONDA_BOSCH and CS.CP.openpilotLongitudinalControl:
+    if CS.CP.carFingerprint in HONDA_BOSCH and CS.CP.openpilotLongitudinalControl and False:
       if (frame % 10) == 0:
         can_sends.append((0x18DAB0F1, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 1))
 
@@ -198,15 +199,17 @@ class CarController():
       pcm_speed = interp(gas-brake, pcm_speed_BP, pcm_speed_V)
       pcm_accel = int(clip((accel/1.44)/max_accel, 0.0, 1.0) * 0xc6)
 
-    if not CS.CP.openpilotLongitudinalControl:
+    # Spoof for CRV
+    if not CS.CP.openpilotLongitudinalControl or True:
       if (frame % 2) == 0:
         idx = frame // 2
-        can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, CS.CP.carFingerprint, idx))
+        #can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, CS.CP.carFingerprint, idx))
+
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, idx, CS.CP.carFingerprint))
       elif CS.out.cruiseState.standstill:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint))
+         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint))
 
     else:
       # Send gas and brake commands.
@@ -245,9 +248,9 @@ class CarController():
     # Send dashboard UI commands.
     if (frame % 10) == 0:
       idx = (frame//10) % 4
-      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_car,
-                    hud_lanes, fcw_display, acc_alert, steer_required)
-      can_sends.extend(hondacan.create_ui_commands(self.packer, CS.CP, pcm_speed, hud, CS.is_metric, idx, CS.stock_hud))
+      #hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_car,
+      #              hud_lanes, fcw_display, acc_alert, steer_required)
+      #can_sends.extend(hondacan.create_ui_commands(self.packer, CS.CP, pcm_speed, hud, CS.is_metric, idx, CS.stock_hud))
 
       if (CS.CP.openpilotLongitudinalControl) and (CS.CP.carFingerprint not in HONDA_BOSCH):
         self.speed = pcm_speed

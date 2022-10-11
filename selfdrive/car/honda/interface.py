@@ -38,7 +38,7 @@ class CarInterface(CarInterfaceBase):
 
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
-      ret.openpilotLongitudinalControl = Params().get_bool("DisableRadar") or True
+      ret.openpilotLongitudinalControl = Params().get_bool("DisableRadar")
 
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
@@ -321,6 +321,8 @@ class CarInterface(CarInterfaceBase):
     ret.steerRateCost = 0.5
     ret.steerLimitTimer = 0.8
 
+    # Spoof
+    #ret.openpilotLongitudinalControl = True
     return ret
 
   @staticmethod
