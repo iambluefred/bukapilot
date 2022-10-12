@@ -6,6 +6,7 @@ from selfdrive.car import dbc_dict
 Ecu = car.CarParams.Ecu
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+HUD_MULTIPLIER = 1.052
 
 class CarControllerParams():
   # Allow small margin below -3.5 m/s^2 from ISO 15622:2018 since we
