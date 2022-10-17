@@ -1,3 +1,7 @@
+Version 6-longOverhaul  (2022-10-17)
+=========================
+ * CRV
+
 Version 5-longOverhaul  (2022-08-15)
 =========================
  * bukapilot speed display matches stock speedometer
