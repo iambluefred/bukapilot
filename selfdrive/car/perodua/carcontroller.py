@@ -18,6 +18,14 @@ from common.features import Features
 BRAKE_THRESHOLD = 0.01
 BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,1.66,1.80,1.94,4.0]
 PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3]
+PUMP_RESET_INTERVAL = 2.0
+PUMP_RESET_DURATION = 0.1
+
+class BrakingStatus():
+  STANDSTILL_INIT = 0
+  BRAKE_HOLD = 1
+  PUMP_RESET = 2
+
 
 def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
   # slow rate if steer torque increases in magnitude
@@ -34,28 +42,47 @@ def compute_gb(accel):
   gb = float(accel) / 4.0
   return clip(gb, 0.0, 1.0), clip(-gb, 0.0, 1.0)
 
-def psd_brake(apply_brake, last_pump_start_ts, ts, last_pump):
-  saturated = False
+# reset pump every PUMP_RESET_INTERVAL seconds for. Reset to zero for PUMP_RESET_DURATION
+def standstill_brake(min_accel, ts_last, ts_now, prev_status):
+  brake = min_accel
+  status = prev_status
 
+  dt = ts_now - ts_last
+  if prev_status == BrakingStatus.PUMP_RESET and dt > PUMP_RESET_DURATION:
+    status = BrakingStatus.BRAKE_HOLD
+    ts_last = ts_now
+
+  if prev_status == BrakingStatus.BRAKE_HOLD and dt > PUMP_RESET_INTERVAL:
+    status = BrakingStatus.PUMP_RESET
+    ts_last = ts_now
+
+  if prev_status == BrakingStatus.STANDSTILL_INIT and dt > PUMP_RESET_INTERVAL:
+    status = BrakingStatus.PUMP_RESET
+    ts_last = ts_now
+
+  if status == BrakingStatus.PUMP_RESET:
+    brake = 0
+
+  return brake, status, ts_last
+
+def psd_brake(apply_brake, last_pump):
   # reversed engineered from Ativa stock braking
   # this is necessary for noiseless pump braking
   pump = PUMP_VALS[bisect_left(BRAKE_MAG, apply_brake)]
+
+  # make sure the pump value decrease and increases within 0.1
+  # to prevent brake bleeding.
+  # TODO does it really prevent brake bleed?
   if abs(pump - last_pump) > 0.1:
     pump = last_pump + clip(pump - last_pump, -0.1, 0.1)
   last_pump = pump
+
   if apply_brake >= BRAKE_THRESHOLD:
     brake_req = 1
   else:
-    last_pump_start_ts = ts
     brake_req = 0
 
-  # todo : reset pump timer if:
-  # - we are applying steady state brakes and we haven't been running the pump
-  #   for more than 3s (to prevent pressure bleeding)
-  if (ts - last_pump_start_ts > 5 and apply_brake > BRAKE_THRESHOLD):
-    saturated = True
-
-  return pump, last_pump_start_ts, brake_req, saturated, last_pump
+  return pump, brake_req, last_pump
 
 class CarControllerParams():
   def __init__(self, CP):
@@ -80,8 +107,6 @@ class CarControllerParams():
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.last_steer = 0
-    self.last_pump_start_ts = 0.
-    self.pump_saturated = False
     self.steer_rate_limited = False
     self.steering_direction = False
     self.brake_pressed = False
@@ -90,9 +115,17 @@ class CarController():
     self.brake = 0
     self.brake_scale = BRAKE_SCALE[CP.carFingerprint]
     self.gas_scale = GAS_SCALE[CP.carFingerprint]
+
     f = Features()
     self.need_clear_engine = f.has("ClearCode")
+
     self.last_pump = 0
+
+    # standstill globals
+    self.prev_ts = 0.
+    self.standstill_status = BrakingStatus.STANDSTILL_INIT
+    self.min_standstill_accel = 0
+
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
 
@@ -140,9 +173,18 @@ class CarController():
 
       # CAN controlled longitudinal
       if (frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
-        # PSD brake logic
-        pump, self.last_pump_start_ts, brake_req, self.pump_saturated, self.last_pump = psd_brake(apply_brake, self.last_pump_start_ts, ts, self.last_pump)
 
+        # standstill logic
+        if enabled and apply_brake > 0 and CS.out.standstill:
+          if self.standstill_status == BrakingStatus.STANDSTILL_INIT:
+            self.min_standstill_accel = apply_brake
+          apply_brake, self.standstill_status, self.prev_ts = standstill_brake(self.min_standstill_accel, self.prev_ts, ts, self.standstill_status)
+        else:
+          self.standstill_status = BrakingStatus.STANDSTILL_INIT
+          self.prev_ts = ts
+
+        # PSD brake logic
+        pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
         boost = interp(CS.out.vEgo, [0., 3], [1.4, 2.1])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
