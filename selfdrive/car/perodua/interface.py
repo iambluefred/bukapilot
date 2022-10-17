@@ -194,12 +194,6 @@ class CarInterface(CarInterfaceBase):
       if self.CC.brake_pressed and (ret.cruiseState.speed >= ret.vEgo):
         events.add(EventName.promptDriverBrake)
 
-    # events for ACC cars
-    if self.CP.carFingerprint in ACC_CAR and self.CP.carFingerprint != CAR.ALZA:
-      # warning about the 3s only standstill brake
-      if ret.standstill and self.CC.pump_saturated:
-        events.add(EventName.promptDriverBrake)
-
     ret.events = events.to_msg()
 
     self.CS.out = ret.as_reader()
