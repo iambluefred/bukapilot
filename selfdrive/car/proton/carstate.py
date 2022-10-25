@@ -76,8 +76,11 @@ class CarState(CarStateBase):
     distance_val = int(cp.vl["PCM_BUTTONS"]['SET_DISTANCE'])
     ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
 
-    self.is_cruise_latch = cp.vl["PCM_BUTTONS"]["ACC_SET"] != 0
+    if cp.vl["PCM_BUTTONS"]["ACC_SET"] != 0 and not ret.brakePressed:
+      self.is_cruise_latch = True
 
+    if cp.vl["PCM_BUTTONS"]["ACC_SET"] == 0 and ret.brakePressed:
+      self.is_cruise_latch = False
     if ret.brakePressed:
       self.is_cruise_latch = False
 
@@ -109,6 +112,9 @@ class CarState(CarStateBase):
       ret.leftBlindspot = False
       ret.rightBlindspot = False
 
+    # to delete
+    ret.cruiseState.speedOffset = cp.vl["ADAS_LEAD_DETECT"]['LEAD_DISTANCE']
+
     return ret
 
 
@@ -116,6 +122,7 @@ class CarState(CarStateBase):
   def get_can_parser(CP):
     signals = [
       # sig_name, sig_address, default
+      ("LEAD_DISTANCE", "ADAS_LEAD_DETECT", 0.),
       ("WHEELSPEED_F", "WHEEL_SPEED", 0.),
       ("WHEELSPEED_B", "WHEEL_SPEED", 0.),
       ("SET_DISTANCE", "PCM_BUTTONS", 0.),
