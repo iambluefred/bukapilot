@@ -18,7 +18,7 @@ from common.features import Features
 BRAKE_THRESHOLD = 0.01
 BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,1.66,1.80,1.94,4.0]
 PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3]
-PUMP_RESET_INTERVAL = 2.0
+PUMP_RESET_INTERVAL = 1.5
 PUMP_RESET_DURATION = 0.1
 
 class BrakingStatus():
