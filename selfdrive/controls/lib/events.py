@@ -455,6 +455,15 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2),
   },
 
+  EventName.protonHandOnWheelWarning: {
+    ET.WARNING: Alert(
+      "Touch Steering Wheel",
+      "Set Proton ICC to ACC to remove warning",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2),
+  },
+
+
   EventName.belowSteerSpeed: {
     ET.WARNING: below_steer_speed_alert,
   },
