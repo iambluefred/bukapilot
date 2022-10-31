@@ -110,6 +110,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     belowLaneChangeSpeed @108;
     promptDriverBrake @109;
     qcDone @111;
+    protonHandOnWheelWarning @112;
 
     radarCanErrorDEPRECATED @15;
     communityFeatureDisallowedDEPRECATED @62;
