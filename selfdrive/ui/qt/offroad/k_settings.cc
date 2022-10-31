@@ -45,12 +45,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/kommu/icon_bukapilot_mirrored.png",
     },
     {
-      "PowerSaver",
-      "Power Saver Mode",
-      "Shutdown the device immediately 15 minutes after inactivity.",
-      "../assets/offroad/icon_battery.png",
-    },
-    {
       "RecordFront",
       "Record and Upload Driver Camera",
       "Upload data from the driver facing camera and help improve the driver monitoring algorithm.",
@@ -242,6 +236,25 @@ void DevicePanel::poweroff() {
   }
 }
 
+PersonalisedPanel::PersonalisedPanel(QWidget* parent) : ListWidget(parent) {
+  // min, max, step
+  stopDistanceOffsetSb = new SpinboxControl("StoppingDistanceOffset","Stop Distance Offset", "The offset distance from the lead car the vehicle is meant to stop", "m", (double []){0.0, 5.0, 0.1}, true);
+  addItem(stopDistanceOffsetSb);
+
+  drivePathOffsetSb = new SpinboxControl("DrivePathOffset","Path Skew Offset", "The path offset from center of the lane. Perform positive offset if the vehicle is currently skewed left.", "m", (double []){-1.0, 1.0, 0.05}, false);
+  addItem(drivePathOffsetSb);
+
+  fanPwmOverrideSb = new SpinboxControl("FanPwmOverride","Fan Speed", "Note: Lowering the fan speed may reduce the overall fan noise but risk of device overheating.", "%", (double []){0, 100.0, 10.0}, false);
+  addItem(fanPwmOverrideSb);
+
+  powerSaverEntryDurationSb = new SpinboxControl("PowerSaverEntryDuration","Device Poweroff", "Power saver entry duration after ignition is off.", "min", (double []){10, 720.0, 10.0}, true);
+  addItem(powerSaverEntryDurationSb);
+
+  connect(uiState(), &UIState::offroadTransition, stopDistanceOffsetSb, &SpinboxControl::setEnabled);
+  connect(uiState(), &UIState::offroadTransition, drivePathOffsetSb, &SpinboxControl::setEnabled);
+
+}
+
 SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   gitCommitLbl = new LabelControl("Git Commit");
   osVersionLbl = new LabelControl("OS Version");
@@ -397,10 +410,11 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   };
 
   std::vector<NavItem> panels = {
-    {"      Device", loadPixmap("../assets/kommu/device.png", {60, 60}), device},
-    {"      Network", loadPixmap("../assets/kommu/network.png", {60, 60}), network_panel(this)},
-    {"      Toggles", loadPixmap("../assets/kommu/toggles.png", {60, 60}), new TogglesPanel(this)},
-    {"      Software", loadPixmap("../assets/kommu/software.png", {60, 60}), new SoftwarePanel(this)},
+    {"   Device", loadPixmap("../assets/kommu/device.png", {60, 60}), device},
+    {"   Network", loadPixmap("../assets/kommu/network.png", {60, 60}), network_panel(this)},
+    {"   Toggles", loadPixmap("../assets/kommu/toggles.png", {60, 60}), new TogglesPanel(this)},
+    {"   Personalised", loadPixmap("../assets/kommu/personalised.png", {60, 60}), new PersonalisedPanel(this)},
+    {"   Software", loadPixmap("../assets/kommu/software.png", {60, 60}), new SoftwarePanel(this)},
   };
 
   const int padding = 55;
