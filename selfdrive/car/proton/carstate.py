@@ -16,6 +16,9 @@ class CarState(CarStateBase):
     self.shifter_values = can_define.dv["TRANSMISSION"]['GEAR']
     self.set_distance_values = can_define.dv['PCM_BUTTONS']['SET_DISTANCE']
     self.is_cruise_latch = False
+    self.acc_req = False
+    self.hand_on_wheel_warning = False
+    self.is_icc_on = False
 
   def update(self, cp):
     ret = car.CarState.new_message()
@@ -42,8 +45,9 @@ class CarState(CarStateBase):
 
     ret.seatbeltUnlatched = cp.vl["SEATBELTS"]['RIGHT_SIDE_SEATBELT_ACTIVE_LOW'] == 1
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
+    ret.brakeHoldActive = bool(cp.vl["PARKING_BRAKE"]["CAR_ON_HOLD"])
 
-    disengage = ret.doorOpen or ret.seatbeltUnlatched
+    disengage = ret.doorOpen or ret.seatbeltUnlatched or ret.brakeHoldActive
     if disengage:
       self.is_cruise_latch = False
 
@@ -60,57 +64,57 @@ class CarState(CarStateBase):
     steer_dir = 1 if (ret.steeringAngleDeg >= 0) else -1
     ret.steeringTorque = cp.vl["STEERING_TORQUE"]['MAIN_TORQUE'] * steer_dir
     ret.steeringTorqueEps = ret.steeringTorque
-    #ret.steeringPressed = bool(abs(ret.steeringTorqueEps) > 3)
     ret.steeringPressed = bool(abs(ret.steeringTorqueEps) > 20)
     ret.steerWarning = False
     ret.steerError = False
+    self.hand_on_wheel_warning = bool(cp.vl["ADAS_LKAS"]["HAND_ON_WHEEL_WARNING"])
+    self.is_icc_on = bool(cp.vl["PCM_BUTTONS"]["ICC_ON"])
 
-    # Todo: get the real value
     ret.vEgoCluster = ret.vEgo * HUD_MULTIPLIER
 
     # Todo: get the real value
     ret.stockAeb = False
     ret.stockFcw = False
 
+    self.acc_req = bool(cp.vl["ACC_CMD"]["ACC_REQ"])
     ret.cruiseState.available = any([cp.vl["PCM_BUTTONS"]["ACC_ON_OFF_BUTTON"], cp.vl["PCM_BUTTONS"]["GAS_OVERRIDE"]])
+
     distance_val = int(cp.vl["PCM_BUTTONS"]['SET_DISTANCE'])
     ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
 
+    # engage and disengage logic
     if cp.vl["PCM_BUTTONS"]["ACC_SET"] != 0 and not ret.brakePressed:
       self.is_cruise_latch = True
 
     if cp.vl["PCM_BUTTONS"]["ACC_SET"] == 0 and ret.brakePressed:
-      self.is_cruise_latch = False
-    if ret.brakePressed:
       self.is_cruise_latch = False
 
     # set speed in range of 30 - 130kmh only
     self.cruise_speed = int(cp.vl["PCM_BUTTONS"]['ACC_SET_SPEED']) * CV.KPH_TO_MS
     ret.cruiseState.speedCluster = self.cruise_speed
     ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
-    ret.cruiseState.standstill = ret.standstill
+    ret.cruiseState.standstill = bool(cp.vl["ACC_CMD"]["STANDSTILL2"])
     ret.cruiseState.nonAdaptive = False
-    ret.cruiseState.enabled = self.is_cruise_latch
+
     if not ret.cruiseState.available:
       self.is_cruise_latch = False
+    if ret.brakePressed or (not self.acc_req and not ret.cruiseState.standstill):
+      self.is_cruise_latch = False
+
+    ret.cruiseState.enabled = self.is_cruise_latch
 
     # button presses
     ret.leftBlinker = bool(cp.vl["LEFT_STALK"]["LEFT_SIGNAL"])
     ret.rightBlinker = bool(cp.vl["LEFT_STALK"]["RIGHT_SIGNAL"])
     ret.genericToggle = bool(cp.vl["LEFT_STALK"]["GENERIC_TOGGLE"])
 
-    ret.brakeHoldActive = bool(cp.vl["PARKING_BRAKE"]["CAR_ON_HOLD"])
     ret.espDisabled = bool(cp.vl["PARKING_BRAKE"]["ESC_ON"]) != 1
 
     # blindspot sensors
     if self.CP.enableBsm:
       # used for lane change so its okay for the chime to work on both side.
-      # Todo: to find
       ret.leftBlindspot = bool(cp.vl["BSM_ADAS"]["LEFT_APPROACH"])
       ret.rightBlindspot = bool(cp.vl["BSM_ADAS"]["RIGHT_APPROACH"])
-    else:
-      ret.leftBlindspot = False
-      ret.rightBlindspot = False
 
     # to delete
     ret.cruiseState.speedOffset = cp.vl["ADAS_LEAD_DETECT"]['LEAD_DISTANCE']
@@ -132,6 +136,7 @@ class CarState(CarStateBase):
       ("ACC_SET_SPEED", "PCM_BUTTONS", 0.),
       ("ACC_ON_OFF_BUTTON", "PCM_BUTTONS", 0.),
       ("GAS_OVERRIDE", "PCM_BUTTONS", 0.),
+      ("ICC_ON", "PCM_BUTTONS", 0.),
       ("GEAR", "TRANSMISSION", 0),
       ("APPS_1", "GAS_PEDAL", 0.),
       ("BRAKE_PRESSURE", "BRAKE", 0.),
@@ -148,7 +153,11 @@ class CarState(CarStateBase):
       ("BACK_LEFT_DOOR", "DOOR_LEFT_SIDE", 1),
       ("FRONT_LEFT_DOOR", "DOOR_LEFT_SIDE", 1),
       ("BACK_RIGHT_DOOR", "DOOR_RIGHT_SIDE", 1),
-      ("FRONT_RIGHT_DOOR", "DOOR_RIGHT_SIDE", 1)
+      ("FRONT_RIGHT_DOOR", "DOOR_RIGHT_SIDE", 1),
+      ("STANDSTILL2", "ACC_CMD", 1),
+      ("CRUISE_ENABLE", "ACC_CMD", 1),
+      ("ACC_REQ", "ACC_CMD", 1),
+      ("HAND_ON_WHEEL_WARNING", "ADAS_LKAS", 1),
     ]
     checks = []
 
