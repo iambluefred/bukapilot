@@ -1,7 +1,8 @@
 from cereal import car
 from selfdrive.car import make_can_msg
-from selfdrive.car.proton.protoncan import create_can_steer_command, create_hud, create_lead_detect, send_buttons
+from selfdrive.car.proton.protoncan import create_can_steer_command, create_hud, create_lead_detect, send_buttons, create_acc_cmd
 from selfdrive.car.proton.values import CAR, DBC, BRAKE_SCALE, GAS_SCALE
+from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 from opendbc.can.packer import CANPacker
 from common.numpy_fast import clip, interp
 from common.realtime import DT_CTRL
@@ -50,20 +51,28 @@ class CarController():
     steer_max_interp = interp(CS.out.vEgo, self.params.STEER_BP, self.params.STEER_LIM_TORQ)
     new_steer = int(round(actuators.steer * steer_max_interp))
     apply_steer = apply_acttr_steer_torque_limits(new_steer, self.last_steer, self.params)
+
+    reduce_fighting_torque = ((CS.out.vEgo < LANE_CHANGE_SPEED_MIN) and (CS.out.leftBlinker != CS.out.rightBlinker))
+    if reduce_fighting_torque:
+      apply_steer = apply_steer / 1.5
+
     self.steer_rate_limited = (new_steer != apply_steer) and (apply_steer != 0)
 
     ts = frame * DT_CTRL
 
-    if CS.out.genericToggle:
-      can_sends.append(send_buttons(self.packer, frame % 16))
-
     # CAN controlled lateral running at 50hz
     if (frame % 2) == 0:
-      can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, (frame/2) % 16))
+      can_sends.append(create_can_steer_command(self.packer, apply_steer, enabled, CS.hand_on_wheel_warning and CS.is_icc_on, (frame/2) % 16))
+
       #can_sends.append(create_hud(self.packer, apply_steer, enabled, ldw, rlane_visible, llane_visible))
       #can_sends.append(create_lead_detect(self.packer, lead_visible, enabled))
+      #if CS.out.genericToggle:
+      #  fake_enable = True
+      #else:
+      #  fake_enable = False
+      #can_sends.append(create_acc_cmd(self.packer, actuators.accel, fake_enable, (frame/2) % 16))
 
-    if CS.out.cruiseState.standstill and enabled:
+    if CS.out.standstill and enabled and (frame % 50 == 0):
       # Spam resume button to resume from standstill at max freq of 10 Hz.
       can_sends.append(send_buttons(self.packer, frame % 16))
 

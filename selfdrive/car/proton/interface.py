@@ -44,14 +44,14 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1370. + STD_CARGO_KG
       ret.wheelSpeedFactor = 1
 
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.04], [0.11]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.04], [0.1]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [512]]
       ret.lateralTuning.pid.kf = 0.00007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [1.6, 1.6, 0.6]
-      ret.longitudinalActuatorDelayLowerBound = 0.22
-      ret.longitudinalActuatorDelayUpperBound = 0.40
+      ret.longitudinalActuatorDelayLowerBound = 0.42
+      ret.longitudinalActuatorDelayUpperBound = 0.60
 
     else:
       ret.dashcamOnly = True
@@ -88,6 +88,9 @@ class CarInterface(CarInterfaceBase):
     # create events for auto lane change below allowable speed
     if ret.vEgo < LANE_CHANGE_SPEED_MIN and (ret.leftBlinker or ret.rightBlinker):
       events.add(EventName.belowLaneChangeSpeed)
+
+    if self.CS.hand_on_wheel_warning and self.CS.is_icc_on:
+      events.add(EventName.protonHandOnWheelWarning)
 
     ret.events = events.to_msg()
 
