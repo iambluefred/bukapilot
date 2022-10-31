@@ -52,6 +52,10 @@ private:
   ButtonControl *testBtn;
   ButtonControl *replaceSplashBtn;
   ButtonControl *dumpTmuxBtn;
+  SpinboxControl *stopDistanceOffsetSb;
+  SpinboxControl *drivePathOffsetSb;
+  SpinboxControl *fanPwmOverrideSb;
+  SpinboxControl *powerSaverEntryDurationSb;
 
   int dev_tab_counter = 0;
   Params params;
@@ -62,6 +66,19 @@ class TogglesPanel : public ListWidget {
 public:
   explicit TogglesPanel(SettingsWindow *parent);
 };
+
+class PersonalisedPanel : public ListWidget {
+  Q_OBJECT
+public:
+  explicit PersonalisedPanel(QWidget* parent = nullptr);
+private:
+  SpinboxControl *stopDistanceOffsetSb;
+  SpinboxControl *drivePathOffsetSb;
+  SpinboxControl *fanPwmOverrideSb;
+  SpinboxControl *powerSaverEntryDurationSb;
+
+};
+
 
 class SoftwarePanel : public ListWidget {
   Q_OBJECT
