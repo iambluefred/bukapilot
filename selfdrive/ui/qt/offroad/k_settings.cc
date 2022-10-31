@@ -45,12 +45,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/kommu/icon_bukapilot_mirrored.png",
     },
     {
-      "PowerSaver",
-      "Power Saver Mode",
-      "Shutdown the device immediately 15 minutes after inactivity.",
-      "../assets/offroad/icon_battery.png",
-    },
-    {
       "RecordFront",
       "Record and Upload Driver Camera",
       "Upload data from the driver facing camera and help improve the driver monitoring algorithm.",
@@ -93,6 +87,22 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   testBtn = new ButtonControl("QC Test", "Start");
   replaceSplashBtn = new ButtonControl("Replace Splash Image", "Replace");
   dumpTmuxBtn = new ButtonControl("Dump TMUX", "Dump");
+
+  // min, max, step
+  stopDistanceOffsetSb = new SpinboxControl("StoppingDistanceOffset","Stopping Distance Offset", "The offset distance from the lead car the vehicle is meant to stop", "m", (double []){-0.5, 5.0, 0.1});
+  addItem(stopDistanceOffsetSb);
+
+  drivePathOffsetSb = new SpinboxControl("DrivePathOffset","Path Skew Offset", "The path offset from center of the lane. Perform positive offset if the vehicle is currently skewed left.", "m", (double []){-1.0, 1.0, 0.05});
+  addItem(drivePathOffsetSb);
+
+  fanPwmOverrideSb = new SpinboxControl("FanPwmOverride","Fan Speed", "", "%", (double []){0, 100.0, 10.0});
+  addItem(fanPwmOverrideSb);
+
+  powerSaverEntryDurationSb = new SpinboxControl("PowerSaverEntryDuration","Shutdown Entry Duration", "", "min", (double []){10, 720.0, 10.0});
+  addItem(powerSaverEntryDurationSb);
+
+  connect(uiState(), &UIState::offroadTransition, stopDistanceOffsetSb, &SpinboxControl::setEnabled);
+  connect(uiState(), &UIState::offroadTransition, drivePathOffsetSb, &SpinboxControl::setEnabled);
 
   // offroad-only buttons
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",

@@ -65,6 +65,10 @@ def manager_init() -> None:
     ("IsRHD", "1"),
     ("RecordFront", "1"),
     ("RsjSession", "invalidsession"),
+    ("FanPwmOverride", "70.0"),
+    ("PowerSaverEntryDuration", "360.0"),
+    ("StoppingDistanceOffset", "0.0"),
+    ("DrivePathOffset", "0.0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

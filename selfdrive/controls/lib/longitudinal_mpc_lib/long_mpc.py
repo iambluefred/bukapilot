@@ -2,6 +2,7 @@
 import os
 import numpy as np
 
+from common.params import Params
 from cereal import car
 from common.realtime import sec_since_boot
 from common.numpy_fast import clip, interp
@@ -73,11 +74,11 @@ def get_desired_tf(set_distance=SetDistance.normal):
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * HARSH_BRAKE)
 
-def get_safe_obstacle_distance(v_ego, desired_tf):
-  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE - 1.25 + desired_tf
+def get_safe_obstacle_distance(v_ego, desired_tf, stop_distance_offset):
+  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE - 1.25 + desired_tf + stop_distance_offset
 
-def desired_follow_distance(v_ego, v_lead, desired_tf = get_desired_tf()):
-  return get_safe_obstacle_distance(v_ego, desired_tf) - get_stopped_equivalence_factor(v_lead)
+def desired_follow_distance(v_ego, v_lead, stop_distance_offset, desired_tf = get_desired_tf()):
+  return get_safe_obstacle_distance(v_ego, desired_tf, stop_distance_offset) - get_stopped_equivalence_factor(v_lead)
 
 
 def gen_long_model():
@@ -147,7 +148,7 @@ def gen_long_mpc_solver():
   ocp.cost.yref = np.zeros((COST_DIM, ))
   ocp.cost.yref_e = np.zeros((COST_E_DIM, ))
 
-  desired_dist_comfort = get_safe_obstacle_distance(v_ego, desired_tf)
+  desired_dist_comfort = get_safe_obstacle_distance(v_ego, desired_tf, 0)
 
   # The main cost in normal operation is how close you are to the "desired" distance
   # from an obstacle at every timestep. This obstacle can be a lead car
@@ -218,6 +219,7 @@ class LongitudinalMpc:
     self.desired_tf = T_FOLLOW_NORMAL
     self.reset()
     self.source = SOURCES[2]
+    self.stop_distance_offset = float(Params().get("StoppingDistanceOffset"))
 
   def reset(self):
     self.solver = AcadosOcpSolverFast('long', N, EXPORT_DIR)
@@ -362,7 +364,7 @@ class LongitudinalMpc:
     v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
                                v_lower,
                                v_upper)
-    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, self.desired_tf)
+    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, self.desired_tf, self.stop_distance_offset)
 
     x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     self.source = SOURCES[np.argmin(x_obstacles[0])]

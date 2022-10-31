@@ -52,6 +52,10 @@ private:
   ButtonControl *testBtn;
   ButtonControl *replaceSplashBtn;
   ButtonControl *dumpTmuxBtn;
+  SpinboxControl *stopDistanceOffsetSb;
+  SpinboxControl *drivePathOffsetSb;
+  SpinboxControl *fanPwmOverrideSb;
+  SpinboxControl *powerSaverEntryDurationSb;
 
   int dev_tab_counter = 0;
   Params params;

@@ -20,9 +20,7 @@ CAR_CHARGING_RATE_W = 45
 
 VBATT_PAUSE_CHARGING = 11.0           # Lower limit on the LPF car battery voltage
 VBATT_INSTANT_PAUSE_CHARGING = 7.0    # Lower limit on the instant car battery voltage measurements to avoid triggering on instant power loss
-MAX_TIME_OFFROAD_S = 12*3600
-POWER_SAVER_TIME = 15*60
-MIN_ON_TIME_S = POWER_SAVER_TIME
+MIN_ON_TIME_S = 10 * 60
 
 class PowerMonitoring:
   def __init__(self):
@@ -34,7 +32,7 @@ class PowerMonitoring:
     self.car_voltage_mV = 12e3                  # Low-passed version of peripheralState voltage
     self.car_voltage_instant_mV = 12e3          # Last value of peripheralState voltage
     self.integration_lock = threading.Lock()
-    self.max_time_offroad_s = POWER_SAVER_TIME if self.params.get("PowerSaver") == b'1' else MAX_TIME_OFFROAD_S
+    self.max_time_offroad_s = float(self.params.get("PowerSaverEntryDuration")) * 60
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
