@@ -35,7 +35,7 @@ def compute_set_distance(state):
   else:
     return 0
 
-def create_can_steer_command(packer, steer, steer_req, raw_cnt):
+def create_can_steer_command(packer, steer, steer_req, wheel_touch_warning, raw_cnt):
   """Creates a CAN message for the Perodua LKA Steer Command."""
   values = {
     "LKAS_ENGAGED1": steer_req,
@@ -47,7 +47,7 @@ def create_can_steer_command(packer, steer, steer_req, raw_cnt):
     "SET_ME_1_2": 1,
     "SET_ME_1_3": 1,
     "SET_ME_48": 0x48,
-    "HAND_ON_WHEEL_WARNING": 0,
+    "HAND_ON_WHEEL_WARNING": wheel_touch_warning,
     "WHEEL_WARNING_CHIME": 0,
   }
 
@@ -90,7 +90,7 @@ def create_lead_detect(packer, is_lead, steer_req):
   return packer.make_can_msg("ADAS_LEAD_DETECT", 0, values)
 
 def create_pcm(packer, steer, steer_req, raw_cnt):
-  """Creates a CAN message for the Perodua LKA Steer Command."""
+
   values = {
     "ACC_SET_SPEED": 0x23 if steer_req else 0,
     "SET_DISTANCE": 1 if steer_req else 0,
@@ -105,6 +105,32 @@ def create_pcm(packer, steer, steer_req, raw_cnt):
   values["CHECKSUM"] = crc
 
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
+
+def create_acc_cmd(packer, accel, enabled, raw_cnt):
+  accel = clip(accel, -3, 0.2)
+  print(accel)
+
+  values = {
+    "CMD": accel if enabled else 0,
+    "CMD_OFFSET": accel if enabled else 0,
+    "ACC_REQ": enabled,
+    "SET_ME_1": 1,
+    "CRUISE_ENABLE": 1,
+    "COUNTER": raw_cnt,
+
+    ## not sure
+    "BRAKE_ENGAGED": 0,
+    "SET_ME_X6A": 0x6A if enabled else 0x6A,
+    "RISING_ENGAGE": 0,
+    "UNKNOWN1": 0,
+    "STANDSTILL2": 0,
+  }
+
+  dat = packer.make_can_msg("ACC_CMD", 0, values)[2]
+  crc = get_crc8_8h2f(dat[:-1])
+  values["CHECKSUM"] = crc
+
+  return packer.make_can_msg("ACC_CMD", 0, values)
 
 def send_buttons(packer, count):
   """Spoof ACC Button Command."""
