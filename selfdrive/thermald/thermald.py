@@ -122,7 +122,7 @@ def handle_fan_eon(controller, max_cpu_temp, fan_speed, ignition):
 
 
 def handle_fan_uno(controller, max_cpu_temp, fan_speed, ignition):
-  new_speed = int(interp(max_cpu_temp, [50.0, 70.0], [0, 90]))
+  new_speed = int(interp(max_cpu_temp, [50.0, 73.0, 80], [0, 40, 90]))
 
   if not ignition:
     new_speed = min(80, new_speed)
