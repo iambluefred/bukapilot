@@ -14,7 +14,7 @@ from selfdrive.swaglog import cloudlog
 
 
 def get_expected_signature(panda: Panda) -> bytes:
-  fn = DEFAULT_H7_FW_FN if (panda.get_mcu_type() == MCU_TYPE_H7) else DEFAULT_FW_FN
+  fn = DEFAULT_FW_FN
 
   try:
     return Panda.get_signature_from_firmware(fn)
@@ -32,7 +32,7 @@ def flash_panda(panda_serial: str) -> Panda:
   panda_signature = b"" if panda.bootstub else panda.get_signature()
   cloudlog.warning(f"Safety {panda_serial} connected, version: {panda_version}, signature {panda_signature.hex()[:16]}, expected {fw_signature.hex()[:16]}")
 
-  if panda_signature != fw_signature:
+  if panda_signature != fw_signature or panda.bootstub:
     cloudlog.info("Panda firmware out of date, update required")
     panda.flash()
     cloudlog.info("Done flashing")
