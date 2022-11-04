@@ -62,9 +62,10 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.8371
       ret.mass = 1015. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1.22
+      ret.wheelSpeedFactor = 0.94
 
-      ret.lateralTuning.pid.kf = 0.0000917
+      ret.lateralTuning.pid.kf = 0.000091
+      ret.longitudinalTuning.kpV = [1.0, 1.2, 1.4]
 
       f = Features()
       if f.has("MyviAzri"):
@@ -74,7 +75,8 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.32]]
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11, 28], [390, 650]]
       else:
-        ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.32]]
+        ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0., 18]]
+        ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.10], [0.31, 0.32]]
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[11, 28], [390, 580]]
 
     elif candidate == CAR.BEZZA:
@@ -166,6 +168,9 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
       ret.enableBsm = True
       ret.stoppingDecelRate = 0.005 # reach stopping target smoothly
+    else:
+      ret.longitudinalTuning.kiBP = [0.]
+      ret.longitudinalTuning.kiV = [0.]
 
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, tire_stiffness_factor=tire_stiffness_factor)
