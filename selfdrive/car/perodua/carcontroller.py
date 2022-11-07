@@ -140,6 +140,7 @@ class CarController():
     # gas, brake
     apply_gas, apply_brake = compute_gb(actuators.accel)
     apply_brake *= self.brake_scale
+    apply_brake = clip(apply_brake, 0., 1.51)
     if CS.out.gasPressed:
       apply_brake = 0
     apply_gas *= self.gas_scale
@@ -185,7 +186,7 @@ class CarController():
 
         # PSD brake logic
         pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
-        boost = interp(CS.out.vEgo, [0., 3], [1.2, 2.1])
+        boost = interp(CS.out.vEgo, [0., 3, 8.93], [1.0, 1.8, 2.1])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
