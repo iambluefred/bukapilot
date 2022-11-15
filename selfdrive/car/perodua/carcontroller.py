@@ -187,6 +187,8 @@ class CarController():
         # PSD brake logic
         pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
         boost = interp(CS.out.vEgo, [0., 3, 8.93], [1.0, 1.8, 2.1])
+        if CS.CP.carFingerprint == CAR.ALZA:
+          boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.3, 0.5, 2.1])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
