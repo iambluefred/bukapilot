@@ -94,6 +94,19 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   replaceSplashBtn = new ButtonControl("Replace Splash Image", "Replace");
   dumpTmuxBtn = new ButtonControl("Dump TMUX", "Dump");
 
+  // min, max, step
+  stopDistanceOffsetSb = new SpinboxControl("StoppingDistanceOffset","Stopping Distance Offset", "The offset distance from the lead car the vehicle is meant to stop", "m", (double []){-0.5, 5.0, 0.1});
+  addItem(stopDistanceOffsetSb);
+
+  drivePathOffsetSb = new SpinboxControl("DrivePathOffset","Path Skew Offset", "The path offset from center of the lane. Perform positive offset if the vehicle is currently skewed left.", "m", (double []){-1.0, 1.0, 0.05});
+  addItem(drivePathOffsetSb);
+
+  fanPwmOffsetSb = new SpinboxControl("FanPwmOffset","Fan Speed", "", "%", (double []){0, 100.0, 20.0});
+  addItem(fanPwmOffsetSb);
+
+  connect(uiState(), &UIState::offroadTransition, stopDistanceOffsetSb, &SpinboxControl::setEnabled);
+  connect(uiState(), &UIState::offroadTransition, drivePathOffsetSb, &SpinboxControl::setEnabled);
+
   // offroad-only buttons
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
                                    "Preview the driver facing camera to help optimize device mounting position for best driver monitoring experience. (vehicle must be off)");

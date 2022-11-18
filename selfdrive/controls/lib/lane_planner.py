@@ -5,7 +5,7 @@ from common.numpy_fast import interp
 from common.realtime import DT_MDL
 from selfdrive.hardware import EON, TICI
 from selfdrive.swaglog import cloudlog
-
+from common.params import Params
 
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
@@ -43,6 +43,8 @@ class LanePlanner:
     self.r_lane_change_prob = 0.
 
     self.camera_offset = -CAMERA_OFFSET if wide_camera else CAMERA_OFFSET
+    self.camera_offset = self.camera_offset + float(Params().get("DrivePathOffset"))
+
     self.path_offset = -PATH_OFFSET if wide_camera else PATH_OFFSET
 
   def parse_model(self, md):

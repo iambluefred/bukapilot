@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QPainter>
 #include <QPushButton>
+#include <QDoubleSpinBox>
+#include <QLineEdit>
 
 #include "selfdrive/common/params.h"
 #include "selfdrive/ui/qt/widgets/toggle.h"
@@ -67,6 +69,29 @@ public:
 
 private:
   ElidedLabel label;
+};
+
+// widget for a spinbox with a label
+class SpinboxControl : public AbstractControl {
+  Q_OBJECT
+
+public:
+  SpinboxControl(const QString &param, const QString &title, const QString &desc = "", const QString &unit = "", double range[] = {}, QWidget *parent = nullptr);
+
+public slots:
+  void deselectTextEdit() { spinbox.findChild<QLineEdit*> ()->deselect(); };
+  void setParams(double param_value) {
+  std::string param_value_str = QString::number(param_value).toStdString();
+    params.put(key, param_value_str);
+  }
+  void setEnabled(bool enabled) { spinbox.setEnabled(enabled); };
+
+private:
+  std::string key;
+  Params params;
+
+protected:
+  QDoubleSpinBox spinbox;
 };
 
 // widget for a button with a label
