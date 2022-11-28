@@ -1,3 +1,22 @@
+Version 7-longOverhaul  (2022-10-25)
+=========================
+ * Recalculate MPC to allow harsher brakes for closer distance profiles
+ * Added power saver toggle to shutdown device after 15 minutes of idle
+ * Offset camera skew so that vehicles will slightly (negligible) lean to the right
+ * Fix device re-registration problem after a reinstall
+ * Toyota: Adjustable lead car follow profile
+ * Perodua PSD: Stop-and-go function
+ * Perodua PSD: Faster acceleration from standstill
+ * Supported Proton X50 (Flagship)
+ * Supported Honda City 2020 (V-Sensing)
+ * Supported CRV 2020 (1.5 TCP, Black)
+ * Supported Corolla Cross Hybrid
+
+Version 6-longOverhaul  (2022-09-02)
+=========================
+ * New distance profile
+ * Added more internal QC tools and vehicle porting tools
+
 Version 5-longOverhaul  (2022-08-15)
 =========================
  * bukapilot speed display matches stock speedometer
