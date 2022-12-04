@@ -9,7 +9,15 @@ from common.realtime import DT_CTRL
 from common.params import Params
 import cereal.messaging as messaging
 
-def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
+def apply_proton_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
+
+  # limits due to driver torque
+  driver_max_torque = LIMITS.STEER_MAX + driver_torque * 10
+  driver_min_torque = -LIMITS.STEER_MAX + driver_torque * 10
+  max_steer_allowed = max(min(LIMITS.STEER_MAX, driver_max_torque), 0)
+  min_steer_allowed = min(max(-LIMITS.STEER_MAX, driver_min_torque), 0)
+  apply_torque = clip(apply_torque, min_steer_allowed, max_steer_allowed)
+
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
     apply_torque = clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
@@ -23,8 +31,9 @@ def apply_acttr_steer_torque_limits(apply_torque, apply_torque_last, LIMITS):
 class CarControllerParams():
   def __init__(self, CP):
 
-    self.STEER_BP = CP.lateralParams.torqueBP
-    self.STEER_LIM_TORQ = CP.lateralParams.torqueV
+    self.STEER_MAX = CP.lateralParams.torqueV[0]
+    # make sure Proton only has one max steer torque value
+    assert(len(CP.lateralParams.torqueV) == 1)
 
     # for torque limit calculation
     self.STEER_DELTA_UP = 20                      # torque increase per refresh, 0.8s to max
@@ -48,13 +57,8 @@ class CarController():
         can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
 
     # steer
-    steer_max_interp = interp(CS.out.vEgo, self.params.STEER_BP, self.params.STEER_LIM_TORQ)
-    new_steer = int(round(actuators.steer * steer_max_interp))
-    apply_steer = apply_acttr_steer_torque_limits(new_steer, self.last_steer, self.params)
-
-    reduce_fighting_torque = ((CS.out.vEgo < LANE_CHANGE_SPEED_MIN) and (CS.out.leftBlinker != CS.out.rightBlinker))
-    if reduce_fighting_torque:
-      apply_steer = apply_steer / 1.5
+    new_steer = int(round(actuators.steer * self.params.STEER_MAX))
+    apply_steer = apply_proton_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorque, self.params)
 
     self.steer_rate_limited = (new_steer != apply_steer) and (apply_steer != 0)
 
@@ -78,6 +82,6 @@ class CarController():
 
     self.last_steer = apply_steer
     new_actuators = actuators.copy()
-    new_actuators.steer = apply_steer / steer_max_interp
+    new_actuators.steer = apply_steer / self.params.STEER_MAX
 
     return new_actuators, can_sends

@@ -19,6 +19,7 @@ class CarState(CarStateBase):
     self.acc_req = False
     self.hand_on_wheel_warning = False
     self.is_icc_on = False
+    self.prev_angle = 0
 
   def update(self, cp):
     ret = car.CarState.new_message()
@@ -61,10 +62,11 @@ class CarState(CarStateBase):
 
     # steer
     ret.steeringAngleDeg = cp.vl["STEERING_MODULE"]['STEER_ANGLE']
-    steer_dir = 1 if (ret.steeringAngleDeg >= 0) else -1
+    steer_dir = 1 if (ret.steeringAngleDeg - self.prev_angle >= 0) else -1
+    self.prev_angle = ret.steeringAngleDeg
     ret.steeringTorque = cp.vl["STEERING_TORQUE"]['MAIN_TORQUE'] * steer_dir
-    ret.steeringTorqueEps = ret.steeringTorque
-    ret.steeringPressed = bool(abs(ret.steeringTorqueEps) > 20)
+    ret.steeringTorqueEps = cp.vl["STEERING_MODULE"]['STEER_RATE'] * steer_dir
+    ret.steeringPressed = bool(abs(ret.steeringTorqueEps) > 5)
     ret.steerWarning = False
     ret.steerError = False
     self.hand_on_wheel_warning = bool(cp.vl["ADAS_LKAS"]["HAND_ON_WHEEL_WARNING"])
@@ -143,6 +145,7 @@ class CarState(CarStateBase):
       ("MAIN_TORQUE", "STEERING_TORQUE", 0),
       ("DRIVER_TORQUE", "STEERING_TORQUE", 0),
       ("STEER_ANGLE", "STEERING_MODULE", 0),
+      ("STEER_RATE", "STEERING_MODULE", 0),
       ("ESC_ON", "PARKING_BRAKE", 0),
       ("LEFT_SIGNAL", "LEFT_STALK", 0),
       ("RIGHT_SIGNAL", "LEFT_STALK", 0),
