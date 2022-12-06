@@ -161,8 +161,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
 
     if candidate in ACC_CAR:
-      ret.longitudinalTuning.kiBP = [0.]
-      ret.longitudinalTuning.kiV = [0.]
+      ret.longitudinalTuning.kiBP = [5, 7]
+      ret.longitudinalTuning.kiV = [0.12, 0.]
 
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
