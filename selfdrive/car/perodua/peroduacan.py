@@ -107,8 +107,8 @@ def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, id
   # Value overflow check
   # MAGNITUDE a max value 2.0 to prevent overflow, maximum seen on porto is 1.56
   # PUMP_REACTION{N} has a max value of 1.2, maximum seen on porto is 1.0
-  decel_req = clip(decel_req, 0., 2.0)
-  pump = clip(pump, 0., 1.2)
+  decel_req = clip(decel_req, 0., 1.56)
+  pump = clip(pump, 0., 1.0)
 
   values = {
     "COUNTER": idx,
