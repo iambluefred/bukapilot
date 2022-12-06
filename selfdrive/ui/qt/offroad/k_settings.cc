@@ -33,12 +33,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/kommu/icon_bukapilot.png",
     },
     {
-      "IsLdwEnabled",
-      "Enable Lane Departure Warnings",
-      "Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31 mph (50 km/h).",
-      "../assets/kommu/icon_warning.png",
-    },
-    {
       "IsRHD",
       "Enable Right-Hand Drive",
       "Allow bukapilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.",
@@ -49,6 +43,12 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "Record and Upload Driver Camera",
       "Upload data from the driver facing camera and help improve the driver monitoring algorithm.",
       "../assets/offroad/icon_monitoring.png",
+    },
+    {
+      "QuietMode",
+      "Quiet Mode",
+      "Receive only safety critical alerts.",
+      "../assets/kommu/quiet_mode.png",
     },
     {
       "EndToEndToggle",
