@@ -16,8 +16,8 @@ from bisect import bisect_left
 from common.features import Features
 
 BRAKE_THRESHOLD = 0.01
-BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,1.66,1.80,1.94,4.0]
-PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3]
+BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,4.0]
+PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0]
 PUMP_RESET_INTERVAL = 1.5
 PUMP_RESET_DURATION = 0.1
 
@@ -140,7 +140,7 @@ class CarController():
     # gas, brake
     apply_gas, apply_brake = compute_gb(actuators.accel)
     apply_brake *= self.brake_scale
-    apply_brake = clip(apply_brake, 0., 1.51)
+    apply_brake = clip(apply_brake, 0., 1.56)
     if CS.out.gasPressed:
       apply_brake = 0
     apply_gas *= self.gas_scale
@@ -186,9 +186,9 @@ class CarController():
 
         # PSD brake logic
         pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
-        boost = interp(CS.out.vEgo, [0., 3, 8.93], [1.0, 1.8, 2.1])
+        boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.9, 1.6, 2.0])
         if CS.CP.carFingerprint == CAR.ALZA:
-          boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.3, 0.5, 2.1])
+          boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.3, 0.5, 1.6])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
