@@ -69,6 +69,12 @@ def eliminate_incompatible_cars(msg, candidate_cars):
 
   return compatible_cars
 
+def get_shortest_from_subset(candidate_cars):
+  """Returns the candidate car for the shortest fingerprint match of a subset."""
+  filtered_candidates = [i for i in (_FINGERPRINTS[car] for car in candidate_cars)]
+  list_of_shortest = [len(i[0]) for i in filtered_candidates]
+  shortest_car_match_index = list_of_shortest.index(min(list_of_shortest))
+  return candidate_cars[shortest_car_match_index]
 
 def all_known_cars():
   """Returns a list of all known car strings."""
