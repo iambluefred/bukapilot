@@ -2,7 +2,7 @@ import os
 from common.params import Params
 from common.basedir import BASEDIR
 from selfdrive.version import is_comma_remote, is_tested_branch
-from selfdrive.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
+from selfdrive.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars, get_shortest_from_subset
 from selfdrive.car.vin import get_vin, VIN_UNKNOWN
 from selfdrive.car.fw_versions import get_fw_versions, match_fw_to_car
 from selfdrive.swaglog import cloudlog
@@ -149,6 +149,10 @@ def fingerprint(logcan, sendcan):
     done = failed or succeeded
 
     frame += 1
+
+  # if more than 1 match, we have to get the shortest fingerprint match of the subset
+  if len(candidate_cars[0]) > 1 and car_fingerprint is None:
+    car_fingerprint = get_shortest_from_subset(candidate_cars[0])
 
   exact_match = True
   source = car.CarParams.FingerprintSource.can
