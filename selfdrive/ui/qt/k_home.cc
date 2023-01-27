@@ -249,11 +249,17 @@ void OffroadHome::updateState(const UIState& s) {
 
   bool hasError = false;
   hasError |= s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN;
-  hasError |= hasSevereAlerts;
+
+  bool initialising = false;
+  initialising |= hasSevereAlerts;
 
   if (hasError) {
     device_text->icon = status_icons[cereal::DeviceState::ThermalStatus::RED];
     device_text->text = "DEVICE ERROR";
+  }
+  else if (initialising) {
+    device_text->icon = status_icons[cereal::DeviceState::ThermalStatus::YELLOW];
+    device_text->text = "GETTING READY";
   } else {
     device_text->icon = status_icons[cereal::DeviceState::ThermalStatus::GREEN];
     device_text->text = "SYSTEM READY";
