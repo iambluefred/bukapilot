@@ -12,6 +12,8 @@ from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 from selfdrive.controls.lib.events import Events
 from selfdrive.controls.lib.vehicle_model import VehicleModel
 
+from common.features import Features
+
 GearShifter = car.CarState.GearShifter
 SetDistance = car.CarState.CruiseState.SetDistance
 EventName = car.CarEvent.EventName
@@ -33,6 +35,9 @@ class CarInterfaceBase(ABC):
     self.steering_unpressed = 0
     self.low_speed_alert = False
     self.silent_steer_warning = True
+
+    f = Features()
+    self.mads = f.has("StockAcc")
 
     if CarState is not None:
       self.CS = CarState(CP)
@@ -126,7 +131,7 @@ class CarInterfaceBase(ABC):
       events.add(EventName.wrongCarMode)
     if cs_out.espDisabled:
       events.add(EventName.espDisabled)
-    if cs_out.gasPressed:
+    if cs_out.gasPressed and not self.mads:
       events.add(EventName.gasPressed)
     if cs_out.stockFcw:
       events.add(EventName.stockFcw)
