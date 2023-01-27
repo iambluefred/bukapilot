@@ -9,6 +9,8 @@ from common.realtime import DT_CTRL
 from common.params import Params
 import cereal.messaging as messaging
 
+from common.features import Features
+
 def apply_proton_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
 
   # limits due to driver torque
@@ -47,6 +49,10 @@ class CarController():
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
     self.disable_radar = Params().get_bool("DisableRadar")
+    self.num_cruise_btn_sent = 0
+
+    f = Features()
+    self.mads = f.has("StockAcc")
 
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
@@ -55,6 +61,10 @@ class CarController():
     if CS.CP.openpilotLongitudinalControl and self.disable_radar:
       if (frame % 10) == 0:
         can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
+
+    if frame <= 1000 and CS.out.cruiseState.available and self.num_cruise_btn_sent <= 5:
+      self.num_cruise_btn_sent += 1
+      can_sends.append(send_buttons(self.packer, frame % 16, True))
 
     # steer
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
@@ -78,7 +88,8 @@ class CarController():
 
     if CS.out.standstill and enabled and (frame % 50 == 0):
       # Spam resume button to resume from standstill at max freq of 10 Hz.
-      can_sends.append(send_buttons(self.packer, frame % 16))
+      if not self.mads or CS.acc_req:
+        can_sends.append(send_buttons(self.packer, frame % 16, False))
 
     self.last_steer = apply_steer
     new_actuators = actuators.copy()

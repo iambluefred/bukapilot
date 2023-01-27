@@ -226,6 +226,7 @@ BO_ 643 ACC_BUTTONS: 8 XXX
  SG_ NEW_SIGNAL_1 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_BUTTON_PRESSED : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_BTN : 15|1@0+ (1,0) [0|1] "" XXX
 
 VAL_ 275 GEAR 15 "D" 14 "D" 13 "D" 12 "D" 11 "R" 10 "P" 9 "D" 8 "D" 7 "D" 6 "D" 5 "D" 4 "D" 3 "D" 2 "D" 1 "D" 0 "N" ;
 VAL_ 419 SET_DISTANCE 3 "3BAR" 2 "2BAR" 1 "1BAR" ;
