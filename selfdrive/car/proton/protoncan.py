@@ -132,16 +132,25 @@ def create_acc_cmd(packer, accel, enabled, raw_cnt):
 
   return packer.make_can_msg("ACC_CMD", 0, values)
 
-def send_buttons(packer, count):
+def send_buttons(packer, count, send_cruise):
   """Spoof ACC Button Command."""
-  values = {
-    "SET_BUTTON": 0,
-    "RES_BUTTON": 1,
-    "NEW_SIGNAL_1": 1,
-    "NEW_SIGNAL_2": 1,
-    "SET_ME_BUTTON_PRESSED": 1,
-    "COUNTER": count,
-  }
+
+  if send_cruise:
+   values = {
+      "NEW_SIGNAL_1": 1,
+      "CRUISE_BTN": 1,
+      "SET_ME_BUTTON_PRESSED": 1,
+      "COUNTER": count,
+    }
+  else:
+    values = {
+      "SET_BUTTON": 0,
+      "RES_BUTTON": 1,
+      "NEW_SIGNAL_1": 1,
+      "NEW_SIGNAL_2": 1,
+      "SET_ME_BUTTON_PRESSED": 1,
+      "COUNTER": count,
+    }
 
   dat = packer.make_can_msg("ACC_BUTTONS", 0, values)[2]
   crc = get_crc8_8h2f(dat[:-1])
