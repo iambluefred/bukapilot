@@ -4,6 +4,7 @@ import os
 import queue
 import threading
 import time
+import json
 from collections import OrderedDict, namedtuple
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -254,6 +255,9 @@ def thermald_thread(end_event, hw_queue):
     if sm.updated['pandaStates'] and len(pandaStates) > 0:
 
       # Set ignition based on any panda connected
+      # TODO: generalize line below if more cars needs to ignore ignition_line
+      #ignore_ignition_line = json.loads(params.get("LiveParameters").decode('utf-8'))['carFingerprint'] == 'PROTON X50'
+      #onroad_conditions["ignition"] = any((ps.ignitionLine and not ignore_ignition_line) or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
       onroad_conditions["ignition"] = any(ps.ignitionLine or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
 
       pandaState = pandaStates[0]
