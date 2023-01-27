@@ -4,6 +4,7 @@ import os
 import queue
 import threading
 import time
+import json
 from collections import OrderedDict, namedtuple
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -17,6 +18,7 @@ from common.dict_helpers import strip_deprecated_keys
 from common.filter_simple import FirstOrderFilter
 from common.numpy_fast import interp
 from common.params import Params
+from common.features import Features
 from common.realtime import DT_TRML, sec_since_boot
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
 from selfdrive.controls.lib.pid import PIController
@@ -235,6 +237,7 @@ def thermald_thread(end_event, hw_queue):
   engaged_prev = False
 
   params = Params()
+  f = Features()
   power_monitor = PowerMonitoring()
 
   HARDWARE.initialize_hardware()
@@ -254,7 +257,10 @@ def thermald_thread(end_event, hw_queue):
     if sm.updated['pandaStates'] and len(pandaStates) > 0:
 
       # Set ignition based on any panda connected
-      onroad_conditions["ignition"] = any(ps.ignitionLine or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
+      # TODO: generalize line below if more cars needs to ignore ignition_line
+      ignore_ignition_line = f.has("IgnoreHardIgnition")
+      onroad_conditions["ignition"] = any((ps.ignitionLine and not ignore_ignition_line) or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
+      # onroad_conditions["ignition"] = any(ps.ignitionLine or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
 
       pandaState = pandaStates[0]
 
