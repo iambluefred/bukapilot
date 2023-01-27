@@ -35,7 +35,7 @@ def compute_set_distance(state):
   else:
     return 0
 
-def create_can_steer_command(packer, steer, steer_req, wheel_touch_warning, raw_cnt):
+def create_can_steer_command(packer, steer, steer_req, wheel_touch_warning, raw_cnt, stock_lks_en, auxiliary_en, lane_depart_warning):
   """Creates a CAN message for the Perodua LKA Steer Command."""
   values = {
     "LKAS_ENGAGED1": steer_req,
@@ -43,9 +43,9 @@ def create_can_steer_command(packer, steer, steer_req, wheel_touch_warning, raw_
     "STEER_CMD": abs(steer) if steer_req else 0,
     "STEER_DIR": 1 if steer <= 0 else 0,
     "COUNTER": raw_cnt,
-    "SET_ME_1_1": 1,
-    "SET_ME_1_2": 1,
-    "SET_ME_1_3": 1,
+    "SET_ME_1_1": stock_lks_en,
+    "SET_ME_1_2": auxiliary_en,
+    "SET_ME_1_3": lane_depart_warning,
     "SET_ME_48": 0x48,
     "HAND_ON_WHEEL_WARNING": wheel_touch_warning,
     "WHEEL_WARNING_CHIME": 0,
