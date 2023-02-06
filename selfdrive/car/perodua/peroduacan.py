@@ -151,18 +151,20 @@ def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, d
 
   return packer.make_can_msg("ACC_CMD_HUD", 0, values)
 
-def perodua_create_hud(packer, lkas_rdy, enabled, llane_visible, rlane_visible, ldw, fcw, aeb, front_depart):
+def perodua_create_hud(packer, lkas_rdy, enabled, llane_visible, rlane_visible, ldw, fcw, aeb, front_depart, ldp_off, fcw_off):
 
   values = {
     "LKAS_SET": lkas_rdy,
     "LKAS_ENGAGED": enabled,
     "LDA_ALERT": ldw,
+    "LDA_RELATED1": ldp_off,
     "LANE_RIGHT_DETECT": rlane_visible,
     "LANE_LEFT_DETECT": llane_visible,
     "SET_ME_X02": 0x2,
     "AEB_ALARM": fcw,
     "AEB_BRAKE": aeb,
     "FRONT_DEPART": front_depart,
+    "FCW_DISABLE": fcw_off,
   }
 
   dat = packer.make_can_msg("LKAS_HUD", 0, values)[2]
