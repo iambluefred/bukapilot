@@ -176,7 +176,7 @@ class CarController():
       if (frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
 
         # standstill logic
-        if enabled and apply_brake > 0 and CS.out.standstill:
+        if enabled and apply_brake > 0 and CS.out.standstill and CS.CP.carFingerprint != CAR.ALZA:
           if self.standstill_status == BrakingStatus.STANDSTILL_INIT:
             self.min_standstill_accel = apply_brake
           apply_brake, self.standstill_status, self.prev_ts = standstill_brake(self.min_standstill_accel, self.prev_ts, ts, self.standstill_status)
