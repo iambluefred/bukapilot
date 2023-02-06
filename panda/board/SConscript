@@ -6,27 +6,6 @@ BUILDER = "DEV"
 
 common_flags = []
 build_projects = {}
-
-if os.getenv("PEDAL"):
-  build_projects["pedal"] = {
-    "MAIN": "pedal/main.c",
-    "STARTUP_FILE": "stm32fx/startup_stm32f205xx.s",
-    "LINKER_SCRIPT": "stm32fx/stm32fx_flash.ld",
-    "APP_START_ADDRESS": "0x8004000",
-    "PROJECT_FLAGS": [
-      "-mcpu=cortex-m3",
-      "-msoft-float",
-      "-DSTM32F2",
-      "-DSTM32F205xx",
-      "-O2",
-      "-DPEDAL",
-    ],
-  }
-
-  if os.getenv("PEDAL_USB"):
-    build_projects["pedal_usb"] = build_projects.pop("pedal")
-    build_projects["pedal_usb"]["PROJECT_FLAGS"].append("-DPEDAL_USB")
-
 build_projects["panda"] = {
   "MAIN": "main.c",
   "STARTUP_FILE": "stm32fx/startup_stm32f413xx.s",
@@ -45,26 +24,6 @@ build_projects["panda"] = {
   ],
 }
 
-# arm-none-eabi-gcc on comma two has no cortex-m7 support
-if not os.path.exists("/EON"):
-  build_projects["panda_h7"] = {
-    "MAIN": "main.c",
-    "STARTUP_FILE": "stm32h7/startup_stm32h7x5xx.s",
-    "LINKER_SCRIPT": "stm32h7/stm32h7x5_flash.ld",
-    "APP_START_ADDRESS": "0x8020000",
-    "PROJECT_FLAGS": [
-      "-mcpu=cortex-m7",
-      "-mhard-float",
-      "-DSTM32H7",
-      "-DSTM32H725xx",
-      "-mfpu=fpv5-d16",
-      "-fsingle-precision-constant",
-      "-Os",
-      "-g",
-      "-DPANDA",
-    ],
-  }
-
 if os.getenv("RELEASE"):
   BUILD_TYPE = "RELEASE"
   cert_fn = os.getenv("CERT")
@@ -80,7 +39,6 @@ if os.getenv("DEBUG"):
 
 includes = [
   "stm32fx/inc",
-  "stm32h7/inc",
   "..",
   ".",
 ]
@@ -170,15 +128,6 @@ for project_name in build_projects:
     }
   )
   startup = project_env.Object(project["STARTUP_FILE"])
-
-  # Bootstub
-  crypto_obj = [
-    project_env.Object(f"rsa-{project_name}", "../crypto/rsa.c"),
-    project_env.Object(f"sha-{project_name}", "../crypto/sha.c")
-  ]
-  bootstub_obj = project_env.Object(f"bootstub-{project_name}", "bootstub.c")
-  bootstub_elf = project_env.Program(f"obj/bootstub.{project_name}.elf", [startup] + crypto_obj + [bootstub_obj])
-  bootstub_bin = project_env.Objcopy(f"obj/bootstub.{project_name}.bin", bootstub_elf)
 
   # Build main
   main_obj = project_env.Object(f"main-{project_name}", project["MAIN"])
