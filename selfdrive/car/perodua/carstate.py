@@ -229,7 +229,8 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
     if self.CP.carFingerprint == CAR.MYVI_PSD:
       ret.cruiseState.speed *= 1.04
-    ret.cruiseState.standstill = False
+    if self.CP.carFingerprint in ACC_CAR:
+      ret.cruiseState.standstill = bool(cp.vl["ACC_BRAKE"]["CRUISE_STANDSTILL"]) # only applicable to Alza
     ret.cruiseState.nonAdaptive = False
     ret.cruiseState.enabled = self.is_cruise_latch
     if not ret.cruiseState.available:
@@ -338,6 +339,7 @@ class CarState(CarStateBase):
       signals.append(("LDA_ALERT", "LKAS_HUD", 0))
       signals.append(("GAS_PEDAL_STEP", "GAS_PEDAL_2", 0))
       signals.append(("UI_SPEED", "BUTTONS", 0))
+      signals.append(("CRUISE_STANDSTILL", "ACC_BRAKE", 0))
     else:
       signals.append(("MAIN_TORQUE", "STEERING_TORQUE", 0))
       signals.append(("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.))
