@@ -186,9 +186,11 @@ BO_ 628 LKAS_HUD: 8 XXX
  SG_ HOLD_WARNING : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_RELATED1 : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_ALERT : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_OFF : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ AEB_ALARM : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ AEB_BRAKE : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ FRONT_DEPART : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_DISABLE : 28|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 834 BSM: 8 XXX
  SG_ BSM_CHIME : 23|1@0+ (1,0) [0|1] "" XXX
