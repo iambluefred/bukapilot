@@ -8,9 +8,9 @@ common_flags = []
 build_projects = {}
 build_projects["panda"] = {
   "MAIN": "main.c",
-  "STARTUP_FILE": "stm32fx/startup_stm32f413xx.s",
+  "STARTUP_FILE": "stm32fx/startup_stm32f405xx.s",
   "LINKER_SCRIPT": "stm32fx/stm32fx_flash.ld",
-  "APP_START_ADDRESS": "0x8004000",
+  "APP_START_ADDRESS": "0x8000000",
   "PROJECT_FLAGS": [
     "-mcpu=cortex-m4",
     "-mhard-float",
