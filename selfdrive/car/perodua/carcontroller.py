@@ -126,6 +126,8 @@ class CarController():
     self.standstill_status = BrakingStatus.STANDSTILL_INIT
     self.min_standstill_accel = 0
 
+    self.stockLdw = False
+
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
 
@@ -165,11 +167,11 @@ class CarController():
       if (frame % 2) == 0:
 
         # allow stock LDP passthrough
-        stockLdw = CS.out.stockAdas.laneDepartureHUD
-        if stockLdw:
+        self.stockLdw = CS.out.stockAdas.laneDepartureHUD
+        if self.stockLdw:
             apply_steer = -CS.out.stockAdas.ldpSteerV
 
-        steer_req = enabled or stockLdw
+        steer_req = enabled or self.stockLdw
         can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req, (frame/2) % 16))
 
       # CAN controlled longitudinal
@@ -188,13 +190,13 @@ class CarController():
         pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
         boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.9, 1.6, 2.0])
         if CS.CP.carFingerprint == CAR.ALZA:
-          boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.3, 0.5, 1.6])
+          boost = interp(CS.out.vEgo, [0., 3, 8.93], [0.1, 0.3, 1.0])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
         can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, (frame/5) % 8))
-        can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw, CS.out.stockFcw, CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD, CS.stock_lkc_off, CS.stock_fcw_off))
+        can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available, enabled, llane_visible, rlane_visible, ldw or self.stockLdw, CS.out.stockFcw, CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD, CS.stock_lkc_off, CS.stock_fcw_off))
 
     # KommuActuator controls
     else:
