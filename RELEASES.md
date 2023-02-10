@@ -1,15 +1,6 @@
-Version 8-longOverhaul  (2022-11-30)
+Version 9-Alza  (2023-02-10)
 =========================
- * User configurable fan speed, power saver entry duration, vehicle skew and stopping distance
- * Perodua PSD: Fix brake bleeding
- * Perodua MG3: Fix distance and steering oscillation
- * Proton X50: Can disengage through cruise ready button
- * Proton X50: Hand touch warning if set to ICC instead of ACC
- * Added firmware recovery mechanism after a failed firmware flash
- * Support Perodua Alza (AV)
- * Support Toyota Veloz (AT)
- * Support Honda Civic 2022
- * Support Hyundai Ioniq HEV Plus 2017
+ * Fixing in progress
 
 Version 7-longOverhaul  (2022-10-25)
 =========================
