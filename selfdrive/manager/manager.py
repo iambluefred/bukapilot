@@ -115,19 +115,21 @@ def manager_init() -> None:
   # set default feature dict
   new_dict = {
       "features": {
-        "MyviAzri":     1 << 0,
-        "MyviKevin":    1 << 1,
-        "ClearCode":    1 << 2,
-        "StockAcc" :    1 << 3,
+        "MyviAzri"           :    1 << 0,
+        "MyviKevin"          :    1 << 1,
+        "ClearCode"          :    1 << 2,
+        "StockAcc"           :    1 << 3,
+        "IgnoreHardIgnition" :    1 << 4,
         },
       "packages": {
         "default": [],
         "myvi-a": ["MyviAzri"],
         "myvi-b": ["MyviKevin"],
         "clear-code": ["ClearCode"],
-        "stock-acc" : ["StockAcc"]
+        "stock-acc" : ["StockAcc"],
+        "ignore-ignition-line" : ["IgnoreHardIgnition"]
         },
-      "version": 2,
+      "version": 3,
       }
   cur_dict = params.get("FeaturesDict")
   if cur_dict is None or (json.loads(cur_dict)["version"] < new_dict["version"]):
