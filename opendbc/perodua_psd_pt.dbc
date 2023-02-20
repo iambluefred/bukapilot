@@ -170,7 +170,7 @@ BO_ 627 ACC_CMD_HUD: 8 XXX
  SG_ SET_ME_1_2 : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_1 : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_0_WHEN_ENGAGE : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_CMD : 23|16@0+ (0.01,-0.5) [0|127] "" XXX
+ SG_ ACC_CMD : 23|16@0+ (0.01,0) [0|127] "" XXX
  SG_ SET_1_WHEN_ENGAGE : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN1 : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN2 : 33|1@0+ (1,0) [0|1] "" XXX
