@@ -221,10 +221,12 @@ class CarState(CarStateBase):
     self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
     ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
+
+    # Todo: Delete this, doesn't seem like it's the right logic
     if self.CP.carFingerprint == CAR.MYVI_PSD:
       ret.cruiseState.speed *= 1.04
-    if self.CP.carFingerprint in ACC_CAR:
-      ret.cruiseState.standstill = bool(cp.vl["ACC_BRAKE"]["CRUISE_STANDSTILL"]) # only applicable to Alza
+
+    ret.cruiseState.standstill = False
     ret.cruiseState.nonAdaptive = False
     ret.cruiseState.enabled = self.is_cruise_latch
     if not ret.cruiseState.available:
