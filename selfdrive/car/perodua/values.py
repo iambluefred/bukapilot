@@ -6,7 +6,7 @@ from cereal import car
 from collections import defaultdict
 Ecu = car.CarParams.Ecu
 
-HUD_MULTIPLIER = 1.078
+HUD_MULTIPLIER = 1.04
 
 class CAR:
   ALZA = "PERODUA ALZA"

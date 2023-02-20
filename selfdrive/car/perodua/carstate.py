@@ -144,13 +144,7 @@ class CarState(CarStateBase):
       ret.cruiseState.setDistance = 2
     else:
 
-      ret.vEgoCluster = cp.vl["BUTTONS"]["UI_SPEED"] * CV.KPH_TO_MS
-      if self.CP.carFingerprint == CAR.MYVI_PSD:
-          ret.vEgoCluster *= 1.04
-      elif self.CP.carFingerprint == CAR.ALZA:
-          ret.vEgoCluster *= 1.04
-      elif self.CP.carFingerprint == CAR.ATIVA:
-          ret.vEgoCluster *= 1.04
+      ret.vEgoCluster = cp.vl["BUTTONS"]["UI_SPEED"] * CV.KPH_TO_MS * HUD_MULTIPLIER
       ret.stockAdas.frontDepartureHUD = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
       ret.stockAdas.laneDepartureHUD = bool(cp.vl["LKAS_HUD"]["LDA_ALERT"])
       ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKAS"]['STEER_CMD']
