@@ -24,10 +24,10 @@ class CarInterface(CarInterfaceBase):
     ret.enableApgs = False                 # advanced parking guidance system
     ret.enableDsu = False                  # driving support unit
 
-    ret.steerRateCost = 0.7                # Lateral MPC cost on steering rate, higher value = sharper turn
+    ret.steerRateCost = 0.6                # Lateral MPC cost on steering rate, higher value = sharper turn
     ret.steerLimitTimer = 0.1              # time before steerLimitAlert is issued
     ret.steerControlType = car.CarParams.SteerControlType.torque
-    ret.steerActuatorDelay = 0.48          # Steering wheel actuator delay in seconds
+    ret.steerActuatorDelay = 0.30          # Steering wheel actuator delay in seconds
 
     ret.lateralTuning.init('pid')
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
@@ -44,10 +44,13 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1370. + STD_CARGO_KG
       ret.wheelSpeedFactor = 1
 
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[20., 25.], [20., 25.]]
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.04, 0.4], [0.1, 0.15]]
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [512]]
-      ret.lateralTuning.pid.kf = 0.00007
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [550]]
+
+      ret.lateralTuning.pid.kpBP = [0., 10., 30., 40.]
+      ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.15, 0.16]
+      ret.lateralTuning.pid.kiBP = [0., 20., 30.]
+      ret.lateralTuning.pid.kiV = [0.08, 0.30, 0.45]
+      ret.lateralTuning.pid.kf = 0.00008
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [1.6, 1.6, 0.6]
@@ -65,7 +68,6 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiV = [.14, .08, .02]
 
     ret.minEnableSpeed = -1
-    ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
     ret.enableBsm = True
     ret.stoppingDecelRate = 0.005 # reach stopping target smoothly
 
