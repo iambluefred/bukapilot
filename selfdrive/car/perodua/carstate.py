@@ -87,13 +87,10 @@ class CarState(CarStateBase):
     # brake pedal
     ret.brake = cp.vl["BRAKE"]['BRAKE_PRESSURE']
 
-    # perodua bezza has a lower resolution brake pressure sensor
-    if self.CP.carFingerprint == CAR.BEZZA:
-      ret.brakePressed = ret.brake > 1.2
-    elif self.CP.carFingerprint in ACC_CAR:
+    if self.CP.carFingerprint in ACC_CAR:
       ret.brakePressed = bool(cp.vl["BRAKE"]['BRAKE_ENGAGED'])
     else:
-      ret.brakePressed = ret.brake > 1e-5
+      ret.brakePressed = ret.brake > 1.2
 
     # steer
     if self.CP.carFingerprint in ACC_CAR:
