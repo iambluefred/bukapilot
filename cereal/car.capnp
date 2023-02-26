@@ -234,7 +234,8 @@ struct CarState {
       chill @1;
       normal @2;
       aggresive @3;
-      auto @4;
+      experimental @4;
+      auto @5;
     }
   }
 
