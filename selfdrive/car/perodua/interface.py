@@ -115,7 +115,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.20]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
-      ret.lateralTuning.pid.kf = 0.0000007
+      ret.lateralTuning.pid.kf = 0.00012
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [0.6, 0.55, 0.4]
