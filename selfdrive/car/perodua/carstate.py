@@ -137,8 +137,8 @@ class CarState(CarStateBase):
           self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgoCluster)
           self.is_cruise_latch = True
 
-      # set distance as SetDistance.normal
-      ret.cruiseState.setDistance = 2
+      # set distance as SetDistance.experimental
+      ret.cruiseState.setDistance = 4
     else:
 
       ret.vEgoCluster = cp.vl["BUTTONS"]["UI_SPEED"] * CV.KPH_TO_MS * HUD_MULTIPLIER
