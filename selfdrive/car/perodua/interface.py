@@ -124,18 +124,18 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.ATIVA:
       ret.wheelbase = 2.525
-      ret.steerRatio = 16.74
+      ret.steerRatio = 17.00
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1035. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1.54
+      ret.wheelSpeedFactor = 1.55
 
       ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.22]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
-      ret.lateralTuning.pid.kf = 0.0000007
+      ret.lateralTuning.pid.kf = 0.000188
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [0.6, 0.55, 0.3]
+      ret.longitudinalTuning.kpV = [0.65, 0.6, 0.5]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
