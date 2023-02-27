@@ -33,6 +33,12 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/kommu/icon_bukapilot.png",
     },
     {
+      "IsLdwEnabled",
+      "Enable Lane Departure Warnings",
+      "Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31 mph (50 km/h).",
+      "../assets/kommu/icon_warning.png",
+    },
+    {
       "IsRHD",
       "Enable Right-Hand Drive",
       "Allow bukapilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.",
