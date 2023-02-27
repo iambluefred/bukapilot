@@ -1,3 +1,23 @@
+Version 9.1-longOverhaul  (2023-02-25)
+=========================
+ * Fix firmware caused device error during startup
+ * x50 (credits to Ryan & Darren):
+   * Added software package 'ignore-ignition-line' for x50
+   * Improved torque
+   * Improved control stability at higher speeds
+   * Reduced steering fighting torque
+ * Perodua PSD:
+   * Reduced steering fighting torque during manual override
+   * Fix Alza/Veloz standstill brake and resume
+   * Fix stock lane departure prevention and warning
+   * Fix stock ADAS settings
+   * Fix Alza/Veloz fingerprint clash with Ativa
+   * Retuned lateral for better curve handling
+   * Retuned longitudinal for Ativa and Alza
+ * Perodua MG3 (credits to Kenneth):
+   * More aggresive gas to close distance at higher speed
+
+
 Version 9-longOverhaul  (20223-02-25)
 =========================
  * Fix firmware caused device error during startup
