@@ -219,10 +219,6 @@ class CarState(CarStateBase):
     ret.cruiseState.speedCluster = self.cruise_speed
     ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
 
-    # Todo: Delete this, doesn't seem like it's the right logic
-    if self.CP.carFingerprint == CAR.MYVI_PSD:
-      ret.cruiseState.speed *= 1.04
-
     ret.cruiseState.standstill = False
     ret.cruiseState.nonAdaptive = False
     ret.cruiseState.enabled = self.is_cruise_latch
