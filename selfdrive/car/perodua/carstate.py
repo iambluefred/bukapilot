@@ -217,7 +217,10 @@ class CarState(CarStateBase):
     # set speed in range of 30 - 130kmh only
     self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
-    ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
+    if self.CP.carFingerprint == CAR.ATIVA:
+      ret.cruiseState.speed = ret.cruiseState.speedCluster / 1.078
+    else:
+      ret.cruiseState.speed = ret.cruiseState.speedCluster / HUD_MULTIPLIER
 
     ret.cruiseState.standstill = False
     ret.cruiseState.nonAdaptive = False
