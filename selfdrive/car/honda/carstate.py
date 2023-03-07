@@ -245,6 +245,11 @@ class CarState(CarStateBase):
     gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
 
+    if self.CP.carFingerprint in (CAR.ACCORD, CAR.ACCORDH):
+      gear = 32
+      ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
+
+
     if self.CP.enableGasInterceptor:
       ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) / 2.
     else:

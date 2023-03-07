@@ -165,6 +165,7 @@ class CarController():
 
     # Send steering command.
     idx = frame % 4
+    print(apply_steer)
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
       lkas_active, CS.CP.carFingerprint, idx, CS.CP.openpilotLongitudinalControl))
 
