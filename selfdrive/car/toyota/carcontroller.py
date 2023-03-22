@@ -107,6 +107,9 @@ class CarController():
         self.accel = pcm_accel_cmd
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead, CS.acc_type, CS.distance_btn))
+    else:
+      if CS.out.standstill and enabled and (frame % 50 == 0):
+        can_sends.append(create_resume_command(self.packer))
 
     if frame % 2 == 0 and CS.CP.enableGasInterceptor and CS.CP.openpilotLongitudinalControl:
       # send exactly zero if gas cmd is zero. Interceptor will send the max between read value and gas cmd.
