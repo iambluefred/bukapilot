@@ -38,7 +38,7 @@ X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
 J_EGO_COST = 3.
-A_CHANGE_COST = .5
+A_CHANGE_COST = 200.
 DANGER_ZONE_COST = 200.
 CRASH_DISTANCE = .5
 LEAD_DANGER_FACTOR = 0.75
@@ -54,13 +54,13 @@ T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 MIN_ACCEL = -3.5
-COMFORT_BRAKE = 2.5
-HARSH_BRAKE = 2.3
-STOP_DISTANCE = 5.6
-T_FOLLOW_CHILL = 1.65
-T_FOLLOW_NORMAL = 1.45
-T_FOLLOW_AGGRO = 1.25
-T_FOLLOW_DANGER = 1.25
+COMFORT_BRAKE = 2.0
+HARSH_BRAKE = 2.0
+STOP_DISTANCE = 3.0
+T_FOLLOW_CHILL = 1.6
+T_FOLLOW_NORMAL = 1.4
+T_FOLLOW_AGGRO = 1.0
+T_FOLLOW_DANGER = 0.8
 
 def get_desired_tf(set_distance=SetDistance.normal):
   if set_distance == SetDistance.aggresive:
@@ -77,8 +77,8 @@ def get_desired_tf(set_distance=SetDistance.normal):
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * HARSH_BRAKE)
 
-def get_safe_obstacle_distance(v_ego, desired_tf, stop_distance_offset):
-  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE - 1.25 + desired_tf + stop_distance_offset
+def get_safe_obstacle_distance(v_ego, desired_tf, stop_distance_offset = 0):
+  return (v_ego**2) / (2 * COMFORT_BRAKE) + desired_tf * v_ego + STOP_DISTANCE + stop_distance_offset
 
 def desired_follow_distance(v_ego, v_lead, stop_distance_offset, desired_tf = get_desired_tf()):
   return get_safe_obstacle_distance(v_ego, desired_tf, stop_distance_offset) - get_stopped_equivalence_factor(v_lead)
