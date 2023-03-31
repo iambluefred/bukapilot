@@ -26,7 +26,7 @@ class CarState(CarStateBase):
     if CP.carFingerprint in ACC_CAR:
       self.set_distance_values = can_define.dv['ACC_CMD_HUD']['FOLLOW_DISTANCE']
     self.is_cruise_latch = False
-    self.cruise_speed = 30 * CV.KPH_TO_MS
+    self.cruise_speed = 10 * CV.KPH_TO_MS
     self.cruise_speed_counter = 0
     self.acttrGas = 0
 
@@ -191,7 +191,7 @@ class CarState(CarStateBase):
           while self.dt >= SEC_HOLD_TO_STEP_SPEED:
             kph = self.cruise_speed * CV.MS_TO_KPH
             kph = ((kph / 5) - 1) * 5  # step down to next nearest 5
-            kph = max(30, kph)
+            kph = max(10, kph)
             self.cruise_speed = kph * CV.KPH_TO_MS
             self.dt -= SEC_HOLD_TO_STEP_SPEED
 
@@ -201,7 +201,7 @@ class CarState(CarStateBase):
           self.is_cruise_latch = True
 
         elif self.is_minus_btn_latch and not minus_button:
-          self.cruise_speed = max(30 * CV.KPH_TO_MS, ret.vEgoCluster)
+          self.cruise_speed = max(10 * CV.KPH_TO_MS, ret.vEgoCluster)
           self.is_cruise_latch = True
 
 
@@ -215,7 +215,7 @@ class CarState(CarStateBase):
       self.is_cruise_latch = False
 
     # set speed in range of 30 - 130kmh only
-    self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
+    self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 10 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
     if self.CP.carFingerprint == CAR.ATIVA:
       ret.cruiseState.speed = ret.cruiseState.speedCluster / 1.078
