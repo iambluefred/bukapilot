@@ -167,7 +167,7 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
       ret.enableBsm = True
-      ret.stoppingDecelRate = 0.05 # reach stopping target smoothly
+      ret.stoppingDecelRate = 0.25 # reach stopping target smoothly
     else:
       ret.longitudinalTuning.kiBP = [0.]
       ret.longitudinalTuning.kiV = [0.6]
