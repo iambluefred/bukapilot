@@ -157,6 +157,9 @@ class Controls:
     self.button_timers = {ButtonEvent.Type.decelCruise: 0, ButtonEvent.Type.accelCruise: 0}
     self.last_actuators = car.CarControl.Actuators.new_message()
 
+    self.params_check_last_t = 0.0
+    self.params_check_freq = 0.3
+
     # TODO: no longer necessary, aside from process replay
     self.sm['liveParameters'].valid = True
 
@@ -216,6 +219,12 @@ class Controls:
     #cpus = list(self.sm['deviceState'].cpuUsagePercent)[:(-1 if EON else None)]
     #if max(cpus, default=0) > 95 and not SIMULATION:
     #  self.events.add(EventName.highCpuUsage)
+
+    t = sec_since_boot()
+    if t - self.params_check_last_t > self.params_check_freq:
+      self.LaC.update_op_params()
+      print("Update OP Param")
+      self.params_check_last_t = t
 
     # Alert if fan isn't spinning for 5 seconds
     if self.sm['peripheralState'].pandaType in (PandaType.uno, PandaType.dos):

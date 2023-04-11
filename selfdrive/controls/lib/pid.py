@@ -50,6 +50,7 @@ class PIController():
     error = float(apply_deadzone(setpoint - measurement, deadzone))
     self.p = error * self.k_p
     self.f = feedforward * self.k_f
+    print(self.p)
 
     if override:
       self.i -= self.i_unwind_rate * float(np.sign(self.i))
