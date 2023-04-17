@@ -80,11 +80,7 @@ class CarController():
 
       #can_sends.append(create_hud(self.packer, apply_steer, enabled, ldw, rlane_visible, llane_visible))
       #can_sends.append(create_lead_detect(self.packer, lead_visible, enabled))
-      #if CS.out.genericToggle:
-      #  fake_enable = True
-      #else:
-      #  fake_enable = False
-      #can_sends.append(create_acc_cmd(self.packer, actuators.accel, fake_enable, (frame/2) % 16))
+      can_sends.append(create_acc_cmd(self.packer, actuators.accel, enabled, (frame/2) % 16))
 
     if CS.out.standstill and enabled and (frame % 50 == 0):
       # Spam resume button to resume from standstill at max freq of 10 Hz.

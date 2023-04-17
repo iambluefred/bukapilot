@@ -107,12 +107,13 @@ def create_pcm(packer, steer, steer_req, raw_cnt):
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
 def create_acc_cmd(packer, accel, enabled, raw_cnt):
-  accel = clip(accel, -3, 0.2)
+  accel = clip(accel, -3, 3)
   print(accel)
 
   values = {
-    "CMD": accel if enabled else 0,
-    "CMD_OFFSET": accel if enabled else 0,
+    "CMD": 0x8C14 if enabled else 0x8C14,
+    #"CMD": 0xA005 if enabled else 0x8C14,
+    "CMD_OFFSET": accel * 5 if enabled else 0x8E8A,
     "ACC_REQ": enabled,
     "SET_ME_1": 1,
     "CRUISE_ENABLE": 1,
@@ -120,7 +121,7 @@ def create_acc_cmd(packer, accel, enabled, raw_cnt):
 
     ## not sure
     "BRAKE_ENGAGED": 0,
-    "SET_ME_X6A": 0x6A if enabled else 0x6A,
+    "SET_ME_X6A": 0x79 if enabled else 0x6A,
     "RISING_ENGAGE": 0,
     "UNKNOWN1": 0,
     "STANDSTILL2": 0,
