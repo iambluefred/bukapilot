@@ -212,7 +212,7 @@ class CarController():
         pump, brake_req, self.last_pump = psd_brake(apply_brake, self.last_pump)
 
         # the 0.5 is needed because once speed is commanded, the accel is too high at lower speed below 10kmh
-        boost = interp(CS.out.vEgo, [3, 4], [0., 1.0])
+        boost = interp(CS.out.vEgo, [2, 3], [0., 1.0])
         des_speed = actuators.speed + (actuators.accel * boost)
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
