@@ -145,6 +145,7 @@ class CarState(CarStateBase):
       ret.stockAdas.frontDepartureHUD = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
       ret.stockAdas.laneDepartureHUD = bool(cp.vl["LKAS_HUD"]["LDA_ALERT"])
       ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKAS"]['STEER_CMD']
+      ret.stockAdas.aebV = cp.vl["ACC_BRAKE"]['AEB_1019']
 
       ret.stockAeb = bool(cp.vl["LKAS_HUD"]['AEB_BRAKE'])
       ret.stockFcw = bool(cp.vl["LKAS_HUD"]['AEB_ALARM'])
@@ -332,6 +333,7 @@ class CarState(CarStateBase):
       signals.append(("GAS_PEDAL_STEP", "GAS_PEDAL_2", 0))
       signals.append(("UI_SPEED", "BUTTONS", 0))
       signals.append(("CRUISE_STANDSTILL", "ACC_BRAKE", 0))
+      signals.append(("AEB_1019", "ACC_BRAKE", 0))
     else:
       signals.append(("MAIN_TORQUE", "STEERING_TORQUE", 0))
       signals.append(("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.))
