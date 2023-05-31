@@ -102,7 +102,7 @@ def aeb_brake_command(packer, enabled, decel_cmd):
 
   return packer.make_can_msg("ADAS_AEB", 0, values)
 
-def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, idx):
+def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, aeb, idx):
 
   # Value overflow check
   # MAGNITUDE a max value 2.0 to prevent overflow, maximum seen on porto is 1.56
@@ -117,10 +117,10 @@ def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, id
     "MAGNITUDE": (-1* decel_cmd) if (enabled and decel_req) else 0,
     "SET_ME_1_WHEN_ENGAGE": 1 if enabled else 0,
     "PUMP_REACTION2": -1* pump if enabled else 0,
-    #"AEB_REQ1": aeb,
-    #"AEB_REQ2": aeb,
-    #"AEB_REQ3": aeb,
-    #"AEB_1019": 1019 if aeb else 0,
+    "AEB_REQ1": 1 if aeb else 0,
+    "AEB_REQ2": 1 if aeb else 0,
+    "AEB_REQ3": 1 if aeb else 0,
+    "AEB_1019": aeb,
   }
 
   dat = packer.make_can_msg("ACC_BRAKE", 0, values)[2]
