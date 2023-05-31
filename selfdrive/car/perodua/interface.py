@@ -162,7 +162,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in ACC_CAR:
       ret.longitudinalTuning.kiBP = [5, 7, 28]
-      ret.longitudinalTuning.kiV = [0.12, 0.10, 0.06]
+      ret.longitudinalTuning.kiV = [0.10, 0.08, 0.06]
 
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
