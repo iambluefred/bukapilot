@@ -9,6 +9,8 @@ from selfdrive.car.interfaces import CarStateBase
 from selfdrive.car.perodua.values import DBC, CAR, ACC_CAR, HUD_MULTIPLIER
 from time import time
 
+from common.features import Features
+
 # todo: clean this part up
 pedal_counter = 0
 pedal_press_state = 0
@@ -39,6 +41,13 @@ class CarState(CarStateBase):
 
     self.stock_lkc_off = True
     self.stock_fcw_off = True
+
+    # for MADS
+    f = Features()
+    self.mads = f.has("StockAcc")
+    self.lkas_set = False
+    self.acc_set  = False
+
   def update(self, cp):
     ret = car.CarState.new_message()
 
@@ -215,6 +224,11 @@ class CarState(CarStateBase):
     if ret.brakePressed:
       self.is_cruise_latch = False
 
+    if self.mads:
+      self.lkas_set = bool(cp.vl["LKAS_HUD"]["LKAS_SET"])
+      self.acc_set = bool(cp.vl["ACC_CMD_HUD"]["SET_1_WHEN_ENGAGE"])
+      self.is_cruise_latch |= self.lkas_set
+
     # set speed in range of 30 - 130kmh only
     self.cruise_speed = max(min(self.cruise_speed, 130 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
@@ -334,6 +348,8 @@ class CarState(CarStateBase):
       signals.append(("UI_SPEED", "BUTTONS", 0))
       signals.append(("CRUISE_STANDSTILL", "ACC_BRAKE", 0))
       signals.append(("AEB_1019", "ACC_BRAKE", 0))
+      signals.append(("LKAS_SET", "LKAS_HUD", 0))
+      signals.append(("SET_1_WHEN_ENGAGE", "ACC_CMD_HUD", 0))
     else:
       signals.append(("MAIN_TORQUE", "STEERING_TORQUE", 0))
       signals.append(("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.))

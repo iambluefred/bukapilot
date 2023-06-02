@@ -136,6 +136,7 @@ class CarController():
 
     f = Features()
     self.need_clear_engine = f.has("ClearCode")
+    self.mads = f.has("StockAcc")
 
     self.last_pump = 0
 
@@ -214,6 +215,10 @@ class CarController():
         # the 0.5 is needed because once speed is commanded, the accel is too high at lower speed below 10kmh
         boost = interp(CS.out.vEgo, [2, 3], [0., 1.0])
         des_speed = actuators.speed + (actuators.accel * boost)
+
+        # MADS
+        if self.mads and not CS.acc_set:
+          enabled = False
         can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
                                                       CS.out.cruiseState.available, enabled, lead_visible,
                                                       des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
