@@ -29,6 +29,9 @@ class CarState(CarStateBase):
     self.distance_btn = 0
     self.raw_distance = 0
 
+    # rpm check for alphard vellfire
+    self.rpm = 0
+
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
@@ -47,6 +50,7 @@ class CarState(CarStateBase):
       ret.gas = cp.vl[msg]["GAS_PEDAL"]
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
 
+    self.rpm = cp.vl["ENGINE_RPM"]["RPM"]
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
@@ -177,6 +181,7 @@ class CarState(CarStateBase):
       ("AUTO_HIGH_BEAM", "LIGHT_STALK"),
       ("LDA_ALERT", "LKAS_HUD"),
       ("STEER_REQUEST", "STEERING_LKA"),
+      ("RPM", "ENGINE_RPM"),
     ]
 
     checks = [
@@ -195,6 +200,7 @@ class CarState(CarStateBase):
       ("STEER_TORQUE_SENSOR", 50),
       ("LKAS_HUD", 0), # TODO: figure out why freq is inconsistent
       ("STEERING_LKA", 42),
+      ("ENGINE_RPM", 0),
     ]
 
     if CP.flags & ToyotaFlags.HYBRID:

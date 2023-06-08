@@ -52,6 +52,10 @@ class CarController():
       interceptor_gas_cmd = 0.
     pcm_accel_cmd = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
+    # throttle accel if it goes above 3200 rpm, happens with Toyota Alphards and Vellfires
+    if CS.rpm > 3200 and active:
+      pcm_accel_cmd = 0.2
+
     # steer torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
