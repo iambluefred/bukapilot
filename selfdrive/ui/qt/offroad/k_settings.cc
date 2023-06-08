@@ -244,7 +244,7 @@ void DevicePanel::poweroff() {
 
 PersonalisedPanel::PersonalisedPanel(QWidget* parent) : ListWidget(parent) {
   // min, max, step
-  stopDistanceOffsetSb = new SpinboxControl("StoppingDistanceOffset","Stop Distance Offset", "The offset distance from the lead car the vehicle is meant to stop", "m", (double []){0.0, 5.0, 0.1}, true);
+  stopDistanceOffsetSb = new SpinboxControl("StoppingDistanceOffset","Stop Distance Offset", "The offset distance from the lead car the vehicle is meant to stop", "m", (double []){-2.0, 5.0, 0.1}, true);
   addItem(stopDistanceOffsetSb);
 
   drivePathOffsetSb = new SpinboxControl("DrivePathOffset","Path Skew Offset", "The path offset from center of the lane. Perform positive offset if the vehicle is currently skewed left.", "m", (double []){-1.0, 1.0, 0.05}, false);
