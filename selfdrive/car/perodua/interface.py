@@ -119,6 +119,8 @@ class CarInterface(CarInterfaceBase):
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [0.5, 0.5, 0.4]
+      ret.longitudinalTuning.kiBP = [5, 7, 28]
+      ret.longitudinalTuning.kiV = [0.11, 0.08, 0.06]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -136,6 +138,8 @@ class CarInterface(CarInterfaceBase):
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [0.65, 0.6, 0.5]
+      ret.longitudinalTuning.kiBP = [5, 7, 28]
+      ret.longitudinalTuning.kiV = [0.11, 0.08, 0.06]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -145,14 +149,16 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1170. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1.39
+      ret.wheelSpeedFactor = 1.42
 
-      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.13], [0.22]]
+      ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.16], [0.30]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
       ret.lateralTuning.pid.kf = 0.00015
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [0.1, 0.5, 0.6]
+      ret.longitudinalTuning.kpV = [0.15, 0.6, 0.7]
+      ret.longitudinalTuning.kiBP = [5, 7, 28]
+      ret.longitudinalTuning.kiV = [0.12, 0.12, 0.12]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
@@ -161,9 +167,6 @@ class CarInterface(CarInterfaceBase):
       ret.safetyModel = car.CarParams.SafetyModel.noOutput
 
     if candidate in ACC_CAR:
-      ret.longitudinalTuning.kiBP = [5, 7, 28]
-      ret.longitudinalTuning.kiV = [0.10, 0.08, 0.06]
-
       ret.minEnableSpeed = -1
       ret.steerActuatorDelay = 0.30           # Steering wheel actuator delay in seconds
       ret.enableBsm = True
