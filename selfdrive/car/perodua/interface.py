@@ -111,16 +111,16 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1025. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1.303
+      ret.wheelSpeedFactor = 1.34
 
       ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.20]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
       ret.lateralTuning.pid.kf = 0.00012
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      ret.longitudinalTuning.kpV = [0.5, 0.5, 0.4]
+      ret.longitudinalTuning.kpV = [0.5, 0.5, 0.45]
       ret.longitudinalTuning.kiBP = [5, 7, 28]
-      ret.longitudinalTuning.kiV = [0.11, 0.08, 0.06]
+      ret.longitudinalTuning.kiV = [0.11, 0.1, 0.1]
       ret.longitudinalActuatorDelayLowerBound = 0.42
       ret.longitudinalActuatorDelayUpperBound = 0.60
 
