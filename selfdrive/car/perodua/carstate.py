@@ -101,6 +101,9 @@ class CarState(CarStateBase):
     else:
       ret.brakePressed = ret.brake > 1.2
 
+    if self.mads:
+      ret.brakePressed = False
+
     # steer
     if self.CP.carFingerprint in ACC_CAR:
       ret.steeringAngleDeg = cp.vl["STEERING_MODULE"]['STEER_ANGLE']
