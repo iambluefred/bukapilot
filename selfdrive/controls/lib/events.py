@@ -624,9 +624,9 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.overheat: {
-    ET.PERMANENT: NormalPermanentAlert("System Overheated"),
-    ET.SOFT_DISABLE: soft_disable_alert("System Overheated"),
-    ET.NO_ENTRY: NoEntryAlert("System Overheated"),
+    ET.PERMANENT: NormalPermanentAlert("Overheat Prevention", "Please cool down device to 50 degree celcius"),
+    ET.SOFT_DISABLE: soft_disable_alert("Overheat Prevention: Please cool down device to 50 degree celcius"),
+    ET.NO_ENTRY: NoEntryAlert("Overheat Prevention: Please cool down device to 50 degree celcius"),
   },
 
   EventName.wrongGear: {
