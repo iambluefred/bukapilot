@@ -267,6 +267,9 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   versionLbl = new LabelControl("Version", "", getVersion());
   lastUpdateLbl = new LabelControl("Last Update Check", "", "The last time bukapilot successfully checked for an update. The updater only runs while the car is off.");
   updateBtn = new ButtonControl("Check for Update", "");
+  featuresInput = new FeaturesControl();
+  fingerprintInput = new FixFingerprintSelect();
+
   connect(updateBtn, &ButtonControl::clicked, [=]() {
     if (params.getBool("IsOffroad")) {
       fs_watch->addPath(QString::fromStdString(params.getParamPath("LastUpdateTime")));
@@ -277,7 +280,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
     std::system("pkill -1 -f selfdrive.updated");
   });
 
-
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
   connect(uninstallBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm("Are you sure you want to uninstall?", this)) {
@@ -286,7 +288,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   });
   connect(uiState(), &UIState::offroadTransition, uninstallBtn, &QPushButton::setEnabled);
 
-  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitCommitLbl, osVersionLbl, uninstallBtn};
+  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitCommitLbl, osVersionLbl, featuresInput, fingerprintInput, uninstallBtn};
   for (QWidget* w : widgets) {
     addItem(w);
   }
@@ -301,8 +303,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
       updateLabels();
     }
   });
-
-  addItem(new FeaturesControl());
 }
 
 void SoftwarePanel::showEvent(QShowEvent *event) {

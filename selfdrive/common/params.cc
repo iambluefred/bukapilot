@@ -183,6 +183,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"FeaturesDict", PERSISTENT},
     {"FeaturesPackage", PERSISTENT},
     {"FeaturesValue", PERSISTENT},
+    {"FixFingerprint", PERSISTENT},
     {"QuietMode", PERSISTENT},
     {"QC_Test", CLEAR_ON_MANAGER_START},
 };
