@@ -122,7 +122,7 @@ class CarState(CarStateBase):
 
     # button presses
     ret.leftBlinker = bool(cp.vl["STALK"]["LEFT_BLINKER"])
-    ret.rightBlinker = 0 bool(cp.vl["STALK"]["RIGHT_BLINKER"])
+    ret.rightBlinker = 0 # bool(cp.vl["STALK"]["RIGHT_BLINKER"])
     ret.genericToggle = 0 # Todo bool(cp.vl["LEFT_STALK"]["GENERIC_TOGGLE"])
 
     ret.espDisabled = 0 # Todo bool(cp.vl["PARKING_BRAKE"]["ESC_ON"]) != 1
