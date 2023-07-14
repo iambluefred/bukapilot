@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from cereal import car
-from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
@@ -35,19 +34,19 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = True
 
     if candidate == CAR.ATTO3:
-      ret.wheelbase = 2.6
-      ret.steerRatio = 15.00
+      ret.wheelbase = 2.72
+      ret.steerRatio = 16.0
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
-      ret.mass = 1370. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1
+      ret.mass = 1750. + STD_CARGO_KG
+      ret.wheelSpeedFactor = 1             # it is exactly 1 to 1 with gps speed
 
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [530]]
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [1000]]  # so far valid steer torque without faulting is up to 5000
 
-      ret.lateralTuning.pid.kpBP = [0., 25., 35., 40.]
-      ret.lateralTuning.pid.kpV = [0.05, 0.15, 0.15, 0.16]
-      ret.lateralTuning.pid.kiBP = [0., 20., 30.]
-      ret.lateralTuning.pid.kiV = [0.10, 0.20, 0.40]
+      ret.lateralTuning.pid.kpBP = [0.]
+      ret.lateralTuning.pid.kpV = [0.15]
+      ret.lateralTuning.pid.kiBP = [0.]
+      ret.lateralTuning.pid.kiV = [0.10]
       ret.lateralTuning.pid.kf = 0.00007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]

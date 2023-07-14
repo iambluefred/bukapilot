@@ -3,10 +3,7 @@
 from selfdrive.car import dbc_dict
 from cereal import car
 
-from collections import defaultdict
-Ecu = car.CarParams.Ecu
-
-HUD_MULTIPLIER = 1.073
+HUD_MULTIPLIER = 0.715
 
 class CAR:
   ATTO3 = "BYD ATTO 3"

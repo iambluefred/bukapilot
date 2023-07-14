@@ -28,20 +28,62 @@ def byd_checksum(byte_key, dat):
 
   return (((byte_crc4_linear_inverse(first_bytes) + (-1*remainder + 5)) << 4) + byte_crc4_linear_inverse(second_bytes)) & 0xff
 
-def create_can_steer_command(packer, steer, steer_req, wheel_touch_warning, raw_cnt, stock_lks_settings):
+def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning, raw_cnt, steer_rate):
 
   values = {
-    "STEER_CMD": stock_lks_settings,
-    "STEER_REQ": 1,
-    "STEER_ANGLE": steer,
+    "TORQUE": steer_rate,    # TODO find out if this is really steer rate
+    "STEER_REQ": steer_req,
+    "STEER_ANGLE": steer_angle,
+    "SET_ME_X01": 1 if steer_req else 0,
+    "SET_ME_XEB": 0xB if steer_req else 0,
     "COUNTER": raw_cnt,
     "SET_ME_FF": 0xFF,
     "SET_ME_F": 0xF,
-    "UNKNOWN": 3,
-  }
+    "SET_ME_X01": 1,
+    "SET_ME_1_1": 1,
+    "SET_ME_1_2": 1,
+    }
 
   dat = packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)[2]
   crc = byd_checksum(0xaf, dat[:-1])
   values["CHECKSUM"] = crc
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
+
+def create_accel_command(packer, accel, enabled, raw_cnt):
+
+  values = {
+    "ACCEL_CMD": accel,
+    "SET_ME_25_1": 25,         # always 25
+    "SET_ME_25_2": 25,         # always 25
+    "COUNTER": raw_cnt,
+    "ACC_ON_1": enabled,
+    "ACC_ON_2": enabled,
+    "UNKNOWN1": 2 if enabled else 0,  # 2 is needed to brake, 1 is to cruise, 3 is to accel, 4-9 more power?
+    "UNKNOWN2": 12 if enabled else 0, # prioritise test 12-14
+    "SET_ME_X8": 8,
+    "SET_ME_1": 1,
+    "SET_ME_XF": 0xF,
+    "CMD_REQ_ACTIVE_LOW": 0 if enabled else 1,
+    "ACC_REQ_NOT_STANDSTILL": enabled,
+    "ACC_CONTROLLABLE_AND_ON": enabled,
+  }
+
+  dat = packer.make_can_msg("ACC_CMD", 0, values)[2]
+  crc = byd_checksum(0xaf, dat[:-1])
+  values["CHECKSUM"] = crc
+  return packer.make_can_msg("ACC_CMD", 0, values)
+
+def send_buttons(packer, count):
+  """Spoof ACC Button Command."""
+  values = {
+      "SET_BUTTON": 0,
+      "RES_BUTTON": 1,
+      "SET_ME_1_1": 1,
+      "SET_ME_1_2": 1,
+      "COUNTER": count,
+  }
+  dat = packer.make_can_msg("PCM_BUTTONS", 0, values)[2]
+  crc = byd_checmsum(0xaf, dat[:-1])
+  values["CHECKSUM"] = crc
+  return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
