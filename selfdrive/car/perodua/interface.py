@@ -130,7 +130,7 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1035. + STD_CARGO_KG
-      ret.wheelSpeedFactor = 1.48
+      ret.wheelSpeedFactor = 1.50   # Currently tuning this, 1.525 is too high, 1.48 is too low.
 
       ret.lateralTuning.pid.kiV, ret.lateralTuning.pid.kpV = [[0.12], [0.22]]
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [255]]
