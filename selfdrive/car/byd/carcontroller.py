@@ -49,9 +49,7 @@ class CarController():
     self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
     self.disable_radar = Params().get_bool("DisableRadar")
     self.num_cruise_btn_sent = 0
-
-    f = Features()
-    self.mads = f.has("StockAcc")
+    self.random_counter = 0
 
   def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw):
     can_sends = []
@@ -67,21 +65,24 @@ class CarController():
 
     ts = frame * DT_CTRL
 
+    if (frame % 1000) == 0:
+      self.random_counter = (self.random_counter + 1) & 0xF
+
     # BYD CAN controlled lateral running at 50hz
     if (frame % 2) == 0:
       if CS.out.leftBlinker and False:
-        can_sends.append(create_can_steer_command(self.packer, 0, enabled, False, (frame/2) % 16, 0))
+        can_sends.append(create_can_steer_command(self.packer, 0, enabled, False, (frame/2) % 16, 0, self.random_counter))
         #can_sends.append(create_can_steer_command(self.packer, 10, enabled, False, (frame/2) % 16, 2773))
       else:
-        can_sends.append(create_can_steer_command(self.packer, apply_angle, enabled, False, (frame/2) % 16, 0))
+        can_sends.append(create_can_steer_command(self.packer, apply_angle, enabled, False, (frame/2) % 16, 0, self.random_counter))
 
       if CS.out.genericToggle:
         # accel
-        can_sends.append(create_accel_command(self.packer, 40, 1, (frame/2) % 16))
+        can_sends.append(create_accel_command(self.packer, 40, 1, (frame/2) % 16, self.randon_counter))
         # decel
         # can_sends.append(create_accel_command(self.packer, -40, 1, (frame/2) % 16))
       else:
-        can_sends.append(create_accel_command(self.packer, 0, 0, (frame/2) % 16))
+        can_sends.append(create_accel_command(self.packer, 0, 0, (frame/2) % 16, self.random_counter))
       #  a = list(create_accel_command(self.packer, 0, 0, (frame/2) % 16)[2])
       #  b = [hex(i) for i in a]
       #  print(b)

@@ -28,14 +28,14 @@ def byd_checksum(byte_key, dat):
 
   return (((byte_crc4_linear_inverse(first_bytes) + (-1*remainder + 5)) << 4) + byte_crc4_linear_inverse(second_bytes)) & 0xff
 
-def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning, raw_cnt, steer_rate):
+def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning, raw_cnt, steer_rate, r):
 
   values = {
     "TORQUE": steer_rate,    # TODO find out if this is really steer rate
-    "STEER_REQ": steer_req,
+    "STEER_REQ": steer_req,                # Try 0x2B
     "STEER_ANGLE": steer_angle,
-    "SET_ME_X01": 1 if steer_req else 0,
-    "SET_ME_XEB": 0xB if steer_req else 0,
+    "SET_ME_X01": 1 if steer_req else 0,   # Try 0x1
+    "SET_ME_XEB": r if steer_req else 0, # Try 0xB
     "COUNTER": raw_cnt,
     "SET_ME_FF": 0xFF,
     "SET_ME_F": 0xF,
@@ -49,7 +49,7 @@ def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning
   values["CHECKSUM"] = crc
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
-def create_accel_command(packer, accel, enabled, raw_cnt):
+def create_accel_command(packer, accel, enabled, raw_cnt, r):
 
   values = {
     "ACCEL_CMD": accel,
@@ -58,8 +58,8 @@ def create_accel_command(packer, accel, enabled, raw_cnt):
     "COUNTER": raw_cnt,
     "ACC_ON_1": enabled,
     "ACC_ON_2": enabled,
-    "UNKNOWN1": 2 if enabled else 0,  # 2 is needed to brake, 1 is to cruise, 3 is to accel, 4-9 more power?
-    "UNKNOWN2": 12 if enabled else 0, # prioritise test 12-14
+    "UNKNOWN1": r if enabled else 0,  # 2 is needed to brake, 1 is to cruise, 3 is to accel, 4-9 more power?
+    "UNKNOWN2": 12 if enabled else 0, # prioritise test 12-14, was 12
     "SET_ME_X8": 8,
     "SET_ME_1": 1,
     "SET_ME_XF": 0xF,
