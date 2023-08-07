@@ -70,17 +70,18 @@ class CarController():
 
     # BYD CAN controlled lateral running at 50hz
     if (frame % 2) == 0:
-      if CS.out.leftBlinker and False:
+      if CS.out.genericToggle and False:
         can_sends.append(create_can_steer_command(self.packer, 0, enabled, False, (frame/2) % 16, 0, self.random_counter))
         #can_sends.append(create_can_steer_command(self.packer, 10, enabled, False, (frame/2) % 16, 2773))
       else:
         can_sends.append(create_can_steer_command(self.packer, apply_angle, enabled, False, (frame/2) % 16, 0, self.random_counter))
 
-      if CS.out.genericToggle:
+      if CS.out.leftBlinker and False:
         # accel
-        can_sends.append(create_accel_command(self.packer, 40, 1, (frame/2) % 16, self.randon_counter))
+        can_sends.append(create_accel_command(self.packer, 30, 1, (frame/2) % 16, self.random_counter))
+      elif CS.out.rightBlinker and False:
         # decel
-        # can_sends.append(create_accel_command(self.packer, -40, 1, (frame/2) % 16))
+        can_sends.append(create_accel_command(self.packer, -30, 1, (frame/2) % 16, self.random_counter))
       else:
         can_sends.append(create_accel_command(self.packer, 0, 0, (frame/2) % 16, self.random_counter))
       #  a = list(create_accel_command(self.packer, 0, 0, (frame/2) % 16)[2])
