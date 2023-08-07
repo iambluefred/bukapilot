@@ -26,7 +26,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_FL'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_FR'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'],
-      cp.vl["WHEEL_SPEED"]['WHEELSPEED_BR'], # TODO: why would BR make the value wrong? Wheelspeed sensor prob?
+      cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'], # TODO: why would BR make the value wrong? Wheelspeed sensor prob?
     )
     ret.vEgoRaw = mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
 

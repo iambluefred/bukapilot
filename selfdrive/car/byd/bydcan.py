@@ -31,12 +31,12 @@ def byd_checksum(byte_key, dat):
 def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning, raw_cnt, steer_rate, r):
 
   values = {
-    "TORQUE": steer_rate,    # TODO find out if this is really steer rate
+    "TORQUE": 0 if steer_req else 0,    # TODO find out if this is really steer rate
     "STEER_REQ": steer_req,                # Try 0x2B
     "STEER_REQ_ACTIVE_LOW": not steer_req,
     "STEER_ANGLE": steer_angle,
     "SET_ME_X01": 1 if steer_req else 0,   # Try 0x1
-    "SET_ME_XEB": r if steer_req else 0, # Try 0xB
+    "SET_ME_XEB": 0x9 if steer_req else 0, # Try 0xB
     "COUNTER": raw_cnt,
     "SET_ME_FF": 0xFF,
     "SET_ME_F": 0xF,
