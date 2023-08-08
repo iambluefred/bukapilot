@@ -25,29 +25,19 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerRateCost = 0.7                # Lateral MPC cost on steering rate, higher value = sharper turn
     ret.steerLimitTimer = 0.1              # time before steerLimitAlert is issued
-    ret.steerControlType = car.CarParams.SteerControlType.torque
+    ret.steerControlType = car.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.30          # Steering wheel actuator delay in seconds
-
-    ret.lateralTuning.init('pid')
 
     ret.enableGasInterceptor = 0x201 in fingerprint[0] or 0x401 in fingerprint[0]
     ret.openpilotLongitudinalControl = True
 
     if candidate == CAR.ATTO3:
       ret.wheelbase = 2.72
-      ret.steerRatio = 16.0
+      ret.steerRatio = 8.0
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1750. + STD_CARGO_KG
       ret.wheelSpeedFactor = 1             # it is exactly 1 to 1 with gps speed
-
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0.], [1000]]  # so far valid steer torque without faulting is up to 5000
-
-      ret.lateralTuning.pid.kpBP = [0.]
-      ret.lateralTuning.pid.kpV = [0.15]
-      ret.lateralTuning.pid.kiBP = [0.]
-      ret.lateralTuning.pid.kiV = [0.10]
-      ret.lateralTuning.pid.kf = 0.00007
 
       ret.longitudinalTuning.kpBP = [0., 5., 20.]
       ret.longitudinalTuning.kpV = [0, 0, 0]

@@ -35,8 +35,8 @@ def create_can_steer_command(packer, steer_angle, steer_req, wheel_touch_warning
     "STEER_REQ": steer_req,                # Try 0x2B
     "STEER_REQ_ACTIVE_LOW": not steer_req,
     "STEER_ANGLE": steer_angle,
-    "SET_ME_X01": 1 if steer_req else 0,   # Try 0x1
-    "SET_ME_XEB": 0x9 if steer_req else 0, # Try 0xB
+    "SET_ME_X01": 0x1 if steer_req else 0,   # Try 0x1
+    "SET_ME_XEB": 0xB if steer_req else 0, # Try 0xB
     "COUNTER": raw_cnt,
     "SET_ME_FF": 0xFF,
     "SET_ME_F": 0xF,
@@ -58,7 +58,7 @@ def create_accel_command(packer, accel, enabled, raw_cnt, r):
     "COUNTER": raw_cnt,
     "ACC_ON_1": enabled,
     "ACC_ON_2": enabled,
-    "UNKNOWN1": r if enabled else 0,  # 2 is needed to brake, 1 is to cruise, 3 is to accel, 4-9 more power?
+    "UNKNOWN1": 2 if enabled else 0,  # 2 is needed to brake, 1 is to cruise, 3 is to accel, 4-9 more power?
     "UNKNOWN2": 12 if enabled else 0, # prioritise test 12-14, was 12
     "SET_ME_X8": 8,
     "SET_ME_1": 1,
@@ -86,7 +86,7 @@ def send_buttons(packer, count):
       "COUNTER": count,
   }
   dat = packer.make_can_msg("PCM_BUTTONS", 0, values)[2]
-  crc = byd_checmsum(0xaf, dat[:-1])
+  crc = byd_checksum(0xaf, dat[:-1])
   values["CHECKSUM"] = crc
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 
