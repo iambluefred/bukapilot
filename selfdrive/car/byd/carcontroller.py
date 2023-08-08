@@ -5,15 +5,22 @@ from selfdrive.car.byd.values import CAR, DBC
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 from opendbc.can.packer import CANPacker
 from common.numpy_fast import clip, interp
-from common.realtime import DT_CTRL
 from common.params import Params
 import cereal.messaging as messaging
 
 from common.features import Features
 
+def apply_byd_steer_angle_limits(apply_angle, actual_angle, v_ego, LIMITS):
+  # pick angle rate limits based on wind up/down
+  steer_up = actual_angle * apply_angle >= 0. and abs(apply_angle) > abs(actual_angle)
+  rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
+
+  return clip(apply_angle, actual_angle - rate_limits, actual_angle + rate_limits)
+
 class CarControllerParams():
   def __init__(self, CP):
-    pass
+    self.ANGLE_RATE_LIMIT_UP = 0.9       # maximum allow 90 degree per second, 100Hz loop means 0.9
+    self.ANGLE_RATE_LIMIT_DOWN = 0.9
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -30,29 +37,25 @@ class CarController():
 
     # steer
     apply_angle = actuators.steeringAngleDeg
-    ts = frame * DT_CTRL
-
-    if (frame % 1000) == 0:
-      self.random_counter = (self.random_counter + 1) & 0xF
-    print(self.random_counter)
+    apply_angle = apply_byd_steer_angle_limits(apply_angle, CS.out.steeringAngleDeg, CS.out.vEgo, self.params)
 
     # BYD CAN controlled lateral running at 50hz
     if (frame % 2) == 0:
       if CS.out.genericToggle:
-        can_sends.append(create_can_steer_command(self.packer, apply_angle, True, False, (frame/2) % 16, 0, 0xF))
+        can_sends.append(create_can_steer_command(self.packer, apply_angle, True, (frame/2) % 16))
 #        if CS.out.leftBlinker:
  #         can_sends.append(create_can_steer_command(self.packer, 30, True, False, (frame/2) % 16, 0, 0xB))
       else:
-        can_sends.append(create_can_steer_command(self.packer, apply_angle, False, False, (frame/2) % 16, 0, self.random_counter))
+        can_sends.append(create_can_steer_command(self.packer, apply_angle, False, (frame/2) % 16))
 
       if CS.out.leftBlinker and False:
         # accel
-        can_sends.append(create_accel_command(self.packer, 30, 1, (frame/2) % 16, self.random_counter))
+        can_sends.append(create_accel_command(self.packer, 30, 1, (frame/2) % 16))
       elif CS.out.rightBlinker and False:
         # decel
-        can_sends.append(create_accel_command(self.packer, -30, 1, (frame/2) % 16, self.random_counter))
+        can_sends.append(create_accel_command(self.packer, -30, 1, (frame/2) % 16))
       else:
-        can_sends.append(create_accel_command(self.packer, 0, 0, (frame/2) % 16, self.random_counter))
+        can_sends.append(create_accel_command(self.packer, 0, 0, (frame/2) % 16))
       #  a = list(create_accel_command(self.packer, 0, 0, (frame/2) % 16)[2])
       #  b = [hex(i) for i in a]
       #  print(b)

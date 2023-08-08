@@ -33,7 +33,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.ATTO3:
       ret.wheelbase = 2.72
-      ret.steerRatio = 8.0
+      ret.steerRatio = 18.0
       ret.centerToFront = ret.wheelbase * 0.44
       tire_stiffness_factor = 0.9871
       ret.mass = 1750. + STD_CARGO_KG
